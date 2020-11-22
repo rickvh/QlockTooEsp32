@@ -1,0 +1,3 @@
+/**
+ * getCurrentTime() - struct
+ * 

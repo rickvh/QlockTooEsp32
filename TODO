@@ -1,0 +1,73 @@
+Components:
+
+
+Display
+- display buffer obv X,Y
+
+
+Animation (&display)
+- interface die het display kan beschrijven
+
+Clock
+- obv tijd het display updaten
+
+
+
+
+
+
+==================================
+
+Features
+- Clock
+  - kleur
+     - hoekjes
+     - uren
+     - minuten
+  - effect
+     - minuten aan/uit
+     - overgang letters
+  - autodim
+     - op tijd
+     - lichtsensor
+
+- Wifi
+  - standaard uit, af en toe aan om tijd op te halen
+  - aan te zetten als de klok op 'dev'-mode wordt gezet
+  - kort aan om de tijd op te halen
+
+- HTTP
+  - Pagina met settings
+    - ntp-server
+  - Status
+    - last update van ntp-server
+    - huidige tijd
+  - remap display X,Y
+  - Draw on display
+  - Set mode
+    - klok
+  - Factory reset?
+
+
+Buttons
+  - dev mode
+  - klok mode
+  - switch color
+
+
+- Smart
+  - kleur in te stellen mbv Home Assistant
+  - Werkt niet met Wifi standaard uit?
+
+- OTA-logger
+  - UDP ?
+  - via #define in/uit te schakelen
+
+
+
+
+Bootanimation -> Clock
+
+Triggers:
+- http (draw, ?) -> show drawing
+- 5 min idle -> clock
