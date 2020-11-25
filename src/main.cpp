@@ -1,22 +1,37 @@
+#define USE_MDNS
+#define HOST_NAME "qlocktoo"
+
+
+
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 //#include <NeoPixelBus.h>
 #include <Adafruit_NeoPixel.h>
 #include <WiFiClient.h>
 #include "display.h"
+// #include <SPIFFS.h>
+// #include <logging.hpp>
+// #include <ets-appender.hpp>
+// #include <udp-appender.hpp>
 
+// using namespace esp32m;
+#include <RemoteDebugger.h> 
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #else
 #include <WiFiClient.h>
-#include <ESPmDNS.h>
+#include <DNSServer.h>
+#include "ESPmDNS.h"
 // #include <WiFiUdp.h>
 #endif
 
+RemoteDebug Debug;
+void setColor(uint32_t);
 
-
+const char* ssid = "SKULLFORT";
+const char* password = "schattigebabyeendjes.jpg!";
 
 
 // typedef NeoGrbwFeature MyPixelColorFeature;
@@ -38,19 +53,39 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PixelCount, PixelPin, NEO_GRBW + NEO
 
 
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("Booting QlockToo");
+
+
+#pragma region setupfunctions
+void setupDisplay() {
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show(); // Initialize all pixels to 'off'
+}
+
+void setupWifi() {
+  debugI("Connecting to Wifi...");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-
   while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Connection Failed! Rebooting...");
+    debugE("Connection Failed! Rebooting...");
     delay(5000);
     ESP.restart();
   }
+  debugI("Wifi connected");
 
+
+  #if defined USE_MDNS && defined HOST_NAME
+	if (MDNS.begin(HOST_NAME)) {
+		debugI("* MDNS responder started. Hostname -> ");
+		debugI(HOST_NAME);
+	}
+  #else
+  debugI("mDNS disabled");
+  #endif
+}
+
+void setupOTA() {
   // Port defaults to 3232
   // ArduinoOTA.setPort(3232);
 
@@ -63,7 +98,6 @@ void setup() {
   // Password can be set with it's md5 value as well
   // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
   // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
-
   ArduinoOTA
     .onStart([]() {
       String type;
@@ -91,34 +125,83 @@ void setup() {
     });
 
   ArduinoOTA.begin();
+}
+
+void processCmdRemoteDebug() {
+  String lastCmd = Debug.getLastCommand();
+
+	if (lastCmd == "clear") {
+		debugI("* Clear display");
+    // strip.ColorHSV(hue+=50)));
+    setColor(strip.Color(0,0,0));
+  } else if (lastCmd == "red") {
+    debugI("* Set display to RED");
+    setColor(strip.Color(255,0,0));
+  } else if (lastCmd == "rgb") {
+		debugI("* Clear display");
+    // strip.ColorHSV(hue+=50)));
+    strip.Color(0, 0, 0);
+    strip.show();
+  }
+}
+
+void setupLogging() {
+
+  Debug.begin("qlocktoo"); // Initialize the WiFi server
+	Debug.setResetCmdEnabled(true); // Enable the reset command
+  // Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
+	Debug.showColors(true); // Colors
+
+	String helpCmd = "clear - Clear display\n";
+  helpCmd.concat("red - Set red color");
+	helpCmd.concat("rgb <r,g,b> - Set RGB value");
+
+	Debug.setHelpProjectsCmds(helpCmd);
+	Debug.setCallBackProjectCmds(&processCmdRemoteDebug);
+	Debug.initDebugger(debugGetDebuggerEnabled, debugHandleDebugger, debugGetHelpDebugger, debugProcessCmdDebugger); // Set the callbacks
+
+	// debugInitDebugger(&Debug); // Init the debugger
+
+  // if (debugAddFunctionVoid("benchInt", &benchInt) >= 0) {
+  // debugSetLastFunctionDescription("To run a benchmark of integers");
+// }
+
+}
+#pragma endregion
+
+void setColor(uint32_t c) {
+  for(uint16_t i=0; i<strip.numPixels()+4; i++) {
+      strip.setPixelColor(i  , c); // Draw new pixel
+      // strip.setPixelColor()
+      // strip.setPixelColor(i-4, 0); // Erase pixel a few steps back
+  }
+  strip.show();
+}
+
+void setup() {
+  debugI("Booting QlockToo");
+
+  setupWifi();
+  setupOTA();
+  setupLogging();
 
   Serial.println("Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-
-  strip.begin();
-  strip.setBrightness(50);
-  strip.show(); // Initialize all pixels to 'off'
-}
-
-static void chase(uint32_t c) {
-  for(uint16_t i=0; i<strip.numPixels()+4; i++) {
-      strip.setPixelColor(i  , c); // Draw new pixel
-      // strip.setPixelColor()
-      // strip.setPixelColor(i-4, 0); // Erase pixel a few steps back
-      
-
-  }
+  setupDisplay();
 }
 
 void loop() {
 
 
   ArduinoOTA.handle();
-  chase(strip.gamma32(strip.ColorHSV(hue+=50)));
-  strip.show();
 
-  // delay(25);
+  Debug.handle();
+
+  // chase(strip.gamma32(strip.ColorHSV(hue+=50)));
+  // strip.show();
+
+  delay(1000);
   //delayMicroseconds(500);
 }
