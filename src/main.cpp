@@ -1,21 +1,14 @@
 #define USE_MDNS
-#define HOST_NAME "qlocktoo"
-
-
+#define HOST_NAME       "qlocktoo"
+#define LEDSTRIP_PIN    13
+//#define DEBUG_DISABLED // uncomment for production release
+#define WEBSOCKET_DISABLED // disbale logging via websockets
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
-//#include <NeoPixelBus.h>
-#include <Adafruit_NeoPixel.h>
 #include <WiFiClient.h>
-#include "display.h"
-// #include <SPIFFS.h>
-// #include <logging.hpp>
-// #include <ets-appender.hpp>
-// #include <udp-appender.hpp>
-
-// using namespace esp32m;
 #include <RemoteDebugger.h> 
+#include "display.h"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -34,32 +27,12 @@ const char* ssid = "SKULLFORT";
 const char* password = "schattigebabyeendjes.jpg!";
 
 
-// typedef NeoGrbwFeature MyPixelColorFeature;
-
-const uint16_t PixelCount = 110;
-const uint16_t PixelPin = 13;
 uint16_t hue = 0;
-
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = Arduino pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PixelCount, PixelPin, NEO_GRBW + NEO_KHZ800);
-//NeoPixelBus<MyPixelColorFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
+Display display = Display(LEDSTRIP_PIN);
 
 
-
-
-
-#pragma region setupfunctions
 void setupDisplay() {
-  strip.begin();
-  strip.setBrightness(50);
-  strip.show(); // Initialize all pixels to 'off'
+  display.begin();
 }
 
 void setupWifi() {
@@ -133,15 +106,18 @@ void processCmdRemoteDebug() {
 	if (lastCmd == "clear") {
 		debugI("* Clear display");
     // strip.ColorHSV(hue+=50)));
-    setColor(strip.Color(0,0,0));
+    setColor(display.Color(0,0,0,0));
   } else if (lastCmd == "red") {
     debugI("* Set display to RED");
-    setColor(strip.Color(255,0,0));
+    setColor(display.Color(255,0,0,0));
   } else if (lastCmd == "rgb") {
-		debugI("* Clear display");
+		debugI("* Not implemented");
     // strip.ColorHSV(hue+=50)));
-    strip.Color(0, 0, 0);
-    strip.show();
+    // strip->Color(0, 0, 0);
+    // strip->show();
+  } else if (lastCmd == "test") {
+		debugI("Leds");
+    // debugI("%i:%i:%i", 4, 2, strip->numPixels());
   }
 }
 
@@ -167,15 +143,16 @@ void setupLogging() {
 // }
 
 }
-#pragma endregion
 
 void setColor(uint32_t c) {
-  for(uint16_t i=0; i<strip.numPixels()+4; i++) {
-      strip.setPixelColor(i  , c); // Draw new pixel
-      // strip.setPixelColor()
-      // strip.setPixelColor(i-4, 0); // Erase pixel a few steps back
+  debugD("Set color to: ", c);
+  for(uint8_t y=0; y < display.getHeight(); y++) {
+    for(uint8_t x=0; x < display.getWidth(); x++) {
+      display.setPixel(x, y, c); // Draw new pixel
+      debugV("Set pixel %x, %y --> %c", x, y, c);
+    }
   }
-  strip.show();
+  display.show();
 }
 
 void setup() {
@@ -184,17 +161,10 @@ void setup() {
   setupWifi();
   setupOTA();
   setupLogging();
-
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
   setupDisplay();
 }
 
 void loop() {
-
-
   ArduinoOTA.handle();
 
   Debug.handle();
@@ -204,4 +174,4 @@ void loop() {
 
   delay(1000);
   //delayMicroseconds(500);
-}
+};

@@ -19,12 +19,15 @@
 void flush();
 
 
-class Display {
+class Display : public Adafruit_NeoPixel {
     private:
-        // Adafruit_NeoPixel ledstrip;
+        // Mapping from x,y coordinates to the actual led-index
+        uint8_t pixelmapping[DISPLAY_WIDTH][DISPLAY_HEIGHT];
 
     public:
-        Display(const uint16_t gpio_pin);
+        
+
+        Display(const uint16_t gpio_pin, );
 
         void begin();
 

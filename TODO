@@ -49,6 +49,11 @@ Features
   - Factory reset?
 
 
+- Games
+  - Controller geabstraheerd
+    - 1 implementatie: PS4 controller
+    - 1 implementatie: UDP ?
+
 Buttons
   - dev mode
   - klok mode
@@ -62,6 +67,7 @@ Buttons
 - OTA-logger
   - UDP ?
   - via #define in/uit te schakelen
+
 
 
 

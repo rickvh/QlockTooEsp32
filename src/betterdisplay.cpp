@@ -1,6 +1,6 @@
 #pragma once
 
-#include "display.h"
+#include "betterdisplay.h"
 
 // /*
 //  * Display heeft nodig:
