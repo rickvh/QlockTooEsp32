@@ -41,7 +41,7 @@ int pass = 0;
 Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
   NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
-  NEO_RGBW           + NEO_KHZ800);
+  NEO_GRBW           + NEO_KHZ800);
 
 
 uint16_t remapPixels(uint16_t x, uint16_t y) {
@@ -144,15 +144,19 @@ void processCmdRemoteDebug() {
 	if (lastCmd == "clear") {
 		debugI("* Clear display");
     // strip.ColorHSV(hue+=50)));
-    setColor(display.Color(0,0,0));
+    setColor(Adafruit_NeoPixel::Color(0,0,0,0));
   } else if (lastCmd == "red") {
     debugI("* Set display to RED");
-    setColor(display.Color(255,0,0));
-  } else if (lastCmd == "rgb") {
-		debugI("* Not implemented");
-    // strip.ColorHSV(hue+=50)));
-    // strip->Color(0, 0, 0);
-    // strip->show();
+    setColor(Adafruit_NeoPixel::Color(255,0,0,0));
+  } else if (lastCmd == "green") {
+    debugI("* Set display to GREEN");
+    setColor(Adafruit_NeoPixel::Color(0,255,0,0));
+  } else if (lastCmd == "blue") {
+    debugI("* Set display to BLUE");
+    setColor(Adafruit_NeoPixel::Color(0,0,255,0));
+  } else if (lastCmd == "white") {
+    debugI("* Set display to WHITE");
+    setColor(Adafruit_NeoPixel::Color(0,0,0,255));
   } else if (lastCmd == "test") {
 		debugI("Leds");
     // debugI("%i:%i:%i", 4, 2, strip->numPixels());
@@ -184,8 +188,11 @@ void setupLogging() {
 
 void setColor(uint32_t c) {
   debugD("Set color to: ", c);
-  display.fill(c);
+
+  display.setPassThruColor(c);
+  display.fillScreen(c);
   display.show();
+  display.setPassThruColor();
 }
 
 void setup() {
@@ -205,7 +212,7 @@ void loop() {
   // chase(strip.gamma32(strip.ColorHSV(hue+=50)));
   // strip.show();
 
-  delay(100);
+  delay(1000);
   //delayMicroseconds(500);
 
   // switch(frame++){
@@ -231,18 +238,22 @@ void loop() {
       //   x_start++;
       // }
       // break;
-
-      display.fillScreen(0);
-      display.setCursor(x, 0);
-      display.print(F("Charlie is een schatje!"));
-      if(--x < -136) {
-        x = display.width();
-        if(++pass >= 3) pass = 0;
-        display.setTextColor(display.ColorHSV(hue+=5000, 100, 100));
-      }
+  // }
+      // display.fillScreen(0);
+      // display.setCursor(x, 0);
+      // display.print(F("Test"));
+      // if(--x < -36) {
+      //   x = display.width();
+      //   if(++pass >= 3) pass = 0;
+      //   display.setTextColor(display.ColorHSV(hue+=50000, 100, 100));
+      // }
       // break;
 
-      display.show();
+  //     if (frame > 10) {
+  //       frame = 0;
+  //     }
+
+  //     display.show();
   // }
   // display.show();
 };
