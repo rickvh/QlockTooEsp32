@@ -77,3 +77,66 @@ Bootanimation -> Clock
 Triggers:
 - http (draw, ?) -> show drawing
 - 5 min idle -> clock
+
+
+
+
+===================
+Classes
+
+= Display
++ drawLine(...)
++ drawPixel(...)
++ clear()
++ setMaxBrightness()
+
+Setting (struct)
+union type class met een int/bool/string/enum waarde
+
+SettingStorage - eerst in-memory, later SPIFFS
++ getSetting(app, name) -> Setting
++ setSetting(app, name, Setting)
+
+= App
+- &Display
++ init(Display, SettingStorage)
++ handleInput(inputEvent)
++ handle() (= vanuit main-loop)
+
+= Clock : App
+settings: STYLE, TRANSITION-STYLE, COLORMODE, COLOR_HOUR, COLOR_HET_IS, COLOR_WORDS, COLOR_MINUTES
+- NTPClient
+- time_t currentTime
+
+= Game : App
+
+
+= Tetris : Game
+- score
+- blokje
+- speed
+- positie van vallend blokje
+- tijd voordat blokje een stap verder valt / tijd voor animatie
++ handle() ->
+  state: falling -> check tijd -> update positie -> check collision -> check complete lines -> start animation
+  state: animation -> check tijd -> update animation / end animation -> start nextblokje
+  state: nextblokje -> 
+
+= InputDevice
++ InputDevice(eventPublisher)
++ handle() (= vanuit main-loop) / kan dit een aparte task zijn?
+
+= PS4Controller : InputDevice
+- listen for input / interrupt -> eventPublisher.publishEvent(...)
+- listen for connection / connection lost -> eventPublisher.publishEvent(...)
++ rumble(ms)
++ color()
+
+??? Menu als App ??
+
+main:
+- initDisplay
+- initWifi / start WifiManager
+- initWebserver
+- inputs[] = {H/W buttons, webinterface, PS4 controller}
+- startApp(clock(display, settingStorage))
