@@ -32,6 +32,7 @@ uint8_t frame = 1;
 uint8_t x_start = 1;
 uint8_t y_start = 1;
 uint16_t hue = 0;
+uint8_t saturation = 255, brightness = 255;
 
 int x    = 11;
 int pass = 0;
@@ -59,7 +60,7 @@ uint16_t remapPixels(uint16_t x, uint16_t y) {
     {106,69,62,85,92,18,11,47,26,34}
   };
 
-  debugD("Getting mapping for: %x, %y", x, y);
+  debugD("Getting mapping for: %u, %u", x, y);
   return mapping[x][9-y];
 }
 
@@ -69,7 +70,7 @@ void setupDisplay() {
 
 
   display.setTextWrap(false);
-  display.setBrightness(5);
+  display.setBrightness(255);
   display.setTextColor(display.Color(0, 200, 0));
 }
 
@@ -157,6 +158,21 @@ void processCmdRemoteDebug() {
   } else if (lastCmd == "white") {
     debugI("* Set display to WHITE");
     setColor(Adafruit_NeoPixel::Color(0,0,0,255));
+  } else if (lastCmd == "sat") {
+    debugI("* Set saturation += 50");
+    saturation += 50;
+  } else if (lastCmd == "t1") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 1));
+  } else if (lastCmd == "t2") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 2));
+  } else if (lastCmd == "t3") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 3));
+  } else if (lastCmd == "t4") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 4));
+  } else if (lastCmd == "t5") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 5));
+  } else if (lastCmd == "t6") {
+    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 6));
   } else if (lastCmd == "test") {
 		debugI("Leds");
     // debugI("%i:%i:%i", 4, 2, strip->numPixels());
@@ -212,7 +228,7 @@ void loop() {
   // chase(strip.gamma32(strip.ColorHSV(hue+=50)));
   // strip.show();
 
-  delay(1000);
+  delay(100);
   //delayMicroseconds(500);
 
   // switch(frame++){
@@ -226,17 +242,34 @@ void loop() {
   //     display.fill(display.Color(0,0,255));
   //     break;
   //   default:
-      // display.drawLine(x_start, y_start, display.width() - x_start, display.height() - y_start, display.ColorHSV(hue+=100, 200, 30));
-      // if (x_start == display.width()){
-      //   if (y_start == display.height()) {
-      //     x_start = 0;
-      //   } else {
-      //     y_start++;
-      //   }
-      // } else {
-      //   y_start = 0;
-      //   x_start++;
-      // }
+      uint16_t x_end = display.width() - x_start;
+      uint16_t y_end = display.height() - y_start;
+
+      uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
+      display.setPassThruColor(color);
+      
+      display.drawLine(x_start, y_start, x_end, y_end, color);
+      if (x_start == display.width()){
+        if (y_start == display.height()) {
+          x_start = 0;
+          y_start = 0;
+        } else {
+          y_start++;
+        }
+      } else {
+        y_start = 0;
+        x_start++;
+      }
+
+      // uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
+      // display.setPassThruColor(color);
+      // display.fill(color);
+
+      debugI("Coords: %u, %u - %u, %u. Hue: %u", x_start, y_start, x_end, y_end, hue);
+
+// x = 1 2 3 4 5 -- 11 -- 0
+// y = 0 1 2 3 4 5 6 -- 10
+
       // break;
   // }
       // display.fillScreen(0);
@@ -255,5 +288,5 @@ void loop() {
 
   //     display.show();
   // }
-  // display.show();
+  display.show();
 };
