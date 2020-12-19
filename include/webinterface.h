@@ -1,13 +1,23 @@
 #pragma once
 
-#include <WiFiServer.h>
+#include "RemoteDebugger.h"
+#include <ESPAsyncWebServer.h>
+using namespace std;
 
 class Webinterface {
     private:
-        int m_port;
-        WiFiServer m_server;
+        // int port;
+        // AsyncWebServer &server;
+        // AsyncWebSocket &ws;
+        // AsyncEventSource &events;
+        
+        RemoteDebug &Debug;
+        void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 
     public:
-        Webinterface(int port);
-        void loop();
+        Webinterface(int port, RemoteDebug &debug_); // : port(port) { }
+        // Webinterface(int port); // : port(port) { }
+        // ~Webinterface() { }
+
+        void test(const char* tekst);
 };

@@ -1,4 +1,4 @@
-#define USE_MDNS
+#define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
 #define LEDSTRIP_PIN    13
 //#define DEBUG_DISABLED // uncomment for production release
@@ -25,9 +25,7 @@
 #include "ESPmDNS.h"
 // #include <WiFiUdp.h>
 #endif
-
-// #include ""
-
+#include "webinterface.h"
 
 using namespace std;
 
@@ -35,7 +33,7 @@ const char* ssid = "SKULLFORT";
 const char* password = "schattigebabyeendjes.jpg!";
 
 RemoteDebug Debug;
-WiFiServer server(80);
+Webinterface webinterface(80, Debug);
 
 void setColor(uint32_t);
 void handleSwirl();
@@ -114,6 +112,8 @@ void setupWifi() {
 	if (MDNS.begin(HOST_NAME)) {
 		debugI("* MDNS responder started. Hostname -> ");
 		debugI(HOST_NAME);
+    MDNS.addService("http", "tcp", 80);
+    MDNS.addService("telnet", "tcp", 23);
 	}
   #else
   debugI("mDNS disabled");
@@ -125,7 +125,7 @@ void setupOTA() {
   // ArduinoOTA.setPort(3232);
 
   // Hostname defaults to esp3232-[MAC]
-  // ArduinoOTA.setHostname("myesp32");
+  ArduinoOTA.setHostname(HOST_NAME);
 
   // No authentication by default
   // ArduinoOTA.setPassword("admin");
@@ -207,6 +207,8 @@ void processCmdRemoteDebug() {
     
     debugI("* Color set to Hue(%d), Saturation(%d), Value(%d)", h<<8, s, v);
     setColor(Adafruit_NeoPixel::ColorHSV(h << 8, s, v));
+  } else if (cmd == "web") {
+    webinterface.test("Kiekeboe");
   }
 }
 
@@ -249,6 +251,7 @@ void setup() {
   setupOTA();
   setupLogging();
   setupDisplay();
+  // this->webinterface = 
 }
 
 void loop() {
