@@ -4,29 +4,42 @@
 //#define DEBUG_DISABLED // uncomment for production release
 #define WEBSOCKET_DISABLED // disbale logging via websockets
 
+// #include "utils/split.h"
+
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <WiFiClient.h>
 #include <RemoteDebugger.h> 
 // #include "display.h"
 #include <Adafruit_NeoMatrix.h>
+#include <string>
+#include "utils/stringutils.h"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #else
+#include <WiFi.h>
 #include <WiFiClient.h>
 #include <DNSServer.h>
 #include "ESPmDNS.h"
 // #include <WiFiUdp.h>
 #endif
 
-RemoteDebug Debug;
-void setColor(uint32_t);
+// #include ""
+
+
+using namespace std;
 
 const char* ssid = "SKULLFORT";
 const char* password = "schattigebabyeendjes.jpg!";
 
+RemoteDebug Debug;
+WiFiServer server(80);
+
+void setColor(uint32_t);
+void handleSwirl();
+void handleText();
 
 uint8_t frame = 1;
 uint8_t x_start = 1;
@@ -34,9 +47,20 @@ uint8_t y_start = 1;
 uint16_t hue = 0;
 uint8_t saturation = 255, brightness = 255;
 
+uint8_t speed = 50, acc = 50, dir = 1;
+
 int x    = 11;
 int pass = 0;
 
+
+typedef enum {
+  CLOCK,
+  SWIRL,
+  TEXT,
+  DEBUG
+} Mode;
+
+Mode current_mode = SWIRL;
 
 // Display display = Display(LEDSTRIP_PIN);
 Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
@@ -67,7 +91,6 @@ uint16_t remapPixels(uint16_t x, uint16_t y) {
 void setupDisplay() {
   display.setRemapFunction(remapPixels);
   display.begin();
-
 
   display.setTextWrap(false);
   display.setBrightness(255);
@@ -140,42 +163,50 @@ void setupOTA() {
 }
 
 void processCmdRemoteDebug() {
-  String lastCmd = Debug.getLastCommand();
-
-	if (lastCmd == "clear") {
+  vector<string> tokens = split(Debug.getLastCommand().c_str(), ' ');
+  if (! tokens.size()) return;
+  
+  uint8_t index = 0;
+  string const& cmd = tokens[index++];
+  
+	if (cmd == "clear") {
 		debugI("* Clear display");
-    // strip.ColorHSV(hue+=50)));
     setColor(Adafruit_NeoPixel::Color(0,0,0,0));
-  } else if (lastCmd == "red") {
-    debugI("* Set display to RED");
-    setColor(Adafruit_NeoPixel::Color(255,0,0,0));
-  } else if (lastCmd == "green") {
-    debugI("* Set display to GREEN");
-    setColor(Adafruit_NeoPixel::Color(0,255,0,0));
-  } else if (lastCmd == "blue") {
-    debugI("* Set display to BLUE");
-    setColor(Adafruit_NeoPixel::Color(0,0,255,0));
-  } else if (lastCmd == "white") {
-    debugI("* Set display to WHITE");
-    setColor(Adafruit_NeoPixel::Color(0,0,0,255));
-  } else if (lastCmd == "sat") {
-    debugI("* Set saturation += 50");
-    saturation += 50;
-  } else if (lastCmd == "t1") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 1));
-  } else if (lastCmd == "t2") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 2));
-  } else if (lastCmd == "t3") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 3));
-  } else if (lastCmd == "t4") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 4));
-  } else if (lastCmd == "t5") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 5));
-  } else if (lastCmd == "t6") {
-    setColor(Adafruit_NeoPixel::ColorHSV(UINT16_MAX / 6 * 6));
-  } else if (lastCmd == "test") {
-		debugI("Leds");
-    // debugI("%i:%i:%i", 4, 2, strip->numPixels());
+  } else if (cmd == "swirl") {
+    current_mode = SWIRL;
+    debugI("* Mode set to SWIRL");
+  } else if (cmd == "text") {
+    current_mode = TEXT;
+    debugI("* Mode set to TEXT");
+  } else if (cmd == "clock") {
+    current_mode = CLOCK;
+    debugI("* Mode set to CLOCK");
+  } else if (cmd == "rgb") {
+    if (tokens.size() != 4) {
+      debugE("Command \'rgb\' requires 3 parameters");
+      return;
+    }
+
+    uint8_t r, g, b;
+    parseInt(tokens[index++], r);
+    parseInt(tokens[index++], g);
+    parseInt(tokens[index++], b);
+
+    debugI("* Color set to Red(%d), Green(%d), Blue(%d)", r, g, b);
+    setColor(Adafruit_NeoPixel::Color(r, g, b));
+  } else if (cmd == "hsv") {
+    if (tokens.size() != 4) {
+      debugE("Command \'hsv\' requires 3 parameters");
+      return;
+    }
+    
+    uint8_t h, s, v;
+    parseInt(tokens[index++], h);
+    parseInt(tokens[index++], s);
+    parseInt(tokens[index++], v);
+    
+    debugI("* Color set to Hue(%d), Saturation(%d), Value(%d)", h<<8, s, v);
+    setColor(Adafruit_NeoPixel::ColorHSV(h << 8, s, v));
   }
 }
 
@@ -222,50 +253,26 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-
   Debug.handle();
 
-  // chase(strip.gamma32(strip.ColorHSV(hue+=50)));
-  // strip.show();
-
-  delay(100);
-  //delayMicroseconds(500);
-
-  // switch(frame++){
-  //   case 1:
-  //     display.fill(display.Color(255,0,0));
-  //     break;
-  //   case 2:
-  //     display.fill(display.Color(0,255,0));
-  //     break;
-  //   case 3:
-  //     display.fill(display.Color(0,0,255));
-  //     break;
-  //   default:
-      uint16_t x_end = display.width() - x_start;
-      uint16_t y_end = display.height() - y_start;
-
-      uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
-      display.setPassThruColor(color);
-      
-      display.drawLine(x_start, y_start, x_end, y_end, color);
-      if (x_start == display.width()){
-        if (y_start == display.height()) {
-          x_start = 0;
-          y_start = 0;
-        } else {
-          y_start++;
-        }
-      } else {
-        y_start = 0;
-        x_start++;
-      }
+  switch (current_mode) {
+    case CLOCK:
+      break;
+    case DEBUG:
+      break;
+    case SWIRL:
+      handleSwirl();
+      break;
+    case TEXT:
+      handleText();
+      break;
+  }
 
       // uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
       // display.setPassThruColor(color);
       // display.fill(color);
 
-      debugI("Coords: %u, %u - %u, %u. Hue: %u", x_start, y_start, x_end, y_end, hue);
+      
 
 // x = 1 2 3 4 5 -- 11 -- 0
 // y = 0 1 2 3 4 5 6 -- 10
@@ -290,3 +297,52 @@ void loop() {
   // }
   display.show();
 };
+
+void handleSwirl() {
+  delay(speed);
+
+  uint16_t x_end = display.width() - x_start;
+  uint16_t y_end = display.height() - y_start;
+
+  uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
+  display.setPassThruColor(color);
+  
+  debugI("Coords: %u, %u - %u, %u. Hue: %u", x_start, y_start, x_end, y_end, hue);
+  display.drawLine(x_start, y_start, x_end, y_end, color);
+  if (x_start == display.width()){
+    if (y_start == display.height()) {
+      x_start = 0;
+      y_start = 0;
+    } else {
+      y_start++;
+    }
+  } else {
+    y_start = 0;
+    x_start++;
+  }
+
+  acc += (1 * dir);
+  speed += acc;
+  if (speed >= 100) {
+    speed = 100;
+    dir = -1;
+  } else if (speed <= 40) {
+    speed = 40;
+    dir = 1;
+  }
+}
+
+void handleText() {
+  display.fillScreen(0);
+  display.setCursor(x, 0);
+  display.print(F("Test"));
+  uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
+  display.setPassThruColor(color);
+  if(--x < -36) {
+    x = display.width();
+    if(++pass >= 3) pass = 0;
+    
+    // display.setTextColor();
+  }
+  delay(200);
+}
