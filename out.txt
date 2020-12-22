@@ -1,0 +1,69 @@
+Warning! Ignore unknown configuration option `data_dir` in section [env:esp32dev]
+Processing esp32dev (platform: espressif32; board: esp32dev; framework: arduino; upload_protocol: espota; upload_port: 192.168.0.111; upload_flags: --auth=test; lib_deps: adafruit/Adafruit NeoPixel@^1.7.0, joaolopesf/RemoteDebug@^3.0.5, joaolopesf/RemoteDebugger@^0.9.4, adafruit/Adafruit NeoMatrix@^1.2.0, adafruit/Adafruit BusIO@^1.7.0, Wire, SPI, ESP Async WebServer, bblanchon/ArduinoJson@^6.17.2; data_dir: qlocktoo-portal/dist)
+--------------------------------------------------------------------------------
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (2.1.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (esp-prog) External (esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 3.10004.201016 (1.0.4) 
+ - tool-esptoolpy 1.30000.201119 (3.0.0) 
+ - tool-mkspiffs 2.230.0 (2.30) 
+ - tool-openocd-esp32 2.1000.20201202 (10.0) 
+ - toolchain-xtensa32 2.50200.80 (5.2.0)
+LDF: Library Dependency Finder -> http://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 37 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- <Adafruit NeoPixel> 1.7.0 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit NeoPixel)
+|-- <RemoteDebug> 3.0.5 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/RemoteDebug)
+|   |-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|   |-- <WiFiClientSecure> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure)
+|   |   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <RemoteDebugger> 0.9.4 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/RemoteDebugger)
+|   |-- <RemoteDebug> 3.0.5 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/RemoteDebug)
+|   |   |-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|   |   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|   |   |-- <WiFiClientSecure> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure)
+|   |   |   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <Adafruit NeoMatrix> 1.2.0 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit NeoMatrix)
+|   |-- <Adafruit GFX Library> 1.10.3 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit GFX Library)
+|   |   |-- <Adafruit BusIO> 1.7.0 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit BusIO)
+|   |   |   |-- <Wire> 1.0.1 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/Wire)
+|   |   |   |-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|   |   |-- <Wire> 1.0.1 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/Wire)
+|   |   |-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|   |-- <Adafruit NeoPixel> 1.7.0 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit NeoPixel)
+|-- <Adafruit BusIO> 1.7.0 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/Adafruit BusIO)
+|   |-- <Wire> 1.0.1 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/Wire)
+|   |-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|-- <Wire> 1.0.1 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/Wire)
+|-- <SPI> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPI)
+|-- <ESP Async WebServer> 1.2.3 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/ESP Async WebServer)
+|   |-- <AsyncTCP> 1.1.1 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/AsyncTCP)
+|   |-- <ArduinoJson> 6.17.2 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/ArduinoJson)
+|   |-- <FS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/FS)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <ArduinoJson> 6.17.2 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/ArduinoJson)
+|-- <ESPmDNS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <ArduinoOTA> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA)
+|   |-- <Update> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/Update)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|   |-- <ESPmDNS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS)
+|   |   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <DNSServer> 1.1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/DNSServer)
+|   |-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <SPIFFS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/SPIFFS)
+|   |-- <FS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/FS)
+|-- <WiFi> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/WiFi)
+|-- <AsyncTCP> 1.1.1 (/Users/richal/projects/QlockToo/.pio/libdeps/esp32dev/AsyncTCP)
+|-- <FS> 1.0 (/Users/richal/.platformio/packages/framework-arduinoespressif32/libraries/FS)
+Building in release mode
+"mkspiffs_espressif32_arduino" -c data -p 256 -b 4096 -s 1507328 .pio/build/esp32dev/spiffs.bin
+/qlocktoo-portal/runtime.0e49e2b53282f40c8925.js
+"/Users/richal/.platformio/penv/bin/python" "/Users/richal/.platformio/packages/framework-arduinoespressif32/tools/espota.py" --auth=test --debug --progress -i 192.168.0.111 -s -f .pio/build/esp32dev/spiffs.bin
+========================= [SUCCESS] Took 30.16 seconds =========================

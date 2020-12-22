@@ -2,6 +2,7 @@
 
 #include "RemoteDebugger.h"
 #include <ESPAsyncWebServer.h>
+#include "control.h"
 using namespace std;
 
 class Webinterface {
@@ -12,6 +13,10 @@ class Webinterface {
         // AsyncEventSource &events;
         
         RemoteDebug &Debug;
+        AsyncWebServer server;
+        // auto ws = AsyncWebSocket("/ws");
+        // auto event = AsyncEventSource("/events");       
+
         void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 
     public:
@@ -20,4 +25,5 @@ class Webinterface {
         // ~Webinterface() { }
 
         void test(const char* tekst);
+        void begin(void (*setColor)(uint32_t), Mode *currentMode);
 };

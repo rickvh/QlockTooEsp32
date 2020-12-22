@@ -10,3 +10,7 @@
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 **/.history
+
+### Temporary; TODO: fix platformio-config so that it uses the portal's output dir. (Now you need to copy the compiled app to the data dir yourself)
+data/qlocktoo-portal
+

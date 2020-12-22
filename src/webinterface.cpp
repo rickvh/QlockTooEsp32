@@ -2,6 +2,12 @@
 
 #include "RemoteDebugger.h"
 #include <ArduinoOTA.h>
+#include "AsyncJson.h"
+#include "ArduinoJson.h"
+#include "Adafruit_NeoPixel.h"
+
+#include "control.h"
+
 #ifdef ESP32
 #include <FS.h>
 #include <SPIFFS.h>
@@ -16,21 +22,99 @@
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
 
-
+const char* PARAM_MESSAGE = "message";
 const int timeout = 2000; // timout for connections in milliseconds
 unsigned long currentTime = 0;
 unsigned long previousTime = 0;         
 
-Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_) {
+Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
 // Webinterface::Webinterface(int port) {
-    auto server = AsyncWebServer(port);
-    auto ws = AsyncWebSocket("/ws");
-    auto event = AsyncEventSource("/events");
+    //server = AsyncWebServer(port);
+    // auto ws = AsyncWebSocket("/ws");
+    // auto event = AsyncEventSource("/events");
 
     // RemoteDebug Debug;
-    debugE("HALLO vanuit mij");
+    debugE("HALLO vanuit webinterface");
     // debugI
+    
+}
 
+void Webinterface::begin(void (*setColorCallback)(uint32_t), Mode *currentMode) {  
+  server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
+  // server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
+  //     debugI("GET received :)");
+  //     request->send(200, "text/plain", "Hello, you rang?");
+  // });
+
+  // Send a GET request to <IP>/get?message=<message>
+  server.on("/get", HTTP_GET, [&] (AsyncWebServerRequest *request) {
+      String message;
+      debugI("GET with message :)");
+      if (request->hasParam(PARAM_MESSAGE)) {
+          message = request->getParam(PARAM_MESSAGE)->value();
+      } else {
+          message = "No message sent";
+      }
+      request->send(200, "text/plain", "Hello, GET: " + message);
+  });
+
+// server.onRequestBody(
+    // [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+
+// [this](const String& var) { return processor(var); }
+  server.onRequestBody(
+    [currentMode = currentMode, setColorCallback = setColorCallback](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+    {
+        if ((request->url() == "/api/clock") &&
+            (request->method() == HTTP_POST))
+        {
+            StaticJsonDocument<512> jsonDoc;
+            
+            if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+            {
+                uint8_t r, g, b;
+                r = jsonDoc["color"]["red"] | 0;
+                g = jsonDoc["color"]["green"] | 0;
+                b = jsonDoc["color"]["blue"] | 0;
+                // debugI("RGB posted: %u, %u, %u", r, g, b);
+                
+                *currentMode = CLOCK;
+                if (setColorCallback) {
+                  setColorCallback(Adafruit_NeoPixel::Color(r, g, b));
+                // } else {
+                  // debugE("Nullpointer 'setColorCallback()'");
+                }
+            }
+
+            request->send(200, "application/json", "{ \"status\": \"success\" }");
+        }
+
+        if ((request->url() == "/api/swirl") &&
+            (request->method() == HTTP_POST))
+        {
+            StaticJsonDocument<512> jsonDoc;
+            
+            if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+            {
+                // debugI("Mode set to SWIRL");
+                if (currentMode) {
+                  *currentMode = SWIRL;
+                // } else {
+                  // debugE("Nullpointer 'currentMode'");
+                }
+            }
+
+            request->send(200, "application/json", "{ \"status\": \"success\" }");
+        }
+      }
+    );
+
+
+  server.onNotFound([&] (AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "Not found");
+  });
+
+  server.begin();
 }
 
 void Webinterface::test(const char* tekst) {

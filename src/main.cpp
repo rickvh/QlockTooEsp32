@@ -1,10 +1,12 @@
+#define VERSION         "0.1"
+
 #define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
 #define LEDSTRIP_PIN    13
 //#define DEBUG_DISABLED // uncomment for production release
 #define WEBSOCKET_DISABLED // disbale logging via websockets
-
 // #include "utils/split.h"
+
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -25,16 +27,22 @@
 #include "ESPmDNS.h"
 // #include <WiFiUdp.h>
 #endif
+#include "control.h"
 #include "webinterface.h"
+
+#include <SPIFFS.h>
 
 using namespace std;
 
+const char* build_str = "Version: " " " __DATE__ " " __TIME__;
 const char* ssid = "SKULLFORT";
 const char* password = "schattigebabyeendjes.jpg!";
-
+ 
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
 
+void listPartitions();
+void listFiles();
 void setColor(uint32_t);
 void handleSwirl();
 void handleText();
@@ -46,19 +54,16 @@ uint16_t hue = 0;
 uint8_t saturation = 255, brightness = 255;
 
 uint8_t speed = 50, acc = 50, dir = 1;
+uint32_t currentColor = 0;
+
 
 int x    = 11;
 int pass = 0;
 
 
-typedef enum {
-  CLOCK,
-  SWIRL,
-  TEXT,
-  DEBUG
-} Mode;
 
-Mode current_mode = SWIRL;
+
+Mode current_mode = CLOCK;
 
 // Display display = Display(LEDSTRIP_PIN);
 Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
@@ -209,6 +214,55 @@ void processCmdRemoteDebug() {
     setColor(Adafruit_NeoPixel::ColorHSV(h << 8, s, v));
   } else if (cmd == "web") {
     webinterface.test("Kiekeboe");
+  } else if (cmd == "ls") {
+    debugI("Partitions:");
+    listPartitions();
+    debugI("Files:");
+    listFiles();
+  } else if (cmd == "version") {
+    debugI("%s", build_str);
+  }
+}
+
+void listPartitions(void)
+{
+  size_t ul;
+  esp_partition_iterator_t _mypartiterator;
+  const esp_partition_t *_mypart;
+  ul = spi_flash_get_chip_size();
+  debugI("Flash chip size: %u", ul);
+  debugI("Partiton table:");
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator)
+  {
+    do
+    {
+      _mypart = esp_partition_get(_mypartiterator);
+      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator)
+  {
+    do
+    {
+      _mypart = esp_partition_get(_mypartiterator);
+      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
+}
+
+
+void listFiles() {
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+ 
+  while(file){
+    debugI("File: %s", file.name());
+ 
+    file = root.openNextFile();
   }
 }
 
@@ -236,7 +290,7 @@ void setupLogging() {
 }
 
 void setColor(uint32_t c) {
-  debugD("Set color to: ", c);
+  debugD("Set color to: %u", c);
 
   display.setPassThruColor(c);
   display.fillScreen(c);
@@ -246,12 +300,16 @@ void setColor(uint32_t c) {
 
 void setup() {
   debugI("Booting QlockToo");
+  debugI("%s", build_str);
 
+  if (!SPIFFS.begin(true)) {
+    debugE("SPIFFS cannot be opened");
+  };
   setupWifi();
   setupOTA();
   setupLogging();
   setupDisplay();
-  // this->webinterface = 
+  webinterface.begin(&setColor, &current_mode);
 }
 
 void loop() {
