@@ -59,9 +59,9 @@
   <!-- Mode inclusion -->
   <div [ngSwitch]="mode.value">
       <p *ngSwitchDefault>Kies een modus</p>
-      <pre *ngSwitchCase="'clock'"><app-clock mode="digital"></app-clock></pre>
-      <pre *ngSwitchCase="'swirl'"><app-swirl></app-swirl></pre>
-      <pre *ngSwitchCase="'test'">Test</pre>
+      <p *ngSwitchCase="'clock'"><app-clock mode="digital"></app-clock></p>
+      <p *ngSwitchCase="'swirl'"><app-swirl></app-swirl></p>
+      <p *ngSwitchCase="'test'"><app-test></app-test></p>
   </div>
 
   <!-- Footer -->
