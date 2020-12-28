@@ -1,5 +1,6 @@
 #include "webinterface.h"
 
+#include "Arduino.h"
 #include "RemoteDebugger.h"
 #include <ArduinoOTA.h>
 #include "AsyncJson.h"
@@ -7,6 +8,8 @@
 #include "Adafruit_NeoPixel.h"
 
 #include "control.h"
+#include "color.h"
+#include "clock.h"
 
 #ifdef ESP32
 #include <FS.h>
@@ -24,8 +27,6 @@
 
 const char* PARAM_MESSAGE = "message";
 const int timeout = 2000; // timout for connections in milliseconds
-unsigned long currentTime = 0;
-unsigned long previousTime = 0;         
 
 Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
 // Webinterface::Webinterface(int port) {
@@ -39,7 +40,7 @@ Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), serve
     
 }
 
-void Webinterface::begin(void (*setColorCallback)(uint32_t), Mode *currentMode) {  
+void Webinterface::begin(void (*setMode)(Mode mode, const void *config)) {  
   server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
   // server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
   //     debugI("GET received :)");
@@ -63,7 +64,7 @@ void Webinterface::begin(void (*setColorCallback)(uint32_t), Mode *currentMode) 
 
 // [this](const String& var) { return processor(var); }
   server.onRequestBody(
-    [currentMode = currentMode, setColorCallback = setColorCallback](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+    [setMode = setMode](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
     {
         if ((request->url() == "/api/clock") &&
             (request->method() == HTTP_POST))
@@ -78,12 +79,12 @@ void Webinterface::begin(void (*setColorCallback)(uint32_t), Mode *currentMode) 
                 b = jsonDoc["color"]["blue"] | 0;
                 // debugI("RGB posted: %u, %u, %u", r, g, b);
                 
-                *currentMode = CLOCK;
-                if (setColorCallback) {
-                  setColorCallback(Adafruit_NeoPixel::Color(r, g, b));
-                // } else {
-                  // debugE("Nullpointer 'setColorCallback()'");
-                }
+                auto color = RGBW(r, g, b);
+                ClockConfig config;
+                config.colorHour = color;
+                config.colorItIs = color;
+                config.colorWords = color;
+                setMode(CLOCK, &config);
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -97,18 +98,13 @@ void Webinterface::begin(void (*setColorCallback)(uint32_t), Mode *currentMode) 
             if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
             {
                 // debugI("Mode set to SWIRL");
-                if (currentMode) {
-                  *currentMode = SWIRL;
-                // } else {
-                  // debugE("Nullpointer 'currentMode'");
-                }
+                setMode(SWIRL, NULL);
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");
         }
       }
     );
-
 
   server.onNotFound([&] (AsyncWebServerRequest *request) {
     request->send(404, "text/plain", "Not found");

@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./clock.component.scss']
 })
 export class ClockComponent implements OnInit {
+  busy = false;
   mode: String = '';
   color = {
     red: 20,
@@ -17,13 +18,22 @@ export class ClockComponent implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-  }
-
-  colorChanged(): void {
     this.http.post('/api/clock', { color: this.color }).subscribe(data => {
       console.log(data);
     })
   }
 
-
+  colorChanged(): void {
+    if (!this.busy) {
+      this.busy = true;
+      this.http.post('/api/clock', { color: this.color }).subscribe(data => {
+        this.busy = false;
+        console.log(data);
+      },
+      error => {
+        this.busy = false;
+        console.log(error);
+      });
+    }
+  }
 }

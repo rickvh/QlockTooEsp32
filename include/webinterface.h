@@ -3,6 +3,7 @@
 #include "RemoteDebugger.h"
 #include <ESPAsyncWebServer.h>
 #include "control.h"
+#include "color.h"
 using namespace std;
 
 class Webinterface {
@@ -25,5 +26,5 @@ class Webinterface {
         // ~Webinterface() { }
 
         void test(const char* tekst);
-        void begin(void (*setColor)(uint32_t), Mode *currentMode);
+        void begin(void (*setMode)(Mode mode, const void *config));
 };

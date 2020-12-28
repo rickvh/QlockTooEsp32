@@ -29,21 +29,29 @@
 #endif
 #include "control.h"
 #include "webinterface.h"
+#include "clock.h"
 
 #include <SPIFFS.h>
+#include "wifipassword.h"
+
+
+#define NTP_TIMEOUT 1500
 
 using namespace std;
 
 const char* build_str = "Version: " " " __DATE__ " " __TIME__;
-const char* ssid = "SKULLFORT";
-const char* password = "schattigebabyeendjes.jpg!";
- 
+
+
+const uint8_t   timeZone        = 1;     // Central European Time
+int8_t minutesTimeZone = 0;
+const PROGMEM char *ntpServer = "pool.ntp.org";
+
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
 
+void changeMode(Mode mode, const void *config);
 void listPartitions();
 void listFiles();
-void setColor(uint32_t);
 void handleSwirl();
 void handleText();
 
@@ -54,8 +62,6 @@ uint16_t hue = 0;
 uint8_t saturation = 255, brightness = 255;
 
 uint8_t speed = 50, acc = 50, dir = 1;
-uint32_t currentColor = 0;
-
 
 int x    = 11;
 int pass = 0;
@@ -70,6 +76,9 @@ Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
   NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
   NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
   NEO_GRBW           + NEO_KHZ800);
+
+
+Clock appClock(display, Debug);
 
 
 uint16_t remapPixels(uint16_t x, uint16_t y) {
@@ -125,6 +134,12 @@ void setupWifi() {
   #endif
 }
 
+void setupNTP() {
+  const long  gmtOffset_sec = 3600;
+  const int   daylightOffset_sec = 3600;
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+}
+
 void setupOTA() {
   // Port defaults to 3232
   // ArduinoOTA.setPort(3232);
@@ -176,7 +191,8 @@ void processCmdRemoteDebug() {
   
 	if (cmd == "clear") {
 		debugI("* Clear display");
-    setColor(Adafruit_NeoPixel::Color(0,0,0,0));
+    display.clear();
+    display.show();
   } else if (cmd == "swirl") {
     current_mode = SWIRL;
     debugI("* Mode set to SWIRL");
@@ -198,20 +214,9 @@ void processCmdRemoteDebug() {
     parseInt(tokens[index++], b);
 
     debugI("* Color set to Red(%d), Green(%d), Blue(%d)", r, g, b);
-    setColor(Adafruit_NeoPixel::Color(r, g, b));
-  } else if (cmd == "hsv") {
-    if (tokens.size() != 4) {
-      debugE("Command \'hsv\' requires 3 parameters");
-      return;
-    }
-    
-    uint8_t h, s, v;
-    parseInt(tokens[index++], h);
-    parseInt(tokens[index++], s);
-    parseInt(tokens[index++], v);
-    
-    debugI("* Color set to Hue(%d), Saturation(%d), Value(%d)", h<<8, s, v);
-    setColor(Adafruit_NeoPixel::ColorHSV(h << 8, s, v));
+    auto color = RGBW(r, g, b);
+    display.fill(color.getColor());
+    display.show();
   } else if (cmd == "web") {
     webinterface.test("Kiekeboe");
   } else if (cmd == "ls") {
@@ -289,13 +294,16 @@ void setupLogging() {
 
 }
 
-void setColor(uint32_t c) {
-  debugD("Set color to: %u", c);
+void changeMode(Mode mode, const void *config) {
+  current_mode = mode;
+  if (mode == CLOCK) {
+    // appClock.begin();
 
-  display.setPassThruColor(c);
-  display.fillScreen(c);
-  display.show();
-  display.setPassThruColor();
+    if (config){
+      ClockConfig *tmp = (ClockConfig *) config;
+      appClock.applyConfig(*tmp);
+    }    
+  }
 }
 
 void setup() {
@@ -309,7 +317,13 @@ void setup() {
   setupOTA();
   setupLogging();
   setupDisplay();
-  webinterface.begin(&setColor, &current_mode);
+  setupNTP();
+  webinterface.begin(&changeMode);
+
+  // Start in Clock mode
+  ClockConfig tmp;
+  tmp.colorHour = tmp.colorItIs = tmp.colorWords = RGBW(0, 255,255);
+  changeMode(CLOCK, (void *) &tmp);
 }
 
 void loop() {
@@ -318,6 +332,7 @@ void loop() {
 
   switch (current_mode) {
     case CLOCK:
+      appClock.update();
       break;
     case DEBUG:
       break;
@@ -328,34 +343,7 @@ void loop() {
       handleText();
       break;
   }
-
-      // uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
-      // display.setPassThruColor(color);
-      // display.fill(color);
-
-      
-
-// x = 1 2 3 4 5 -- 11 -- 0
-// y = 0 1 2 3 4 5 6 -- 10
-
-      // break;
-  // }
-      // display.fillScreen(0);
-      // display.setCursor(x, 0);
-      // display.print(F("Test"));
-      // if(--x < -36) {
-      //   x = display.width();
-      //   if(++pass >= 3) pass = 0;
-      //   display.setTextColor(display.ColorHSV(hue+=50000, 100, 100));
-      // }
-      // break;
-
-  //     if (frame > 10) {
-  //       frame = 0;
-  //     }
-
-  //     display.show();
-  // }
+  delay(10);
   display.show();
 };
 
