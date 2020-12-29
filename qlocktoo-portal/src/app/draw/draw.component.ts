@@ -1,16 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { ColorPickerControl, ColorsTable } from '@iplab/ngx-color-picker';
+import { Image } from '../image/image';
 
 @Component({
-  selector: 'app-test',
-  templateUrl: './test.component.html',
-  styleUrls: ['./test.component.scss']
+  selector: 'app-draw',
+  templateUrl: './draw.component.html',
+  styleUrls: ['./draw.component.scss']
 })
-export class TestComponent implements OnInit {
+export class DrawComponent implements OnInit {
 
-  constructor() { }
 
   color: string = "";
+  image: Image;
+
+  constructor() {
+    this.image = new Image();
+  }
 
   public colorPickerControl = new ColorPickerControl()
     .setValueFrom(ColorsTable.aquamarine)

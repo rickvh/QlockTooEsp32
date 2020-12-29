@@ -1,0 +1,9 @@
+$border: solid #000 0.2em;
+$cellsize: 2em;
+
+
+.clock {
+    border: $border;
+    display: grid;
+    grid-template-columns: repeat(11, auto);
+}

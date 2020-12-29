@@ -51,8 +51,8 @@
       <span>Swirl</span>
     </div>
 
-    <div class="card card-small" (click)="mode.value = 'test'" tabindex="0">
-      <span>Test</span>
+    <div class="card card-small" (click)="mode.value = 'draw'" tabindex="0">
+      <span>Draw</span>
     </div>
   </div>
 
@@ -61,7 +61,7 @@
       <p *ngSwitchDefault>Kies een modus</p>
       <p *ngSwitchCase="'clock'"><app-clock mode="digital"></app-clock></p>
       <p *ngSwitchCase="'swirl'"><app-swirl></app-swirl></p>
-      <p *ngSwitchCase="'test'"><app-test></app-test></p>
+      <p *ngSwitchCase="'draw'"><app-draw></app-draw></p>
   </div>
 
   <!-- Footer -->

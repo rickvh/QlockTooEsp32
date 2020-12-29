@@ -1,0 +1,21 @@
+$border: solid #000 0.2em;
+$cellsize: 2em;
+
+:host {
+  display: contents;
+}
+
+span.pixel {
+    width: $cellsize;
+    height: $cellsize;
+    border: $border;
+    margin: 0px;
+    background-color: #aaa;
+}
+
+span.pdixel {
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+}
