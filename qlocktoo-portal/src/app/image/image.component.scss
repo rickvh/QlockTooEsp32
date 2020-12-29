@@ -1,6 +1,14 @@
 $border: solid #000 0.2em;
 $cellsize: 2em;
 
+span.pixel {
+    display: block;
+    width: $cellsize;
+    height: $cellsize;
+    border: $border;
+    margin: 0px;
+    background-color: #aaa;
+}
 
 .clock {
     border: $border;

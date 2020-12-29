@@ -1,7 +1,7 @@
 
 <div class="clock">
     <div *ngFor="let row of image.grid; let y = index">
-        <app-pixel *ngFor="let pixel of row; let x = index" [x]="x" [y]="y" [color]="getColor(0, 0)"></app-pixel>
+        <span class="pixel" *ngFor="let pixel of row; let x = index" [ngStyle]="getColor(0, 0)"></span>
         <!-- <span *ngFor="let pixel of row; let x = index">({{x}},{{y}})</span> -->
     </div>
 </div>
