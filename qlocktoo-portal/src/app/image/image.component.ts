@@ -32,7 +32,6 @@ export class ImageComponent implements OnInit {
   }
 
   onPixelClick(x: number, y: number) {
-    console.log("Pixel clicked: ", x, ", ", y);
     this.image.setColor(x, y, this.brushColor);
   }
 

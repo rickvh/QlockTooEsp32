@@ -8,18 +8,8 @@ export class Image {
       this.grid = new Array(Image.WIDTH)
             .fill(false)
             .map(() => new Array(Image.HEIGHT)
-            .fill({
-                red: 100,
-                green: 0,
-                blue: 0,
-                white: 0
-            }));
-      console.log(this.grid);
+            .fill(new RGBW()));
     }
-
-    // getRgbValue(color: RGBW) : string {
-    //   return `rgb(${color.red}, ${color.green}, ${color.blue})`;
-    // }
 
     getColor(x: number, y: number): RGBW {
       if (x < 0 || x >= Image.WIDTH || y < 0 || y >= Image.HEIGHT) {
