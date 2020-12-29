@@ -1,7 +1,6 @@
 
 <div class="clock">
-    <div *ngFor="let row of image.grid; let y = index">
-        <span class="pixel" *ngFor="let pixel of row; let x = index" [ngStyle]="getColor(0, 0)"></span>
-        <!-- <span *ngFor="let pixel of row; let x = index">({{x}},{{y}})</span> -->
+    <div *ngFor="let row of image.grid; let x = index">
+        <span class="pixel" *ngFor="let pixel of row; let y = index" [ngStyle]="getCssColor(x, y)" (click)="onPixelClick(x, y)"></span>
     </div>
 </div>

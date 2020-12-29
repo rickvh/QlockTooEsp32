@@ -5,11 +5,12 @@ import { Image, RGBW } from './image';
   selector: 'app-image',
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss'],
-  inputs: ['image'],
+  inputs: ['image', 'brushColor'],
   outputs: ['image']
 })
 export class ImageComponent implements OnInit {
   image: Image = new Image();
+  brushColor: RGBW = new RGBW(0, 255, 0);
 
   constructor() {
   }
@@ -22,15 +23,20 @@ export class ImageComponent implements OnInit {
     return this.image.getColor(x, y);
   }
 
+  getCssColor(x: number, y: number) : any {
+    let color = this.image.getColor(x, y);
+    let styles = {
+      'background-color': `rgb(${color.red}, ${color.green}, ${color.blue})`
+    };
+    return styles;
+  }
+
   onPixelClick(x: number, y: number) {
     console.log("Pixel clicked: ", x, ", ", y);
-    this.image.setColor(x, y, {red: 255, green: 0, blue: 0, white: 0});
+    this.image.setColor(x, y, this.brushColor);
   }
 
   clear(): void {
     this.image = new Image();
   }
-
-
 }
-

@@ -9,7 +9,7 @@ export class Image {
             .fill(false)
             .map(() => new Array(Image.HEIGHT)
             .fill({
-                red: 0,
+                red: 100,
                 green: 0,
                 blue: 0,
                 white: 0

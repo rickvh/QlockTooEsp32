@@ -9,7 +9,7 @@ import { RGBW } from './image';
   outputs: ['click']
 })
 export class PixelComponent {
-  color: RGBW = new RGBW();
+  color: RGBW = new RGBW(100, 100, 40);
   x: number = -1;
   y: number = -1;
 
