@@ -1,6 +1,6 @@
 
-<div class="clock">
+<div class="clock" (mousedown)="startDrawing()" (touchstart)="startDrawing()" (mouseup)="stopDrawing()" (touchend)="stopDrawing()">
     <div *ngFor="let row of image.grid; let x = index">
-        <span class="pixel" *ngFor="let pixel of row; let y = index" [ngStyle]="getCssColor(x, y)" (click)="onPixelClick(x, y)"></span>
+        <span class="pixel" *ngFor="let pixel of row; let y = index" [ngStyle]="getCssColor(x, y)"  (click)="onMouseMove(x, y)" (mousemove)="onMouseMove(x, y)" (touchmove)="onMouseMove(x, y)"></span>
     </div>
 </div>

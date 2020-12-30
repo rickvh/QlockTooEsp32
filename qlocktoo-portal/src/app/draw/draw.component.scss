@@ -1,3 +1,9 @@
+$border: solid #444 0.2em;
+
+div.toolbox {
+  border: $border;
+}
+
 div.colorpicker {
-  padding: 2em;
+  // padding: 2em;
 }

@@ -1,7 +1,13 @@
 <h1>Draw</h1>
 
-<div class="colorpicker">
-  <github-picker [(color)]="color" [control]="colorPickerControl"></github-picker>
+<div class="toolbox">
+  <div class="colorpicker">
+    <github-picker [(color)]="color" [control]="colorPickerControl"></github-picker>
+  </div>
+
+  <button mat-raised-button color="accent" (click)="color='rgb(0, 0, 0)'">Erase</button>
 </div>
 
-<app-image [brushColor]="hexToColor(color)"></app-image>
+<app-image [brushColor]="hexToColor(color)" [image]="image"></app-image>
+
+<button mat-raised-button color="warn" (click)="clear()">Clear</button>

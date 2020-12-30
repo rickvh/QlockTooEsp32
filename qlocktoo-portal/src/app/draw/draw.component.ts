@@ -22,7 +22,9 @@ export class DrawComponent implements OnInit {
     .showPresets()
     .hideAlphaChannel();
 
-
+  clear() {
+    this.image = new Image();
+  }
 
   ngOnInit(): void {
   }

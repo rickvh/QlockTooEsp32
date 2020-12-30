@@ -11,6 +11,11 @@ span.pixel {
 }
 
 .clock {
+    touch-action: none;
+
+    padding: 2em;
+    margin: 1em 0;
+    background-color: #444;
     border: $border;
     display: grid;
     grid-template-columns: repeat(11, auto);
