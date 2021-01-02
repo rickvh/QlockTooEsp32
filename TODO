@@ -13,60 +13,90 @@ Clock
 
 
 
+Tasks:
+======
+- webserver
+- ps4 controller
+- display (hoogste prio, luistert naar queue en heeft alleen DAN iets te doen)
+- app (input queue)
+- debugtask? ()
+
 
 
 
 ==================================
 
+Prio:
+[ ] - boot -> check configured? Nee -> state = SETUP_WIFI
+      - currentApp = blink 1 LED rood
+      - /api/config -> {status: uninitialized}
+[ ] 
+[ ] - klok-pagina uitbreiden met settings:
+      - Het is: kleur
+      - tussenwoorden: kleur
+      - uur: kleur
+      - transition: none, fade, ?
+      - Tijdzone via: https://github.com/nayarsystems/posix_tz_db
+[ ] - 
+[ ] - 
+[ ] - 
+[ ] - 
+
+
+# Fix flashsize:
+vVersion 1.0 of the Arduino IDE introduced the F() syntax for storing strings in flash memory rather than RAM. e.g.
+--> Serial.println(F("This string will be stored in flash memory"));
+
+
 Features
-- Clock
-  - kleur
-     - hoekjes
-     - uren
-     - minuten
-  - effect
-     - minuten aan/uit
-     - overgang letters
-  - autodim
-     - op tijd
-     - lichtsensor
+[ ] - Clock
+      - kleur
+        - hoekjes
+        - uren
+        - minuten
+      - effect
+        - minuten aan/uit
+        - overgang letters
+      - autodim
+        - op tijd
+        - lichtsensor
 
-- Wifi
-  - standaard uit, af en toe aan om tijd op te halen
-  - aan te zetten als de klok op 'dev'-mode wordt gezet
-  - kort aan om de tijd op te halen
+[ ] - Wifi
+      - standaard uit, af en toe aan om tijd op te halen
+      - aan te zetten als de klok op 'dev'-mode wordt gezet
+      - kort aan om de tijd op te halen
 
-- HTTP
-  - Pagina met settings
-    - ntp-server
-  - Status
-    - last update van ntp-server
-    - huidige tijd
-  - remap display X,Y
-  - Draw on display
-  - Set mode
-    - klok
-  - Factory reset?
-
-
-- Games
-  - Controller geabstraheerd
-    - 1 implementatie: PS4 controller
-    - 1 implementatie: UDP ?
-
-Buttons
-  - dev mode
-  - klok mode
-  - switch color
+[ ] - HTTP
+      - Pagina met settings
+        - ntp-server
+      - Status
+        - last update van ntp-server
+        - huidige tijd
+      - remap display X,Y
+      - Draw on display
+      - Set mode
+        - klok
+      - Factory reset?
 
 
-- Smart
-  - kleur in te stellen mbv Home Assistant
-  - Werkt niet met Wifi standaard uit?
+[ ] - Games
+      - Controller geabstraheerd
+        - 1 implementatie: PS4 controller
+        - 1 implementatie: UDP ?
 
-- OTA-logger
-  - UDP ?
-  - via #define in/uit te schakelen
+[ ] - Buttons
+    - dev mode
+    - klok mode
+    - switch color
+
+
+[ ] - Smart
+    - kleur in te stellen mbv Home Assistant
+    - Werkt niet met Wifi standaard uit?
+
+[v] - OTA-logger
+    - UDP ?
+    - via #define in/uit te schakelen
 
 
 

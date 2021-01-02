@@ -7,7 +7,6 @@
 #define WEBSOCKET_DISABLED // disbale logging via websockets
 // #include "utils/split.h"
 
-
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <WiFiClient.h>
@@ -30,6 +29,7 @@
 #include "control.h"
 #include "webinterface.h"
 #include "clock.h"
+#include "tz.h"
 
 #include <SPIFFS.h>
 #include "wifipassword.h"
@@ -111,6 +111,7 @@ void setupDisplay() {
 
 void setupWifi() {
   debugI("Connecting to Wifi...");
+  Serial.println("Connecting to Wifi...");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
@@ -120,6 +121,8 @@ void setupWifi() {
     ESP.restart();
   }
   debugI("Wifi connected");
+  Serial.print("Wifi connected: ");
+  Serial.println(WiFi.localIP());
 
 
   #if defined USE_MDNS && defined HOST_NAME
@@ -135,9 +138,11 @@ void setupWifi() {
 }
 
 void setupNTP() {
-  const long  gmtOffset_sec = 3600;
-  const int   daylightOffset_sec = 3600;
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  // const long  gmtOffset_sec = 3600;
+  // const int   daylightOffset_sec = 3600;
+  // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
+  configTzTime(getTimezone().c_str(), "pool.ntp.org");
 }
 
 void setupOTA() {
@@ -307,17 +312,27 @@ void changeMode(Mode mode, const void *config) {
 }
 
 void setup() {
+  Serial.begin(115200);
+  Serial.println("Booting QlockToo");
   debugI("Booting QlockToo");
   debugI("%s", build_str);
+  Serial.println("Booting QlockToo2");
 
   if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS cannot be opened");
     debugE("SPIFFS cannot be opened");
   };
+  Serial.println("setup Wifi");
   setupWifi();
+  Serial.println("setup OTA");
   setupOTA();
+  Serial.println("setup Logging");
   setupLogging();
+  Serial.println("setup Display");
   setupDisplay();
+  Serial.println("setup NTP");
   setupNTP();
+  Serial.println("setup Webinterface");
   webinterface.begin(&changeMode);
 
   // Start in Clock mode

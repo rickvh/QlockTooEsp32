@@ -1,0 +1,36 @@
+{"//firstboot"}
+{
+  "fw_version": "0.1-abcdef",
+  "fw_date": "2021-01-01 16:20",
+  "hostname": "qlocktoo.local",
+  "ip": "192.168.0.111",
+  "ntp_server": "pool.ntp.org",
+  "current_time": "1970-01-01 00:00:00",
+  "tz": "GMT",
+
+  "status": "setup_wifi"
+}
+
+
+{"//correct opgezet"}
+{
+  "fw_version": "0.1-abcdef",
+  "fw_date": "2021-01-01 16:20",
+  "hostname": "qlocktoo.local",
+  "ip": "192.168.0.111",
+  "ntp_server": "pool.ntp.org",
+  "current_time": "2021-01-01 16:25:08",
+  "tz": "Europe/Amsterdam",
+
+  "status": "ok"
+}
+
+
+{"//statussen"}
+{
+  "status": [
+    "setup_wifi",
+    "setup_ntp",
+    "ok"
+  ]
+}

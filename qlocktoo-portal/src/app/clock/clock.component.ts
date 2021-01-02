@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { ColorPickerControl, ColorsTable } from '@iplab/ngx-color-picker';
 
 @Component({
   selector: 'app-clock',
@@ -9,13 +10,22 @@ import { Component, OnInit } from '@angular/core';
 export class ClockComponent implements OnInit {
   busy = false;
   mode: String = '';
+
+  cssColor: string = '';
+
+
   color = {
     red: 20,
     green: 40,
     blue: 100
   }
-  
+
   constructor(private http: HttpClient) { }
+
+  public colorPickerControl = new ColorPickerControl()
+    .setValueFrom(ColorsTable.yellowgreen)
+    .showPresets()
+    .hideAlphaChannel();
 
   ngOnInit(): void {
     this.http.post('/api/clock', { color: this.color }).subscribe(data => {
@@ -35,5 +45,12 @@ export class ClockComponent implements OnInit {
         console.log(error);
       });
     }
+  }
+}
+
+export interface ClockConfig {
+  itIs: {
+    enabled: boolean,
+    color: string | null
   }
 }

@@ -1,28 +1,21 @@
-<h2>clock works!</h2>
+<h2>Configure clock</h2>
 
 
-<h3>
-    <!-- RGB <span ng-attr-style="border: 1px solid #333; background: rgb({{color.red}},{{color.green}},{{color.blue}})"> -->
-      <!-- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
-    <!-- </span> -->
-  </h3>
-<div>
-    Red: {{ color.red }}
-    <mat-slider min="0" max="100" step="1"
-        (input)="color.red = $event.value || 0; colorChanged();" 
-        [value]="color.red"></mat-slider>
-</div>
+<section>
+  <h3>Het is</h3>
 
-<div>
-    Green: {{ color.green }}
-    <mat-slider min="0" max="100" step="1"
-        (input)="color.green = $event.value || 0; colorChanged();" 
-        [value]="color.green"></mat-slider>
-</div>
+  <mat-checkbox [(ngModel)]="itIsEnabled">Enabled</mat-checkbox>
+  <div *ngIf="itIsEnabled" class="colorpicker">
+    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
+  </div>
 
-<div>
-    Blue: {{ color.blue }}
-    <mat-slider min="0" max="100" step="1"
-        (input)="color.blue = $event.value || 0; colorChanged();" 
-        [value]="color.blue"></mat-slider>
-</div>
+  <h3>Words</h3>
+  <div class="colorpicker">
+    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
+  </div>
+
+  <h3>Uur</h3>
+  <div class="colorpicker">
+    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
+  </div>
+</section>
