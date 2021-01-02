@@ -40,7 +40,7 @@ Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), serve
     
 }
 
-void Webinterface::begin(void (*setMode)(Mode mode, const void *config)) {  
+void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode, const void *config)) {  
   server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
   // server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
   //     debugI("GET received :)");
@@ -84,7 +84,7 @@ void Webinterface::begin(void (*setMode)(Mode mode, const void *config)) {
                 config.colorHour = color;
                 config.colorItIs = color;
                 config.colorWords = color;
-                setMode(CLOCK, &config);
+                setMode(qlocktoo::CLOCK, &config);
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -98,7 +98,7 @@ void Webinterface::begin(void (*setMode)(Mode mode, const void *config)) {
             if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
             {
                 // debugI("Mode set to SWIRL");
-                setMode(SWIRL, NULL);
+                setMode(qlocktoo::SWIRL, NULL);
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");

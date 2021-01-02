@@ -15,6 +15,8 @@
 #include <Adafruit_NeoMatrix.h>
 #include <string>
 #include "utils/stringutils.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -30,6 +32,7 @@
 #include "webinterface.h"
 #include "clock.h"
 #include "tz.h"
+#include "image.h"
 
 #include <SPIFFS.h>
 #include "wifipassword.h"
@@ -48,12 +51,14 @@ const PROGMEM char *ntpServer = "pool.ntp.org";
 
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
+Image *currentImage;
 
-void changeMode(Mode mode, const void *config);
+void changeMode(qlocktoo::Mode mode, const void *config);
 void listPartitions();
 void listFiles();
 void handleSwirl();
 void handleText();
+void handleImage();
 
 uint8_t frame = 1;
 uint8_t x_start = 1;
@@ -69,7 +74,7 @@ int pass = 0;
 
 
 
-Mode current_mode = CLOCK;
+qlocktoo::Mode current_mode = qlocktoo::NO_WIFI;
 
 // Display display = Display(LEDSTRIP_PIN);
 Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
@@ -96,11 +101,12 @@ uint16_t remapPixels(uint16_t x, uint16_t y) {
     {106,69,62,85,92,18,11,47,26,34}
   };
 
-  debugD("Getting mapping for: %u, %u", x, y);
+  // debugD("Getting mapping for: %u, %u", x, y);
   return mapping[x][9-y];
 }
 
 void setupDisplay() {
+  
   display.setRemapFunction(remapPixels);
   display.begin();
 
@@ -147,17 +153,7 @@ void setupNTP() {
 
 void setupOTA() {
   // Port defaults to 3232
-  // ArduinoOTA.setPort(3232);
-
-  // Hostname defaults to esp3232-[MAC]
   ArduinoOTA.setHostname(HOST_NAME);
-
-  // No authentication by default
-  // ArduinoOTA.setPassword("admin");
-
-  // Password can be set with it's md5 value as well
-  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
-  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
   ArduinoOTA
     .onStart([]() {
       String type;
@@ -166,7 +162,8 @@ void setupOTA() {
       else // U_SPIFFS
         type = "filesystem";
 
-      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      // Unmount SPIFFS
+      SPIFFS.end();
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -188,6 +185,8 @@ void setupOTA() {
 }
 
 void processCmdRemoteDebug() {
+  using namespace qlocktoo;
+  
   vector<string> tokens = split(Debug.getLastCommand().c_str(), ' ');
   if (! tokens.size()) return;
   
@@ -201,7 +200,35 @@ void processCmdRemoteDebug() {
   } else if (cmd == "swirl") {
     current_mode = SWIRL;
     debugI("* Mode set to SWIRL");
-  } else if (cmd == "text") {
+  } else if (cmd == "mem") {
+    auto free = xPortGetFreeHeapSize();
+    debugI("Free memory: %u", free);
+  } else if (cmd == "img") {
+    if (tokens.size() != 2) {
+      debugE("Command \'img\' requires 1 parameter: [xmas, snow, wifi]");
+      return;
+    }
+
+    if (tokens[1] == "xmas") {
+      current_mode = IMAGE;
+      currentImage = new Image(Image::Preset::XMAS_TREE);
+
+      debugI("* Image set to XMAS");
+      RGBW m = currentImage->getColor(0, 0);
+      debugI("Color currentImage: %u, %u, %u, %u", m.r, m.g, m.b, m.w);
+    }
+    if (tokens[1] == "snow") {
+      current_mode = IMAGE;
+      currentImage = new Image(Image::Preset::SNOWMAN);
+      debugI("* Image set to SNOW");
+    }
+    if (tokens[1] == "wifi") {
+      current_mode = IMAGE;
+      currentImage = new Image(Image::Preset::WIFI);
+      debugI("* Image set to WIFI");
+    }
+  }
+  else if (cmd == "text") {
     current_mode = TEXT;
     debugI("* Mode set to TEXT");
   } else if (cmd == "clock") {
@@ -234,47 +261,6 @@ void processCmdRemoteDebug() {
   }
 }
 
-void listPartitions(void)
-{
-  size_t ul;
-  esp_partition_iterator_t _mypartiterator;
-  const esp_partition_t *_mypart;
-  ul = spi_flash_get_chip_size();
-  debugI("Flash chip size: %u", ul);
-  debugI("Partiton table:");
-  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
-  if (_mypartiterator)
-  {
-    do
-    {
-      _mypart = esp_partition_get(_mypartiterator);
-      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
-    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
-  }
-  esp_partition_iterator_release(_mypartiterator);
-  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
-  if (_mypartiterator)
-  {
-    do
-    {
-      _mypart = esp_partition_get(_mypartiterator);
-      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
-    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
-  }
-  esp_partition_iterator_release(_mypartiterator);
-}
-
-
-void listFiles() {
-  File root = SPIFFS.open("/");
-  File file = root.openNextFile();
- 
-  while(file){
-    debugI("File: %s", file.name());
- 
-    file = root.openNextFile();
-  }
-}
 
 void setupLogging() {
 
@@ -299,9 +285,9 @@ void setupLogging() {
 
 }
 
-void changeMode(Mode mode, const void *config) {
+void changeMode(qlocktoo::Mode mode, const void *config) {
   current_mode = mode;
-  if (mode == CLOCK) {
+  if (mode == qlocktoo::CLOCK) {
     // appClock.begin();
 
     if (config){
@@ -338,14 +324,17 @@ void setup() {
   // Start in Clock mode
   ClockConfig tmp;
   tmp.colorHour = tmp.colorItIs = tmp.colorWords = RGBW(0, 255,255);
-  changeMode(CLOCK, (void *) &tmp);
+  changeMode(qlocktoo::CLOCK, (void *) &tmp);
 }
 
 void loop() {
   ArduinoOTA.handle();
   Debug.handle();
 
+  using namespace qlocktoo;
   switch (current_mode) {
+    case NO_WIFI:
+      // showImage()
     case CLOCK:
       appClock.update();
       break;
@@ -356,6 +345,11 @@ void loop() {
       break;
     case TEXT:
       handleText();
+      break;
+    case IMAGE:
+      handleImage();
+      break;
+    default:
       break;
   }
   delay(10);
@@ -409,4 +403,65 @@ void handleText() {
     // display.setTextColor();
   }
   delay(200);
+}
+
+void handleImage() {
+  debugD("handleImage()");
+  if (! currentImage) {
+    debugW("No image set!");
+    return;
+  }
+
+  for (uint8_t y = 0; y < display.height(); y++) {
+    for (uint8_t x = 0; x < display.width(); x++) {
+      auto color = currentImage->getColor(x, y).getColor();
+      display.setPassThruColor(color);
+      display.writePixel(x, y, color);
+      // display.setPassThruColor();
+      debugD("%u, %u: %u", x, y, color);
+    }
+  }
+  delay(2000);
+}
+
+void listPartitions(void)
+{
+  size_t ul;
+  esp_partition_iterator_t _mypartiterator;
+  const esp_partition_t *_mypart;
+  ul = spi_flash_get_chip_size();
+  debugI("Flash chip size: %u", ul);
+  debugI("Partiton table:");
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator)
+  {
+    do
+    {
+      _mypart = esp_partition_get(_mypartiterator);
+      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
+  _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+  if (_mypartiterator)
+  {
+    do
+    {
+      _mypart = esp_partition_get(_mypartiterator);
+      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+    } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
+  }
+  esp_partition_iterator_release(_mypartiterator);
+}
+
+void listFiles() {
+  File root = SPIFFS.open("/");
+  File file = root.openNextFile();
+ 
+  while(file){
+    debugI("File: %s", file.name());
+ 
+    file = root.openNextFile();
+  }
+  SPIFFS.end();
 }

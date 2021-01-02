@@ -142,14 +142,12 @@ void Clock::update() {
         updateBrightness();
     #endif
 
-
-    debugD("Clock::update()");
     if(!getLocalTime(&this->currentTime)){
         debugD("Failed to obtain time");
     }
-    char str_date[256];
-    strftime(str_date, sizeof(str_date), "%A, %d %B %Y", &currentTime);
-    debugD("Time: %s", str_date);
+    // char str_date[256];
+    // strftime(str_date, sizeof(str_date), "%A, %d %B %Y", &currentTime);
+    // debugD("Time: %s", str_date);
 
 
     // int imageCount = second() / 15;

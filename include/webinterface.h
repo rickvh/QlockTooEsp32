@@ -26,5 +26,5 @@ class Webinterface {
         // ~Webinterface() { }
 
         void test(const char* tekst);
-        void begin(void (*setMode)(Mode mode, const void *config));
+        void begin(void (*setMode)(qlocktoo::Mode mode, const void *config));
 };

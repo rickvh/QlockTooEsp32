@@ -23,6 +23,19 @@ Tasks:
 
 
 
+Flow:
+=====
+- boot: print versie etc naar Serial
+- boot: init config (config class instantieren, meer niet)
+- boot: setup display: clear
+- boot: setup WifiEventHandler -> luister naar state
+- boot: setup WiFi -> state = NO_WIFI --> showAnimation(Animation.NO_WIFI)
+- boot: setup OTA 
+- boot: setup NTP
+- boot: start task display
+- boot: start webserver (heeft al eigen task??)
+
+
 
 ==================================
 

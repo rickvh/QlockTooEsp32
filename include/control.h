@@ -1,8 +1,12 @@
 #pragma once
 
-typedef enum {
-  CLOCK,
-  SWIRL,
-  TEXT,
-  DEBUG
-} Mode;
+namespace qlocktoo {
+  typedef enum {
+    NO_WIFI,
+    CLOCK,
+    SWIRL,
+    TEXT,
+    IMAGE,
+    DEBUG
+  } Mode;
+}
