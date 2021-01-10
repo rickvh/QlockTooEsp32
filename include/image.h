@@ -2,10 +2,17 @@
 
 #include <pgmspace.h>
 #include <array>
+#include <string>
 #include "color.h"
 
-const static uint8_t PROGMEM IMG_WIFI[] = {
-    1,9,11,14,18,21,22,24,30,32,33,35,38,41,43,44,47,49,51,54,56,60,64,71,82,93,103,104,105
+const static uint8_t PROGMEM IMG_WIFI_FRAME_1[] = {
+    14,18,24,27,30,35,38,41,47,49,51,60,71,82,93,103,104,105
+};
+const static uint8_t PROGMEM IMG_WIFI_FRAME_2[] = {
+    27,38,49,60,71,82,93,103,104,105,12,13,23,34,45,46,19,20,31,42,52,53
+};
+const static uint8_t PROGMEM IMG_WIFI_FRAME_3[] = {
+    27,1,9,11,21,22,27,32,33,38,43,44,49,54,56,60,64,71,82,93,103,104,105
 };
 
 const static uint8_t PROGMEM IMG_XMAS_TREE_GREEN[] = {
@@ -20,7 +27,9 @@ const static uint8_t PROGMEM IMG_SNOWMAN_RED[] = {
 const static uint8_t PROGMEM IMG_SNOWMAN_BLUE[] = {
     5,15,16,17
 };
-
+const static uint8_t PROGMEM IMG_ERROR[] = {
+    4,5,15,16,26,27,37,38,48,49,59,60,92,93,103,104
+};
 
 
 class Image {
@@ -31,13 +40,17 @@ class Image {
     
     public:
         enum Preset {
-            WIFI,
+            ERROR,
+            WIFI1,
             WIFI2,
+            WIFI3,
             XMAS_TREE,  
             SNOWMAN
         };
 
         Image();
         Image(Preset file);
+        void readFile(std::string filename);
         RGBW getColor(uint8_t x, uint8_t y);
+        uint32_t getRawColor(uint8_t x, uint8_t y);
 };

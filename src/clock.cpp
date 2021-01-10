@@ -9,12 +9,6 @@
 #include "RemoteDebugger.h"
 
 #define NTP_TIMEOUT 1500
-#define SHOW_TIME_PERIOD 50
-
-
-// Use time or LDR light sensor for auto brightness adjustment.
-#define TIME_BRIGHTNESS
-//#define LDR_BRIGHTNESS
 
 
 #define R_VALUE_2         255 //200
@@ -22,36 +16,7 @@
 #define B_VALUE_2         0 //0
 #define W_VALUE_2         0
 
-#define MIN_BRIGHTNESS  15
-#define MAX_BRIGHTNESS  140
 #define BRIGHTNESS      255 // legacy, keep at 255
-int     lastBrightness  =  MIN_BRIGHTNESS;
-int     dayHour         = 8; // Start increasing brightness
-int     nightHour       = 17; // Start decreasing brightness
-
-#define SYNC_INTERVAL   1200
-
-#define NUM_LEDS        110
-
-
-// bool        autoDST         = true;
-
-// IPAddress   timeServerIP; // time.nist.gov NTP server address
-// const char* ntpServerName   = "nl.pool.ntp.org";
-// byte        packetBuffer[ NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
-// WiFiUDP     Udp;
-// unsigned int localPort = 8888;
-
-unsigned long   lastdisplayupdate   = 0;
-
-uint8_t targetlevels[NUM_LEDS];
-uint8_t currentlevels[NUM_LEDS];
-
-bool isDST(int d, int m, int y);
-bool isDSTSwitchDay(int d, int m, int y);
-void updateBrightness();
-int timeBrightness();
-void showKlok(Adafruit_NeoPixel &display);
 
 /*
    HET IS X UUR
@@ -86,35 +51,12 @@ void showKlok(Adafruit_NeoPixel &display);
 #define STAM 2
 
 
-std::vector<std::vector<int>> ledsbyword = {
-    {0,37,38,36,39}, // HET IS
-    {17,19,54},            // een
-    {58,89,95,57},      // twee
-    {91,93,55,92},      // drie
-    {96,88,59,97},      // vier
-    {87,60,98,86},         // vijf
-    {61,99,85},         // zes
-    {102,65,82,101,64},   // zeven
-    {80,66,103,79},      // acht
-    {100,63,84,107,62},   // negen
-    {67,109,78,68},      // tien
-    {108,77,69},         // elf
-    {73,81,72,74,104,71},// twaalf
-    {35,40,3,34},    // VIJF
-    {30,43,6,31},    // TIEN
-    {9,46,27,10,47}, // KWART
-    {41,4,33,26},    // VOOR1
-    {7,44,29,8},    // OVER1
-    {22,14,50,23},    // HALF
-    {70,76,106},      // UUR
-    {51,15,21,52},          // VOOR2
-    {12,48,25,11}          // OVER2
-};
+void Clock::begin() {    
+    debugI("begin()");
+    
+    // display.setRemapFunction(remapPixels);
+    // display.begin();
 
-
-
-
-void Clock::begin() {
     //init and get the time
     // TODO: verplaatsen naar main
 
@@ -129,45 +71,14 @@ void Clock::applyConfig(ClockConfig &config) {
 }
 
 void Clock::update() {
-    if ((millis() - lastdisplayupdate) <= SHOW_TIME_PERIOD) {
-        return;
-    }
-    lastdisplayupdate = millis();
-    
-
-    #ifdef TIME_BRIGHTNESS
-        display.setBrightness(timeBrightness());
-    #endif
-    #ifdef LDR_BRIGHTNESS
-        updateBrightness();
-    #endif
-
     if(!getLocalTime(&this->currentTime)){
         debugD("Failed to obtain time");
     }
-    // char str_date[256];
-    // strftime(str_date, sizeof(str_date), "%A, %d %B %Y", &currentTime);
-    // debugD("Time: %s", str_date);
 
-
-    // int imageCount = second() / 15;
-
-    // if (hour() >= 22 || hour() <= 7)
-    //   imageCount = 0;
-
-    // if (imageCount == 1) {
-    //   showImage(0);
-    // } else if (imageCount == 3) {
-    //   showImage(1);
-    // } else {
-      showKlok(display);
-    // }
-    
-    
-    // Update LEDs
+    showKlok();
 }
 
-void Clock::showKlok(Adafruit_NeoPixel &display) {
+void Clock::showKlok() {
       // calculate target brightnesses:
     int current_hourword = hour();
     if(current_hourword>12) current_hourword = current_hourword - 12; // 12 hour clock, where 12 stays 12 and 13 becomes one
@@ -291,10 +202,12 @@ void Clock::showKlok(Adafruit_NeoPixel &display) {
             display.setPixelColor(l, color.getColor());
         }
     }
+
+    display.show();
 }
 
 
-int Clock::timeBrightness() {
+uint8_t Clock::timeBrightness() {
     if (hour() > dayHour && hour() < nightHour) {
         return MAX_BRIGHTNESS;
     } else if (hour() < dayHour || hour() > nightHour) {

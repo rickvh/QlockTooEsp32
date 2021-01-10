@@ -1,5 +1,8 @@
 #define VERSION         "0.1"
 
+// #define CONFIG_FREERTOS_USE_TRACE_FACILITY              1
+// #define CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS  1
+
 #define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
 #define LEDSTRIP_PIN    13
@@ -14,9 +17,11 @@
 // #include "display.h"
 #include <Adafruit_NeoMatrix.h>
 #include <string>
+#include <utility>
 #include "utils/stringutils.h"
 #include "nvs_flash.h"
 #include "nvs.h"
+#include "sk.h"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -42,7 +47,7 @@
 
 using namespace std;
 
-const char* build_str = "Version: " " " __DATE__ " " __TIME__;
+const char* build_str = "Version: " VERSION " " __DATE__ " " __TIME__;
 
 
 const uint8_t   timeZone        = 1;     // Central European Time
@@ -51,14 +56,18 @@ const PROGMEM char *ntpServer = "pool.ntp.org";
 
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
-Image *currentImage;
+shared_ptr<Image> currentImage = shared_ptr<Image>(new Image());
 
-void changeMode(qlocktoo::Mode mode, const void *config);
+void changeMode(qlocktoo::Mode mode);
 void listPartitions();
 void listFiles();
 void handleSwirl();
 void handleText();
 void handleImage();
+void animateWifi(void * parameter);
+void showSingleImageTask(void * parameter);
+void showSwirlTask(void * parameter);
+void showClockTask(void * parameter);
 
 uint8_t frame = 1;
 uint8_t x_start = 1;
@@ -71,19 +80,16 @@ uint8_t speed = 50, acc = 50, dir = 1;
 int x    = 11;
 int pass = 0;
 
+// TaskHandle_t pvCreatedTask = NULL;
+TaskHandle_t currentAppTask = NULL;
 
-
-
-qlocktoo::Mode current_mode = qlocktoo::NO_WIFI;
+qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
 
 // Display display = Display(LEDSTRIP_PIN);
-Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, LEDSTRIP_PIN,
-  NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
-  NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
-  NEO_GRBW           + NEO_KHZ800);
 
 
-Clock appClock(display, Debug);
+
+// sk ledstrip;
 
 
 uint16_t remapPixels(uint16_t x, uint16_t y) {
@@ -107,12 +113,20 @@ uint16_t remapPixels(uint16_t x, uint16_t y) {
 
 void setupDisplay() {
   
-  display.setRemapFunction(remapPixels);
-  display.begin();
+  
 
-  display.setTextWrap(false);
-  display.setBrightness(255);
-  display.setTextColor(display.Color(0, 200, 0));
+  // display.setTextWrap(false);
+  // display.setBrightness(255);
+  // display.setTextColor(display.Color(0, 200, 0));
+
+
+  // ledstrip.begin(LEDSTRIP_PIN, 110);
+  // for(uint8_t i = 0; i < 50; i+=2) {
+  //   ledstrip.color(i, 255, 255, 0, 0);
+  // }
+  // for(uint8_t i = 50; i < 110; i+=2) {
+  //   ledstrip.color(i, 0, 0, 100, 100);
+  // }
 }
 
 void setupWifi() {
@@ -164,6 +178,7 @@ void setupOTA() {
 
       // Unmount SPIFFS
       SPIFFS.end();
+      changeMode(qlocktoo::NO_WIFI);
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -179,6 +194,8 @@ void setupOTA() {
       else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
       else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      changeMode(qlocktoo::Mode::ERROR);
+      delay(5000);
     });
 
   ArduinoOTA.begin();
@@ -193,12 +210,8 @@ void processCmdRemoteDebug() {
   uint8_t index = 0;
   string const& cmd = tokens[index++];
   
-	if (cmd == "clear") {
-		debugI("* Clear display");
-    display.clear();
-    display.show();
-  } else if (cmd == "swirl") {
-    current_mode = SWIRL;
+  if (cmd == "swirl") {
+    changeMode(SWIRL);
     debugI("* Mode set to SWIRL");
   } else if (cmd == "mem") {
     auto free = xPortGetFreeHeapSize();
@@ -210,45 +223,46 @@ void processCmdRemoteDebug() {
     }
 
     if (tokens[1] == "xmas") {
-      current_mode = IMAGE;
-      currentImage = new Image(Image::Preset::XMAS_TREE);
-
+      currentImage = shared_ptr<Image>(new Image(Image::Preset::XMAS_TREE));
       debugI("* Image set to XMAS");
-      RGBW m = currentImage->getColor(0, 0);
-      debugI("Color currentImage: %u, %u, %u, %u", m.r, m.g, m.b, m.w);
-    }
-    if (tokens[1] == "snow") {
-      current_mode = IMAGE;
-      currentImage = new Image(Image::Preset::SNOWMAN);
+    } else if (tokens[1] == "snow") {
+      currentImage = shared_ptr<Image>(new Image(Image::Preset::SNOWMAN));
       debugI("* Image set to SNOW");
-    }
-    if (tokens[1] == "wifi") {
-      current_mode = IMAGE;
-      currentImage = new Image(Image::Preset::WIFI);
+    } else if (tokens[1] == "wifi") {
+      currentImage = shared_ptr<Image>(new Image(Image::Preset::WIFI1));
       debugI("* Image set to WIFI");
+    } else {
+      return;
+    }
+    changeMode(IMAGE);
+  }
+  else if (cmd == "task") {
+    if (tokens.size() != 2) {
+      debugE("Command \'task\' requires 1 parameter: [animate, list, stop]");
+      return;
+    }
+    if (tokens[1] == "animate") {
+      changeMode(NO_WIFI);
+    }
+    if (tokens[1] == "list") {
+      // NOOP
+    }
+    if (tokens[1] == "stop") {
+      if (currentAppTask) {
+        debugI("* Task deleted");
+        vTaskDelete(currentAppTask);
+        currentAppTask = NULL;
+      } else {
+        debugI("* No task running");
+      }
     }
   }
   else if (cmd == "text") {
-    current_mode = TEXT;
+    changeMode(TEXT);
     debugI("* Mode set to TEXT");
   } else if (cmd == "clock") {
-    current_mode = CLOCK;
+    changeMode(CLOCK);
     debugI("* Mode set to CLOCK");
-  } else if (cmd == "rgb") {
-    if (tokens.size() != 4) {
-      debugE("Command \'rgb\' requires 3 parameters");
-      return;
-    }
-
-    uint8_t r, g, b;
-    parseInt(tokens[index++], r);
-    parseInt(tokens[index++], g);
-    parseInt(tokens[index++], b);
-
-    debugI("* Color set to Red(%d), Green(%d), Blue(%d)", r, g, b);
-    auto color = RGBW(r, g, b);
-    display.fill(color.getColor());
-    display.show();
   } else if (cmd == "web") {
     webinterface.test("Kiekeboe");
   } else if (cmd == "ls") {
@@ -285,16 +299,55 @@ void setupLogging() {
 
 }
 
-void changeMode(qlocktoo::Mode mode, const void *config) {
-  current_mode = mode;
-  if (mode == qlocktoo::CLOCK) {
-    // appClock.begin();
+void changeMode(qlocktoo::Mode mode) {
+  // TODO: namespaces fixen
+  using namespace qlocktoo;
 
-    if (config){
-      ClockConfig *tmp = (ClockConfig *) config;
-      appClock.applyConfig(*tmp);
-    }    
+  if (mode == currentMode && currentAppTask) {
+    debugI("Mode already activated");
+    return;
   }
+  
+  currentMode = mode;
+  void (*taskFunction)(void *parameter);
+  switch (currentMode) {
+    case CLOCK:
+      taskFunction = showClockTask;
+      break;
+    case NO_WIFI:
+      taskFunction = animateWifi;
+      break;
+    case ERROR:
+      currentImage = shared_ptr<Image>(new Image(Image::Preset::ERROR));
+      taskFunction = showSingleImageTask;
+      break;
+    case IMAGE:
+      taskFunction = showSingleImageTask;
+      break;
+    case SWIRL:
+      taskFunction = showSwirlTask;
+      break;
+    default:
+      return;
+  }
+
+  if (currentAppTask) {
+    debugI("* Previous task deleted");
+    vTaskDelete(currentAppTask);
+  }
+
+  debugI("* Start new task");
+  // xTaskCreate(
+  //   taskFunction,    // Function that should be called
+  //   "App",   // Name of the task (for debugging)
+  //   1000,            // Stack size (bytes)
+  //   &display,            // Parameter to pass
+  //   2,               // Task priority
+  //   &currentAppTask             // Task handle
+  // );
+
+  xTaskCreatePinnedToCore(taskFunction, "App", 4096, NULL, 2, &currentAppTask, 1);
+
 }
 
 void setup() {
@@ -322,75 +375,68 @@ void setup() {
   webinterface.begin(&changeMode);
 
   // Start in Clock mode
-  ClockConfig tmp;
-  tmp.colorHour = tmp.colorItIs = tmp.colorWords = RGBW(0, 255,255);
-  changeMode(qlocktoo::CLOCK, (void *) &tmp);
+  // changeMode(qlocktoo::CLOCK, (void *) &tmp);
 }
 
+// Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
 void loop() {
   ArduinoOTA.handle();
   Debug.handle();
-
-  using namespace qlocktoo;
-  switch (current_mode) {
-    case NO_WIFI:
-      // showImage()
-    case CLOCK:
-      appClock.update();
-      break;
-    case DEBUG:
-      break;
-    case SWIRL:
-      handleSwirl();
-      break;
-    case TEXT:
-      handleText();
-      break;
-    case IMAGE:
-      handleImage();
-      break;
-    default:
-      break;
-  }
-  delay(10);
-  display.show();
+  delay(300);
 };
 
-void handleSwirl() {
-  delay(speed);
-
-  uint16_t x_end = display.width() - x_start;
-  uint16_t y_end = display.height() - y_start;
-
-  uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
-  display.setPassThruColor(color);
+void showSwirlTask(void * parameter) {
+  Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, 13,
+    NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
+    NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
+    NEO_GRBW           + NEO_KHZ800);
+  display.setRemapFunction(remapPixels);
+  display.begin();
   
-  debugI("Coords: %u, %u - %u, %u. Hue: %u", x_start, y_start, x_end, y_end, hue);
-  display.drawLine(x_start, y_start, x_end, y_end, color);
-  if (x_start == display.width()){
-    if (y_start == display.height()) {
-      x_start = 0;
-      y_start = 0;
-    } else {
-      y_start++;
-    }
-  } else {
-    y_start = 0;
-    x_start++;
-  }
+  for (;;) {
+    uint16_t x_end = display.width() - x_start;
+    uint16_t y_end = display.height() - y_start;
 
-  acc += (1 * dir);
-  speed += acc;
-  if (speed >= 100) {
-    speed = 100;
-    dir = -1;
-  } else if (speed <= 40) {
-    speed = 40;
-    dir = 1;
+    uint32_t color = display.ColorHSV(hue+=1000, saturation, brightness);
+    display.setPassThruColor(color);
+    display.drawLine(x_start, y_start, x_end, y_end, color);
+    if (x_start == display.width()){
+      if (y_start == display.height()) {
+        x_start = 0;
+        y_start = 0;
+      } else {
+        y_start++;
+      }
+    } else {
+      y_start = 0;
+      x_start++;
+    }
+
+    acc += (1 * dir);
+    speed += acc;
+    if (speed >= 100) {
+      speed = 100;
+      dir = -1;
+    } else if (speed <= 40) {
+      speed = 40;
+      dir = 1;
+    }
+    display.setPassThruColor();
+    display.show();
+
+    delay(speed);
   }
 }
 
 void handleText() {
+  Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, 13,
+    NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
+    NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
+    NEO_GRBW           + NEO_KHZ800);
+  display.setRemapFunction(remapPixels);
+  display.begin();
+
+
   display.fillScreen(0);
   display.setCursor(x, 0);
   display.print(F("Test"));
@@ -405,24 +451,97 @@ void handleText() {
   delay(200);
 }
 
-void handleImage() {
-  debugD("handleImage()");
-  if (! currentImage) {
-    debugW("No image set!");
-    return;
-  }
+void animateWifi(void * parameter) {
+  Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, 13,
+    NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
+    NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
+    NEO_GRBW           + NEO_KHZ800);
+  display.setRemapFunction(remapPixels);
+  display.begin();
+  
+  Image::Preset current = Image::Preset::WIFI1;
 
-  for (uint8_t y = 0; y < display.height(); y++) {
-    for (uint8_t x = 0; x < display.width(); x++) {
-      auto color = currentImage->getColor(x, y).getColor();
-      display.setPassThruColor(color);
-      display.writePixel(x, y, color);
-      // display.setPassThruColor();
-      debugD("%u, %u: %u", x, y, color);
+  for (;;) {
+    switch (current) {
+      case Image::Preset::WIFI1:
+        current = Image::Preset::WIFI2;
+        break;
+      case Image::Preset::WIFI2:
+        current = Image::Preset::WIFI3;
+        break;
+      case Image::Preset::WIFI3:
+        current = Image::Preset::WIFI1;
+        break;
     }
+    currentImage = shared_ptr<Image>(new Image(current));
+  
+    for (uint8_t y = 0; y < display.height(); y++) {
+      for (uint8_t x = 0; x < display.width(); x++) {
+        auto color = currentImage->getColor(x, y).getColor();
+        display.setPassThruColor(color);
+        display.writePixel(x, y, color);
+        // display.setPassThruColor();
+      }
+    }
+    display.show();
+
+    delay(300);
   }
-  delay(2000);
 }
+
+void showSingleImageTask(void * parameter) {
+  Adafruit_NeoMatrix display = Adafruit_NeoMatrix(11, 10, 13,
+    NEO_MATRIX_BOTTOM     + NEO_MATRIX_RIGHT +
+    NEO_MATRIX_COLUMNS + NEO_MATRIX_PROGRESSIVE,
+    NEO_GRBW           + NEO_KHZ800);
+  display.setRemapFunction(remapPixels);
+  display.begin();
+
+
+  for (;;) {
+    debugD("handleImage()");
+    if (! currentImage) {
+      debugW("No image set!");
+      vTaskDelete(NULL);
+    }
+
+    for (uint8_t y = 0; y < display.height(); y++) {
+      for (uint8_t x = 0; x < display.width(); x++) {
+        auto color = currentImage->getColor(x, y).getColor();
+        display.setPassThruColor(color);
+        display.writePixel(x, y, color);
+        display.setPassThruColor();
+      }
+    }
+    display.show();
+
+    delay(10000);
+  }
+}
+
+void showClockTask(void * parameter) {
+  Clock appClock(Debug);
+  ClockConfig tmp;
+  tmp.colorHour = tmp.colorItIs = tmp.colorWords = RGBW(0, 255,255);
+  appClock.applyConfig(tmp);
+  appClock.begin();
+
+  for (;;) {
+    appClock.update();
+    delay(100);
+  }
+}
+
+/** TODO: implement seperate task to write to the display with very high priority to avoid glitches */
+// void displayWriteTask(void * parameter) {
+// 
+// }
+
+// rouleer door clock, image etc...
+void switchTaskTask(void * parameter) {
+  // TODO:
+}
+
 
 void listPartitions(void)
 {

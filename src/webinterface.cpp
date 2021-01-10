@@ -40,7 +40,7 @@ Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), serve
     
 }
 
-void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode, const void *config)) {  
+void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {  
   server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
   // server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
   //     debugI("GET received :)");
@@ -63,8 +63,9 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode, const void *config
     // [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
 
 // [this](const String& var) { return processor(var); }
+
   server.onRequestBody(
-    [setMode = setMode](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+    [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
     {
         if ((request->url() == "/api/clock") &&
             (request->method() == HTTP_POST))
@@ -84,7 +85,10 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode, const void *config
                 config.colorHour = color;
                 config.colorItIs = color;
                 config.colorWords = color;
-                setMode(qlocktoo::CLOCK, &config);
+
+                // TODO: iets met kleurtjes
+
+                setMode(qlocktoo::CLOCK);
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -93,12 +97,29 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode, const void *config
         if ((request->url() == "/api/swirl") &&
             (request->method() == HTTP_POST))
         {
-            StaticJsonDocument<512> jsonDoc;
+            // StaticJsonDocument<512> jsonDoc;
             
-            if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+            // if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
             {
                 // debugI("Mode set to SWIRL");
-                setMode(qlocktoo::SWIRL, NULL);
+                setMode(qlocktoo::SWIRL);
+            }
+
+            request->send(200, "application/json", "{ \"status\": \"success\" }");
+        }
+        if ((request->url() == "/api/test") &&
+            (request->method() == HTTP_POST))
+        {
+            // StaticJsonDocument<512> jsonDoc;
+            
+            // if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+            {
+                if (testswitch) {
+                  setMode(qlocktoo::SWIRL);
+                } else {
+                  setMode(qlocktoo::NO_WIFI);
+                }
+                testswitch = !testswitch;
             }
 
             request->send(200, "application/json", "{ \"status\": \"success\" }");
