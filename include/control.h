@@ -11,7 +11,9 @@ typedef enum {
     TEXT,
     IMAGE,
     ERROR,
-    DEBUG
+    DEBUG,
+    XMAS,
+    SNOW
 } Mode;
 
 }

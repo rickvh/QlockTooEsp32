@@ -32,6 +32,7 @@
 #include "clock.h"
 #include "tz.h"
 #include "image.h"
+#include "animation.h"
 
 #include <SPIFFS.h>
 #include "wifipassword.h"
@@ -51,34 +52,16 @@ const PROGMEM char *ntpServer = "pool.ntp.org";
 
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
-shared_ptr<Image> currentImage = shared_ptr<Image>(new Image());
+shared_ptr<Image> currentImage = shared_ptr<Image>(new Image(Debug));
 
 void changeMode(qlocktoo::Mode mode);
 void listPartitions();
 void listFiles();
-void handleSwirl();
-void handleText();
-void handleImage();
-void animateWifi(void * parameter);
-void showSingleImageTask(void * parameter);
-void showSwirlTask(void * parameter);
-void showClockTask(void * parameter);
-
-uint8_t frame = 1;
-uint8_t x_start = 1;
-uint8_t y_start = 1;
-uint16_t hue = 0;
-uint8_t saturation = 255, brightness = 255;
-
-uint8_t speed = 50, acc = 50, dir = 1;
-
-int x    = 11;
-int pass = 0;
+void runAppTask(void * parameter);
 
 // TaskHandle_t pvCreatedTask = NULL;
 TaskHandle_t currentAppTask = NULL;
 shared_ptr<App> currentApp = NULL;
-
 qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
 
 
@@ -196,39 +179,38 @@ void processCmdRemoteDebug() {
     }
 
     if (tokens[1] == "xmas") {
-      currentImage = shared_ptr<Image>(new Image(Image::Preset::XMAS_TREE));
+      changeMode(XMAS);
       debugI("* Image set to XMAS");
     } else if (tokens[1] == "snow") {
-      currentImage = shared_ptr<Image>(new Image(Image::Preset::SNOWMAN));
+      changeMode(SNOW);
       debugI("* Image set to SNOW");
     } else if (tokens[1] == "wifi") {
-      currentImage = shared_ptr<Image>(new Image(Image::Preset::WIFI1));
+      changeMode(WIFI_ANIMATION);
       debugI("* Image set to WIFI");
     } else {
       return;
     }
-    changeMode(IMAGE);
   }
   else if (cmd == "task") {
     if (tokens.size() != 2) {
       debugE("Command \'task\' requires 1 parameter: [animate, list, stop]");
       return;
     }
-    if (tokens[1] == "animate") {
-      changeMode(NO_WIFI);
+    // if (tokens[1] == "animate") {
+  //     changeMode(NO_WIFI);
+  //   }
+    if (tokens[1] == "start") {
+      xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 2, &currentAppTask, 1);
     }
-    if (tokens[1] == "list") {
-      // NOOP
-    }
-    if (tokens[1] == "stop") {
-      if (currentAppTask) {
-        debugI("* Task deleted");
-        vTaskDelete(currentAppTask);
-        currentAppTask = NULL;
-      } else {
-        debugI("* No task running");
-      }
-    }
+  //   if (tokens[1] == "stop") {
+  //     if (currentAppTask) {
+  //       debugI("* Task deleted");
+  //       vTaskDelete(currentAppTask);
+  //       currentAppTask = NULL;
+  //     } else {
+  //       debugI("* No task running");
+  //     }
+  //   }
   }
   else if (cmd == "text") {
     changeMode(TEXT);
@@ -273,21 +255,22 @@ void setupLogging() {
 }
 
 void changeMode(qlocktoo::Mode mode) {
-  // if (checkModeAlreadyActive && mode == currentMode && currentAppTask) {
-  //   debugI("Mode already activated");
-  //   return;
-  // }
-  
   currentMode = mode;
   switch (currentMode) {
     case CLOCK:
       // currentApp = shared_ptr<App>(new Clock());
       break;
     case NO_WIFI:
-      currentApp = shared_ptr<App>(new Image(Image::Preset::WIFI1));
+      currentApp = shared_ptr<App>(new Animation());
+      break;
+    case XMAS:
+      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::XMAS_TREE));
+      break;
+    case SNOW:
+      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::SNOWMAN));
       break;
     case ERROR:
-      currentApp = shared_ptr<App>(new Image(Image::Preset::ERROR));
+      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::ERROR));
       break;
     case SWIRL:
       currentApp = shared_ptr<App>(new Swirl());
@@ -354,7 +337,7 @@ void runAppTask(void * parameter) {
     }
 
     // For safety reasons - make sure there's at least a chance for FreeRTOS to switch tasks.
-    delay(0);
+    delay(10);
   }
 }
 

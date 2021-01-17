@@ -5,13 +5,15 @@
 #include <string>
 #include "display.h"
 #include "control.h"
+#include "RemoteDebugger.h"
 
 namespace qlocktoo {
-Image::Image() {
+Image::Image(RemoteDebug &debug) : Debug(debug) {
     pixels.fill(RGBW());
 }
 
-Image::Image(Preset preset) {
+Image::Image(RemoteDebug &debug, Preset preset) : Debug(debug) {
+    Debug = debug;
     RGBW color;
 
     switch (preset) {
@@ -189,11 +191,17 @@ void Image::show() {
 }
 
 void Image::setup() {
+    Display::begin();
     show();
+    debugI("Image-setup");   
 }
 
 void Image::loop() {
     // Since there's really nothing to do, we'll suspend ourself.
-    vTaskSuspend(NULL);
+    // vTaskSuspend(NULL);
+    delay(3000);
+    debugI("Image-loop");
+    show();
+    Display::begin();
 }
 }  // namespace qlocktoo
