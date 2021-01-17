@@ -1,9 +1,12 @@
 #include "image.h"
+#include <SPIFFS.h>
+#include <algorithm>
 #include <array>
 #include <string>
-#include <algorithm>
-#include <SPIFFS.h>
+#include "display.h"
+#include "control.h"
 
+namespace qlocktoo {
 Image::Image() {
     pixels.fill(RGBW());
 }
@@ -11,7 +14,7 @@ Image::Image() {
 Image::Image(Preset preset) {
     RGBW color;
 
-    switch(preset) {
+    switch (preset) {
         case ERROR:
             color.r = 200;
 
@@ -26,7 +29,7 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            break;  
+            break;
         case WIFI1:
             color.b = 200;
 
@@ -41,7 +44,7 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            break;          
+            break;
         case WIFI2:
             color.b = 200;
 
@@ -56,7 +59,7 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            break;  
+            break;
         case WIFI3:
             color.b = 200;
 
@@ -71,9 +74,7 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            break;  
-
-
+            break;
 
         case XMAS_TREE:
             color.g = 200;
@@ -89,8 +90,8 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            pixels[5] = RGBW(200,200,0);
-            pixels[104] = RGBW(200,0,0);
+            pixels[5] = RGBW(200, 200, 0);
+            pixels[104] = RGBW(200, 0, 0);
             break;
 
         case SNOWMAN:
@@ -139,17 +140,19 @@ Image::Image(Preset preset) {
     }
 }
 
+Mode Image::getApp() {
+    return Mode::IMAGE;
+}
 
 void Image::readFile(std::string filename) {
     if (!SPIFFS.begin() || !SPIFFS.exists(filename.c_str())) {
         return;
     }
-    
+
     File file = SPIFFS.open(filename.c_str());
 
-    uint8_t x, y, red, green, blue, white;
-    while (file >> x >> y >> red >> green >> blue >> white)
-    {
+    uint8_t x = 0, y = 0, red = 0, green = 0, blue = 0, white = 0;
+    while (file >> x >> y >> red >> green >> blue >> white) {
         pixels[y * WIDTH + x] = RGBW(red, green, blue, white);
     }
 
@@ -169,12 +172,28 @@ RGBW Image::getColor(uint8_t x, uint8_t y) {
     return pixels[y * WIDTH + x];
 }
 
+// TODO: kan weg??
 // Adafruit compatible color
 uint32_t Image::getRawColor(uint8_t x, uint8_t y) {
-    RGBW color = getColor(x, y);
-    return Adafruit_NeoPixel::Color(
-        color.brightness*color.brightness*color.r/65025,
-        color.brightness*color.brightness*color.g/65025,
-        color.brightness*color.brightness*color.b/65025,
-        color.brightness*color.brightness*color.w/65025);
+    return getColor(x, y).getColor();
 };
+
+void Image::show() {
+    for (uint8_t y = 0; y < HEIGHT; y++) {
+        for (uint8_t x = 0; x < WIDTH; x++) {
+            auto color = getColor(x, y).getColor();
+            Display::drawPixel(x, y, color);
+        }
+    }
+    Display::show();
+}
+
+void Image::setup() {
+    show();
+}
+
+void Image::loop() {
+    // Since there's really nothing to do, we'll suspend ourself.
+    vTaskSuspend(NULL);
+}
+}  // namespace qlocktoo

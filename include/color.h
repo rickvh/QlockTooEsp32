@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Arduino.h>
-#include "Adafruit_NeoPixel.h"
 
 class RGBW {
     public:
@@ -23,14 +22,18 @@ class RGBW {
             this->w = 0;
         };
 
-        // Adafruit compatible color
-        uint32_t getColor() {
-            return Adafruit_NeoPixel::Color(
-                brightness*brightness*r/65025,
-                brightness*brightness*g/65025,
-                brightness*brightness*b/65025,
-                brightness*brightness*w/65025);
+        uint32_t getColor()
+        {
+            uint32_t color = 0;
+
+            color |= ((uint32_t)g << 24);
+            color |= ((uint32_t)r << 16);
+            color |= ((uint32_t)b << 8);
+            color |= (uint32_t)w;
+
+            return color;
         };
+        
 
         // Returns the Red component of a 32-bit color
     // uint8_t Red(uint32_t color)
