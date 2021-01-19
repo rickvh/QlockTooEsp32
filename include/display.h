@@ -24,6 +24,7 @@ class Display {
     static void clear() { realDisplay.clear(); };
     static void show() { realDisplay.show(); };
     static void drawPixel(int16_t x, int16_t y, uint32_t c) { realDisplay.writePixel(x, y, c); };
+    static void drawPixelRaw(int16_t index, uint32_t c, uint8_t brightness) { realDisplay.color32(index, c, brightness); };
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) { realDisplay.writeLine(x0, y0, x1, y1, color); };
 
     // Helper methods

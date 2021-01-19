@@ -6,14 +6,16 @@ namespace qlocktoo {
 class App {
    private:
     bool initialized;
+    Mode app;
 
    protected:
-    virtual void setup();
-    virtual void loop();
+    App(Mode app) : initialized(false), app(app) {};
+    virtual void setup() = 0;
+    virtual void loop() = 0;
 
    public:
-    App() : initialized(false){};
-    virtual Mode getApp();
+    virtual ~App() {};
+    Mode getApp() const { return app; };
     void handle();
 };
 }  // namespace qlocktoo

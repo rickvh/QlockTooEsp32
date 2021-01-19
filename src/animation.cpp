@@ -1,15 +1,9 @@
 #include "animation.h"
-
-#include "control.h"
 #include "image.h"
 
 namespace qlocktoo {
-
-Mode Animation::getApp() {
-    return Mode::WIFI_ANIMATION;
-}
-
 void Animation::setup() {
+    Display::begin();
     currentImage = Image::Preset::WIFI1;
 }
 
@@ -29,7 +23,9 @@ void Animation::loop() {
             break;
     }
     // currentFrame = std::shared_ptr<Image>(new Image(currentImage));
-    currentFrame.get()->show();
+    if (currentFrame) {
+        currentFrame.get()->show();
+    }
 
     delay(300);
 }

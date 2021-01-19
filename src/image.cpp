@@ -4,15 +4,14 @@
 #include <array>
 #include <string>
 #include "display.h"
-#include "control.h"
 #include "RemoteDebugger.h"
 
 namespace qlocktoo {
-Image::Image(RemoteDebug &debug) : Debug(debug) {
+Image::Image(RemoteDebug &debug) : App(Mode::IMAGE), Debug(debug) {
     pixels.fill(RGBW());
 }
 
-Image::Image(RemoteDebug &debug, Preset preset) : Debug(debug) {
+Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug) {
     Debug = debug;
     RGBW color;
 
@@ -142,10 +141,6 @@ Image::Image(RemoteDebug &debug, Preset preset) : Debug(debug) {
     }
 }
 
-Mode Image::getApp() {
-    return Mode::IMAGE;
-}
-
 void Image::readFile(std::string filename) {
     if (!SPIFFS.begin() || !SPIFFS.exists(filename.c_str())) {
         return;
@@ -193,7 +188,7 @@ void Image::show() {
 void Image::setup() {
     Display::begin();
     show();
-    debugI("Image-setup");   
+    debugI("Image-setup");
 }
 
 void Image::loop() {
@@ -201,7 +196,7 @@ void Image::loop() {
     // vTaskSuspend(NULL);
     delay(3000);
     debugI("Image-loop");
-    show();
-    Display::begin();
+    // show();
+    // Display::begin();
 }
 }  // namespace qlocktoo

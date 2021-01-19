@@ -4,8 +4,10 @@
 
 #include "RemoteDebugger.h"
 #include "color.h"
-#include "control.h"
 using namespace std;
+
+extern QueueHandle_t xChangeAppQueue;
+extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
 class Webinterface {
@@ -31,6 +33,6 @@ class Webinterface {
     // ~Webinterface() { }
 
     void test(const char *tekst);
-    void begin(void (*setMode)(qlocktoo::Mode mode));
+    void begin();
 };
 }

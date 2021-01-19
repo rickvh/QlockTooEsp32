@@ -1,4 +1,4 @@
-#define VERSION         "0.1"
+#define VERSION         "0.2"
 
 // #define CONFIG_FREERTOS_USE_TRACE_FACILITY              1
 // #define CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS  1
@@ -19,7 +19,6 @@
 #include "utils/stringutils.h"
 #include "nvs_flash.h"
 #include "nvs.h"
-#include "display.h"
 
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -44,46 +43,29 @@ using namespace qlocktoo;
 using namespace std;
 
 const char* build_str = "Version: " VERSION " " __DATE__ " " __TIME__;
-const bool checkModeAlreadyActive = false;
-
 const uint8_t   timeZone        = 1;     // Central European Time
 int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
 
 RemoteDebug Debug;
 Webinterface webinterface(80, Debug);
-shared_ptr<Image> currentImage = shared_ptr<Image>(new Image(Debug));
 
 void changeMode(qlocktoo::Mode mode);
 void listPartitions();
 void listFiles();
 void runAppTask(void * parameter);
+void runImportantStuffTask(void * parameter);
 
-// TaskHandle_t pvCreatedTask = NULL;
 TaskHandle_t currentAppTask = NULL;
-shared_ptr<App> currentApp = NULL;
+App* currentApp = NULL;
 qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
 
+/**
+ * FreeRTOS stuff
+ */
+QueueHandle_t xChangeAppQueue = NULL;
+QueueHandle_t xClockConfigQueue = NULL;
 
-
-
-void setupDisplay() {
-  
-  
-
-  // display.setTextWrap(false);
-  // display.setBrightness(255);
-  // display.setTextColor(display.Color(0, 200, 0));
-
-
-  // ledstrip.begin(LEDSTRIP_PIN, 110);
-  // for(uint8_t i = 0; i < 50; i+=2) {
-  //   ledstrip.color(i, 255, 255, 0, 0);
-  // }
-  // for(uint8_t i = 50; i < 110; i+=2) {
-  //   ledstrip.color(i, 0, 0, 100, 100);
-  // }
-}
 
 void setupWifi() {
   debugI("Connecting to Wifi...");
@@ -191,27 +173,6 @@ void processCmdRemoteDebug() {
       return;
     }
   }
-  else if (cmd == "task") {
-    if (tokens.size() != 2) {
-      debugE("Command \'task\' requires 1 parameter: [animate, list, stop]");
-      return;
-    }
-    // if (tokens[1] == "animate") {
-  //     changeMode(NO_WIFI);
-  //   }
-    if (tokens[1] == "start") {
-      xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 2, &currentAppTask, 1);
-    }
-  //   if (tokens[1] == "stop") {
-  //     if (currentAppTask) {
-  //       debugI("* Task deleted");
-  //       vTaskDelete(currentAppTask);
-  //       currentAppTask = NULL;
-  //     } else {
-  //       debugI("* No task running");
-  //     }
-  //   }
-  }
   else if (cmd == "text") {
     changeMode(TEXT);
     debugI("* Mode set to TEXT");
@@ -255,42 +216,41 @@ void setupLogging() {
 }
 
 void changeMode(qlocktoo::Mode mode) {
+  if (currentMode == mode) {
+    return;
+  }
   currentMode = mode;
+
+  if (currentApp) {
+    delete currentApp;
+    currentApp = NULL;
+  }
+
   switch (currentMode) {
     case CLOCK:
-      // currentApp = shared_ptr<App>(new Clock());
+      currentApp = new Clock(Debug);
       break;
     case NO_WIFI:
-      currentApp = shared_ptr<App>(new Animation());
+      currentApp = new Animation();
       break;
     case XMAS:
-      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::XMAS_TREE));
+      currentApp = new Image(Debug, Image::Preset::XMAS_TREE);
       break;
     case SNOW:
-      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::SNOWMAN));
+      currentApp = new Image(Debug, Image::Preset::SNOWMAN);
       break;
     case ERROR:
-      currentApp = shared_ptr<App>(new Image(Debug, Image::Preset::ERROR));
+      currentApp = new Image(Debug, Image::Preset::ERROR);
       break;
     case SWIRL:
-      currentApp = shared_ptr<App>(new Swirl());
+      currentApp = new Swirl();
       break;
     default:
       return;
   }
 
-  debugI("* Start new App");
-  // xTaskCreate(
-  //   taskFunction,    // Function that should be called
-  //   "App",   // Name of the task (for debugging)
-  //   1000,            // Stack size (bytes)
-  //   &display,            // Parameter to pass
-  //   2,               // Task priority
-  //   &currentAppTask             // Task handle
-  // );
-
-  // xTaskCreatePinnedToCore(taskFunction, "App", 4096, NULL, 2, &currentAppTask, 1);
-
+  //debugI("Start new app: %s", currentApp->getApp());
+  debugI("Start new app");
 }
 
 void setup() {
@@ -298,7 +258,6 @@ void setup() {
   Serial.println("Booting QlockToo");
   debugI("Booting QlockToo");
   debugI("%s", build_str);
-  Serial.println("Booting QlockToo2");
 
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS cannot be opened");
@@ -310,47 +269,54 @@ void setup() {
   setupOTA();
   Serial.println("setup Logging");
   setupLogging();
-  Serial.println("setup Display");
-  setupDisplay();
   Serial.println("setup NTP");
   setupNTP();
   Serial.println("setup Webinterface");
-  webinterface.begin(&changeMode);
+  webinterface.begin();
+  
+  xChangeAppQueue = xQueueCreate(5, sizeof(Mode));
+  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
+  Serial.println("Queues created");
+
+  xTaskCreatePinnedToCore(runImportantStuffTask, "OTA_and_Debug", 8192, NULL, 2, &currentAppTask, 0);
 
   // Start in Clock mode
-  // changeMode(qlocktoo::CLOCK, (void *) &tmp);
+  changeMode(qlocktoo::CLOCK);
+  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 1);
 }
 
 // Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
 void loop() {
-  ArduinoOTA.handle();
-  Debug.handle();
+  // ArduinoOTA.handle();
+  // Debug.handle();
+  // delay(300);
   delay(300);
+  Mode newMode;
+  // uint8_t newMode;
+  if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
+    debugI("We hebben een nieuwe mode!!!!");
+    Serial.printf("Queue data received: %u\r\n", newMode);
+    changeMode(newMode);
+  }
 };
 
+void runImportantStuffTask(void * parameter) {
+  for (;;) {
+    ArduinoOTA.handle();
+    Debug.handle();
+    delay(300);
+  }
+}
 
 
 void runAppTask(void * parameter) {
   for (;;) {
     if (currentApp) {
-      currentApp.get()->handle();
+      currentApp->handle();
     }
 
     // For safety reasons - make sure there's at least a chance for FreeRTOS to switch tasks.
     delay(10);
-  }
-}
-
-void showClockTask(void * parameter) {
-  Clock appClock(Debug);
-  ClockConfig tmp;
-  tmp.colorHour = tmp.colorItIs = tmp.colorWords = RGBW(0, 255,255);
-  appClock.applyConfig(tmp);
-  appClock.begin();
-
-  for (;;) {
-    appClock.update();
-    delay(100);
   }
 }
 

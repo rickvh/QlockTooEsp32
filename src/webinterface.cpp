@@ -1,7 +1,12 @@
 #include "webinterface.h"
-
 #include <ArduinoOTA.h>
-
+#include <AsyncTCP.h>
+#include <ESPmDNS.h>
+#include <FS.h>
+#include <SPIFFS.h>
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include <SPIFFSEditor.h>
 #include "Arduino.h"
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
@@ -9,20 +14,6 @@
 #include "clock.h"
 #include "color.h"
 #include "control.h"
-
-#ifdef ESP32
-#include <AsyncTCP.h>
-#include <ESPmDNS.h>
-#include <FS.h>
-#include <SPIFFS.h>
-#include <WiFi.h>
-#elif defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include <ESPAsyncTCP.h>
-#endif
-#include <ESPAsyncWebServer.h>
-#include <SPIFFSEditor.h>
 
 namespace qlocktoo {
 Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
@@ -36,7 +27,7 @@ Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), serve
     // debugI
 }
 
-void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {
+void Webinterface::begin() {
     server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
     // server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
     //     debugI("GET received :)");
@@ -67,21 +58,34 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {
                 StaticJsonDocument<512> jsonDoc;
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
-                    uint8_t r, g, b;
-                    r = jsonDoc["color"]["red"] | 0;
-                    g = jsonDoc["color"]["green"] | 0;
-                    b = jsonDoc["color"]["blue"] | 0;
-                    // debugI("RGB posted: %u, %u, %u", r, g, b);
-
-                    auto color = RGBW(r, g, b);
                     ClockConfig config;
-                    config.colorHour = color;
-                    config.colorItIs = color;
-                    config.colorWords = color;
+                    uint8_t r, g, b;
+
+                    auto color = jsonDoc["colorItIs"];
+                    r = color["r"] | 0;
+                    g = color["g"] | 0;
+                    b = color["b"] | 0;
+                    config.colorItIs = RGBW(r, g, b);
+                    Serial.printf("RGB it is: %u, %u, %u\r\n", r, g, b);
+
+                    color = jsonDoc["colorWords"];
+                    r = color["r"] | 0;
+                    g = color["g"] | 0;
+                    b = color["b"] | 0;
+                    config.colorWords = RGBW(r, g, b);
+                    Serial.printf("RGB words: %u, %u, %u\r\n", r, g, b);
+
+                    color = jsonDoc["colorHour"];
+                    r = color["r"] | 0;
+                    g = color["g"] | 0;
+                    b = color["b"] | 0;
+                    config.colorHour = RGBW(r, g, b);
+                    Serial.printf("RGB hour: %u, %u, %u\r\n", r, g, b);
 
                     // TODO: iets met kleurtjes
-
-                    setMode(qlocktoo::CLOCK);
+                    Mode newMode = Mode::CLOCK;
+                    xQueueSend(xChangeAppQueue, &newMode, 0);
+                    xQueueSend(xClockConfigQueue, &config, 0);
                 }
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -93,8 +97,9 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {
 
                 // if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
                 {
-                    // debugI("Mode set to SWIRL");
-                    setMode(qlocktoo::SWIRL);
+                    debugI("Mode set to SWIRL");
+                    // setMode(qlocktoo::SWIRL);
+                    xQueueSend(xChangeAppQueue, (void *) Mode::SWIRL, 0);
                 }
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -102,15 +107,18 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {
             if ((request->url() == "/api/test") &&
                 (request->method() == HTTP_POST)) {
                 // StaticJsonDocument<512> jsonDoc;
+                Serial.println("REST API - test");
+                Serial.print("Address of xChangeAppQueue: ");
+                Serial.println((int) &xChangeAppQueue);
 
                 // if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
                 {
-                    if (testswitch) {
-                        setMode(qlocktoo::SWIRL);
-                    } else {
-                        setMode(qlocktoo::NO_WIFI);
-                    }
+                    Mode test = Mode::CLOCK;
+                    bool success = (xQueueSend(xChangeAppQueue, &test, 0) == pdTRUE);
+                    
                     testswitch = !testswitch;
+
+                    Serial.printf("Send to queue: %s\r\n", success ? "true" : "false");
                 }
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -118,6 +126,7 @@ void Webinterface::begin(void (*setMode)(qlocktoo::Mode mode)) {
         });
 
     server.onNotFound([&](AsyncWebServerRequest *request) {
+        debugI("Not found");
         request->send(404, "text/plain", "Not found");
     });
 

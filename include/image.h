@@ -8,7 +8,6 @@
 #include "app.h"
 #include "color.h"
 #include "display.h"
-#include "control.h"
 #include "RemoteDebugger.h"
 
 namespace qlocktoo {
@@ -38,7 +37,6 @@ class Image : public App {
     std::array<RGBW, WIDTH * HEIGHT> pixels;
 
     // App implementation
-    Mode getApp();
     void setup();
     void loop();
 
