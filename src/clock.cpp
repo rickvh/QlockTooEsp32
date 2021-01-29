@@ -115,7 +115,7 @@ void Clock::loop() {
             break;
         case 3:
             setColor(ledsbyword[KWART], config.colorWords);
-            setColor(ledsbyword[VOOR2], config.colorWords);
+            setColor(ledsbyword[OVER2], config.colorWords);
             setColor(ledsbyword[current_hourword], config.colorHour);
             break;
         case 4:
