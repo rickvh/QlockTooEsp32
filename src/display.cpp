@@ -1,6 +1,15 @@
 #include "display.h"
 #include <NeoPixelBrightnessBus.h>
 
+#ifndef _swap_int16_t
+#define _swap_int16_t(a, b) \
+    {                       \
+        int16_t t = a;      \
+        a = b;              \
+        b = t;              \
+    }
+#endif
+
 namespace qlocktoo {
     static uint16_t getLedByCoordinate(uint16_t x, uint16_t y) {
         static uint8_t mapping[11][10] = {
@@ -45,6 +54,41 @@ namespace qlocktoo {
     }
 
     void Display::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color) {
-        realDisplay.dr
+        int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+        if (steep) {
+            _swap_int16_t(x0, y0);
+            _swap_int16_t(x1, y1);
+        }
+
+        if (x0 > x1) {
+            _swap_int16_t(x0, x1);
+            _swap_int16_t(y0, y1);
+        }
+
+        int16_t dx, dy;
+        dx = x1 - x0;
+        dy = abs(y1 - y0);
+
+        int16_t err = dx / 2;
+        int16_t ystep;
+
+        if (y0 < y1) {
+            ystep = 1;
+        } else {
+            ystep = -1;
+        }
+
+        for (; x0 <= x1; x0++) {
+            if (steep) {
+                drawPixel(y0, x0, color);
+            } else {
+                drawPixel(x0, y0, color);
+            }
+            err -= dy;
+            if (err < 0) {
+                y0 += ystep;
+                err += dx;
+            }
+        }
     }
 }
