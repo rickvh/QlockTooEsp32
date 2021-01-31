@@ -6,6 +6,7 @@
 using namespace std;
 
 extern QueueHandle_t xChangeAppQueue;
+extern QueueHandle_t xDrawQueue;
 extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
@@ -17,8 +18,7 @@ class Webinterface {
     // AsyncWebServer &server;
     // AsyncWebSocket &ws;
     // AsyncEventSource &events;
-    bool testswitch = false;
-
+    
     RemoteDebug &Debug;
     AsyncWebServer server;
     // auto ws = AsyncWebSocket("/ws");

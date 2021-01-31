@@ -32,6 +32,7 @@
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
+#include "draw.h"
 
 #include <SPIFFS.h>
 #include "wifipassword.h"
@@ -64,6 +65,7 @@ qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
  * FreeRTOS stuff
  */
 QueueHandle_t xChangeAppQueue = NULL;
+QueueHandle_t xDrawQueue = NULL;
 QueueHandle_t xClockConfigQueue = NULL;
 
 
@@ -250,6 +252,9 @@ void changeMode(qlocktoo::Mode mode) {
     case SWIRL:
       currentApp = new Swirl();
       break;
+    case DRAW:
+      currentApp = new Draw();
+      break;
     default:
       return;
   }
@@ -282,6 +287,7 @@ void setup() {
   webinterface.begin();
   
   xChangeAppQueue = xQueueCreate(5, sizeof(Mode));
+  xDrawQueue = xQueueCreate(1, sizeof(Draw::Command));
   xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
   Serial.println("Queues created");
 
@@ -362,6 +368,7 @@ void listPartitions(void)
 }
 
 void listFiles() {
+  SPIFFS.begin();
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  

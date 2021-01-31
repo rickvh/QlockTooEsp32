@@ -52,8 +52,10 @@ class Image : public App {
     Image(Preset file);
     // Image(RemoteDebug &debug, Preset file);
     void readFile(std::string filename);
+    void writeFile(std::string filename);
     NeoGrbwFeature::ColorObject getColor(uint8_t x, uint8_t y);
     uint32_t getRawColor(uint8_t x, uint8_t y);
+    void setColor(uint8_t x, uint8_t y, NeoGrbwFeature::ColorObject color);
 
     void show();
 };

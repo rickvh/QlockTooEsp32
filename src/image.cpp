@@ -147,18 +147,48 @@ void Image::readFile(std::string filename) {
 
     File file = SPIFFS.open(filename.c_str());
 
-    uint8_t x = 0, y = 0, red = 0, green = 0, blue = 0, white = 0;
-    while (file >> x >> y >> red >> green >> blue >> white) {
-        pixels[y * WIDTH + x] = RgbwColor(red, green, blue, white);
+    if (!file) {
+        Serial.println("Failed to open /img/test.spr");
+        return;
     }
 
-    // while (file.available()) {
-    //     int l = file.readBytesUntil('\n', buffer, sizeof(buffer));
-    //     buffer << file;
-    //     buffer[l] = 0;
-    //     if (strcmp)
-    // }
+    unsigned char pixel[sizeof(NeoGrbwFeature::ColorObject)];
+    size_t size = pixels.size();
+    uint8_t counter = 0;
+
+    for(int i=0; i<size; i+=sizeof(NeoGrbwFeature::ColorObject)){
+              
+        for(int j=0;j<sizeof(NeoGrbwFeature::ColorObject);j++){
+            pixel[j] = file.read();
+        }
+              
+        NeoGrbwFeature::ColorObject *thePixel = (NeoGrbwFeature::ColorObject *) pixel;
+        NeoGrbwFeature::ColorObject *currentPixel = &pixels[counter];
+        memcpy (currentPixel , thePixel , sizeof(NeoGrbwFeature::ColorObject));
+        counter++;
+    }
+
+    file.close();
     SPIFFS.end();
+}
+
+void Image::writeFile(std::string filename) {
+    if (!SPIFFS.begin()) {
+        return;
+    }
+
+    File file = SPIFFS.open(filename.c_str(), "w");
+    if (!file)
+    {
+        Serial.println("Failed to open /img/test.spr");
+        return;
+    }
+
+    unsigned char * data = reinterpret_cast<unsigned char*>(pixels.data()); // use unsigned char, as uint8_t is not guarunteed to be same width as char...
+    size_t bytes = file.write(data, pixels.size() * sizeof(NeoGrbwFeature::ColorObject));
+    file.close();
+    SPIFFS.end();
+    Serial.printf("%u bytes written", bytes);
 }
 
 NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {
@@ -166,6 +196,13 @@ NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {
         return RgbwColor(0, 0, 0, 0);
     }
     return pixels[y * WIDTH + x];
+}
+
+void Image::setColor(uint8_t x, uint8_t y, NeoGrbwFeature::ColorObject color) {
+    if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
+        return;
+    }
+    pixels[y * WIDTH + x] = color;
 }
 
 void Image::show() {

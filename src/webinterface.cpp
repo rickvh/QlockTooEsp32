@@ -13,6 +13,7 @@
 #include "RemoteDebugger.h"
 #include "clock.h"
 #include "control.h"
+#include "draw.h"
 
 namespace qlocktoo {
 Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
@@ -86,7 +87,7 @@ void Webinterface::begin() {
 
                     // TODO: iets met kleurtjes
                     Mode newMode = Mode::CLOCK;
-                    // xQueueSend(xChangeAppQueue, &newMode, 0);
+                    xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }
 
@@ -106,21 +107,65 @@ void Webinterface::begin() {
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
-            if ((request->url() == "/api/test") &&
+            if ((request->url() == "/api/draw") &&
                 (request->method() == HTTP_POST)) {
-                // StaticJsonDocument<512> jsonDoc;
-                Serial.println("REST API - test");
-                Serial.print("Address of xChangeAppQueue: ");
-                Serial.println((int) &xChangeAppQueue);
+                StaticJsonDocument<512> jsonDoc;
+                Serial.println("REST API - draw");
 
-                // if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
+                if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char*)data))
                 {
-                    Mode test = Mode::CLOCK;
-                    bool success = (xQueueSend(xChangeAppQueue, &test, 0) == pdTRUE);
-                    
-                    testswitch = !testswitch;
-
+                    Mode draw = Mode::DRAW;
+                    bool success = (xQueueSend(xChangeAppQueue, &draw, 0) == pdTRUE);
                     Serial.printf("Send to queue: %s\r\n", success ? "true" : "false");
+
+                    // TODO: volledige bitmap in json??
+                    uint8_t operation = jsonDoc["operation"];
+
+                    /**
+                     * 1 - draw
+                     * 2 - read
+                     * 3 - write
+                     * 4 - clear
+                     */
+
+                    if (operation == 1) {
+                        uint8_t x = jsonDoc["x"];
+                        uint8_t y = jsonDoc["y"];
+                        uint8_t r = jsonDoc["r"];
+                        uint8_t g = jsonDoc["g"];
+                        uint8_t b = jsonDoc["b"];
+                        uint8_t w = jsonDoc["w"];
+
+                        Draw::Command command;
+                        command.operation = Draw::Operation::DRAW;
+                        command.x = x;
+                        command.y = y;
+                        command.r = r;
+                        command.g = g;
+                        command.b = b;
+                        command.w = w;
+                        xQueueSend(xDrawQueue, &command, 0);
+                    }
+
+                    if (operation == 2) {
+                        Draw::Command command;
+                        command.operation = Draw::Operation::READ;
+                        // command.file = "test.spr";
+                        xQueueSend(xDrawQueue, &command, 0);
+                    }
+
+                    if (operation == 3) {
+                        Draw::Command command;
+                        command.operation = Draw::Operation::WRITE;
+                        // command.file = "test.spr";
+                        xQueueSend(xDrawQueue, &command, 0);
+                    }
+
+                    if (operation == 4) {
+                        Draw::Command command;
+                        command.operation = Draw::Operation::CLEAR;
+                        xQueueSend(xDrawQueue, &command, 0);
+                    }
                 }
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
