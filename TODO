@@ -1,48 +1,46 @@
 FIX COLOR ISSUES door RMT-feature te gebruiken??
+- ligt aan de gebruikte ledstrip - die is ook buggy op de Arduino Uno
 
-https://www.reddit.com/r/esp32/comments/ibpfex/problems_with_adafruit_neopixel_library/
-https://gist.github.com/quirkz/b81e1be74f23f55a8a4547403bee8709
-https://github.com/gitpeut/SK6812-RGBW-ESP32/blob/master/sk.h
 
 
 ============
 
-Components:
+Bugs
+[ ] - Wifi animation tijdens OTA
 
 
 Display
-- display buffer obv X,Y
+[x] - display buffer obv X,Y
 
 
 Animation (&display)
-- interface die het display kan beschrijven
+[ ] - interface die het display kan beschrijven
 
 Clock
-- obv tijd het display updaten
+[ ] - obv tijd het display updaten
 
 
 
 Tasks:
 ======
-- webserver
-- ps4 controller
-- display (hoogste prio, luistert naar queue en heeft alleen DAN iets te doen)
-- app (input queue)
-- debugtask? ()
+[x] - webserver
+[ ] - ps4 controller
+[x] - app (input queue)
+[x] - debugtask? ()
 
 
 
 Flow:
 =====
-- boot: print versie etc naar Serial
-- boot: init config (config class instantieren, meer niet)
-- boot: setup display: clear
-- boot: setup WifiEventHandler -> luister naar state
-- boot: setup WiFi -> state = NO_WIFI --> showAnimation(Animation.NO_WIFI)
-- boot: setup OTA 
-- boot: setup NTP
-- boot: start task display
-- boot: start webserver (heeft al eigen task??)
+[ ] - boot: print versie etc naar Serial
+[ ] - boot: init config (config class instantieren, meer niet)
+[x] - boot: setup display: clear
+[ ] - boot: setup WifiEventHandler -> luister naar state
+[ ] - boot: setup WiFi -> state = NO_WIFI --> showAnimation(Animation.NO_WIFI)
+[x] - boot: setup OTA 
+[x] - boot: setup NTP
+[x] - boot: setup Display
+[x] - boot: setup webserver (heeft al eigen task??)
 
 
 
