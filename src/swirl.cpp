@@ -10,7 +10,12 @@ void Swirl::loop() {
     uint16_t x_end = width - x_start;
     uint16_t y_end = height - y_start;
 
-    uint32_t color = Display::ColorHSV(hue += 1000, saturation, brightness);
+    hue += 0.01f;
+    if (hue > 1) {
+        hue = 0;
+    }
+    HsbColor color(hue, saturation, brightness);
+
     Display::drawLine(x_start, y_start, x_end, y_end, color);
     if (x_start == width) {
         if (y_start == height) {

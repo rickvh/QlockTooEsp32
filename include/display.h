@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Arduino.h"
-#include "sk.h"
+#include <NeoPixelBrightnessBus.h>
 
 namespace qlocktoo {
 
@@ -9,7 +9,7 @@ class Display {
    private:
     const static uint8_t LEDSTRIP_PIN = 13;
     static bool initialized;
-    static sk realDisplay;
+    static NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> realDisplay;
 
    public:
     static void begin();
@@ -18,14 +18,16 @@ class Display {
     const static uint8_t WIDTH = 11;
     const static uint8_t HEIGHT = 10;
 
-    static uint8_t setbrightness(uint8_t brightness) { return realDisplay.setbrightness(brightness); };
-    static uint8_t getbrightness() { return realDisplay.getbrightness(); };
+    static uint8_t setbrightness(uint8_t brightness) { return brightness; }; // TODO
+    static uint8_t getbrightness() { return 255; }; // TODO
 
-    static void clear() { realDisplay.clear(); };
-    static void show() { realDisplay.show(); };
-    static void drawPixel(int16_t x, int16_t y, uint32_t c) { realDisplay.writePixel(x, y, c); };
-    static void drawPixelRaw(int16_t index, uint32_t c, uint8_t brightness) { realDisplay.color32(index, c, brightness); };
-    static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color) { realDisplay.writeLine(x0, y0, x1, y1, color); };
+    static void clear() { realDisplay.ClearTo(RgbwColor(0,0,0,0)); };
+    static void show() { realDisplay.Show(); };
+    static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
+    static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
+    static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);
+
+    static void setConfig(uint8_t leds, uint8_t dur1, uint8_t dur2, uint8_t dur3, uint8_t dur4) { };
 
     // Helper methods
     static uint32_t ColorHSV(uint16_t hue, uint8_t sat, uint8_t val) {

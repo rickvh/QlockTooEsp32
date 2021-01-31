@@ -1,12 +1,7 @@
 #include "clock.h"
-
 #include <vector>
-// #include <TimeLib.h>
-// #include "WifiConfig.h"
 #include <WiFi.h>
-
 #include "RemoteDebugger.h"
-#include "color.h"
 #include "time.h"
 
 #define NTP_TIMEOUT 1500
@@ -48,9 +43,9 @@ void Clock::setup() {
     debugI("Clock setup");
 
     ClockConfig config;
-    config.colorItIs = RGBW(0, 0, 255);
-    config.colorWords = RGBW(0, 200, 0);
-    config.colorHour = RGBW(255, 0, 0);
+    config.colorItIs = RgbwColor(0, 0, 255, 0);
+    config.colorWords = RgbwColor(0, 200, 0, 0);
+    config.colorHour = RgbwColor(255, 0, 0, 0);
     applyConfig(config);
 
     Display::begin();
@@ -61,7 +56,7 @@ void Clock::setup() {
     // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
-void Clock::applyConfig(ClockConfig &config) {
+void Clock::applyConfig(ClockConfig config) {
     this->config = config;
 }
 
@@ -187,12 +182,11 @@ uint8_t Clock::timeBrightness() {
     return 0;
 }
 
-void Clock::setColor(const std::vector<int> leds, RGBW rgbw) {
-    uint8_t brigthness = timeBrightness();
-    uint32_t color = rgbw.getColor();
+void Clock::setColor(const std::vector<int> leds, NeoGrbwFeature::ColorObject color) {
+    uint8_t brightness = timeBrightness();
 
     for (uint8_t led : leds) {
-        Display::drawPixelRaw(led, color, brigthness);
+        Display::drawPixel(led, color);
     }
 }
 

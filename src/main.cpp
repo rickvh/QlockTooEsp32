@@ -139,6 +139,10 @@ void setupOTA() {
   ArduinoOTA.begin();
 }
 
+void setupDisplay() {
+  Display::begin();
+}
+
 void processCmdRemoteDebug() {
   using namespace qlocktoo;
   
@@ -269,6 +273,8 @@ void setup() {
   setupOTA();
   Serial.println("setup Logging");
   setupLogging();
+  Serial.println("setup LED Display");
+  setupDisplay();
   Serial.println("setup NTP");
   setupNTP();
   Serial.println("setup Webinterface");
@@ -291,6 +297,10 @@ void loop() {
   // Debug.handle();
   // delay(300);
   delay(300);
+
+  // Display::drawPixelRaw(1, RgbColor(red+=10, green+=2, blue+=10));
+  // Display::show();
+
   Mode newMode;
   // uint8_t newMode;
   if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {

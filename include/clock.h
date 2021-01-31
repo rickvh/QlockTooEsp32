@@ -2,7 +2,6 @@
 
 #include "RemoteDebugger.h"
 #include "app.h"
-#include "color.h"
 #include "display.h"
 #include "control.h"
 
@@ -10,9 +9,9 @@ extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
 typedef struct {
-    RGBW colorItIs;
-    RGBW colorWords;
-    RGBW colorHour;
+    NeoGrbwFeature::ColorObject colorItIs;
+    NeoGrbwFeature::ColorObject colorWords;
+    NeoGrbwFeature::ColorObject colorHour;
 } ClockConfig;
 
 class Clock : public App {
@@ -26,7 +25,7 @@ class Clock : public App {
     RemoteDebug &Debug;
     struct tm currentTime;
     uint8_t timeBrightness();
-    void setColor(const std::vector<int> leds, RGBW color);
+    void setColor(const std::vector<int> leds, NeoGrbwFeature::ColorObject color);
     void handleConfigQueue();
     const std::vector<std::vector<int>> ledsbyword = {
         {0, 37, 38, 36, 39},        // HET IS
@@ -57,7 +56,7 @@ class Clock : public App {
     Clock(RemoteDebug &debug) : App(Mode::CLOCK), Debug(debug) {};
     void setup();
     void loop();
-    void applyConfig(ClockConfig &config);
+    void applyConfig(ClockConfig config);
     //~Clock();
 };
 }

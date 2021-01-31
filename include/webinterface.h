@@ -1,9 +1,8 @@
 #pragma once
 
 #include <ESPAsyncWebServer.h>
-
 #include "RemoteDebugger.h"
-#include "color.h"
+
 using namespace std;
 
 extern QueueHandle_t xChangeAppQueue;

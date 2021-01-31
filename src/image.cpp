@@ -8,16 +8,16 @@
 
 namespace qlocktoo {
 Image::Image(RemoteDebug &debug) : App(Mode::IMAGE), Debug(debug) {
-    pixels.fill(RGBW());
+    pixels.fill(RgbwColor(0, 0, 0, 0));
 }
 
 Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug) {
     Debug = debug;
-    RGBW color;
+    RgbwColor color(0, 0, 0, 0);
 
     switch (preset) {
         case ERROR:
-            color.r = 200;
+            color.R = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -32,7 +32,7 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
             }
             break;
         case WIFI1:
-            color.b = 200;
+            color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -47,7 +47,7 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
             }
             break;
         case WIFI2:
-            color.b = 200;
+            color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -62,7 +62,7 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
             }
             break;
         case WIFI3:
-            color.b = 200;
+            color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -78,7 +78,7 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
             break;
 
         case XMAS_TREE:
-            color.g = 200;
+            color.G = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -91,12 +91,12 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
                     }
                 }
             }
-            pixels[5] = RGBW(200, 200, 0);
-            pixels[104] = RGBW(200, 0, 0);
+            pixels[5] = RgbwColor(200, 200, 0, 0);
+            pixels[104] = RgbwColor(200, 0, 0, 0);
             break;
 
         case SNOWMAN:
-            color.w = 200;
+            color.W = 200;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -108,8 +108,8 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
                     }
                 }
             }
-            color.w = 0;
-            color.r = 200;
+            color.W = 0;
+            color.R = 200;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -121,8 +121,8 @@ Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug)
                     }
                 }
             }
-            color.r = 0;
-            color.b = 200;
+            color.R = 0;
+            color.B = 200;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -150,7 +150,7 @@ void Image::readFile(std::string filename) {
 
     uint8_t x = 0, y = 0, red = 0, green = 0, blue = 0, white = 0;
     while (file >> x >> y >> red >> green >> blue >> white) {
-        pixels[y * WIDTH + x] = RGBW(red, green, blue, white);
+        pixels[y * WIDTH + x] = RgbwColor(red, green, blue, white);
     }
 
     // while (file.available()) {
@@ -162,23 +162,17 @@ void Image::readFile(std::string filename) {
     SPIFFS.end();
 }
 
-RGBW Image::getColor(uint8_t x, uint8_t y) {
+NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {
     if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
-        return RGBW();
+        return RgbwColor(0, 0, 0, 0);
     }
     return pixels[y * WIDTH + x];
 }
 
-// TODO: kan weg??
-// Adafruit compatible color
-uint32_t Image::getRawColor(uint8_t x, uint8_t y) {
-    return getColor(x, y).getColor();
-};
-
 void Image::show() {
     for (uint8_t y = 0; y < HEIGHT; y++) {
         for (uint8_t x = 0; x < WIDTH; x++) {
-            auto color = getColor(x, y).getColor();
+            auto color = getColor(x, y);
             Display::drawPixel(x, y, color);
         }
     }

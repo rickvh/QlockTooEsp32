@@ -6,7 +6,6 @@
 #include <string>
 
 #include "app.h"
-#include "color.h"
 #include "display.h"
 #include "RemoteDebugger.h"
 
@@ -34,7 +33,7 @@ class Image : public App {
     RemoteDebug &Debug;
     const static uint8_t WIDTH = Display::WIDTH;
     const static uint8_t HEIGHT = Display::HEIGHT;
-    std::array<RGBW, WIDTH * HEIGHT> pixels;
+    std::array<NeoGrbwFeature::ColorObject, WIDTH * HEIGHT> pixels;
 
     // App implementation
     void setup();
@@ -55,7 +54,7 @@ class Image : public App {
     // Image(Preset file);
     Image(RemoteDebug &debug, Preset file);
     void readFile(std::string filename);
-    RGBW getColor(uint8_t x, uint8_t y);
+    NeoGrbwFeature::ColorObject getColor(uint8_t x, uint8_t y);
     uint32_t getRawColor(uint8_t x, uint8_t y);
 
     void show();

@@ -1,5 +1,5 @@
 #include "display.h"
-#include "sk.h"
+#include <NeoPixelBrightnessBus.h>
 
 namespace qlocktoo {
     static uint16_t getLedByCoordinate(uint16_t x, uint16_t y) {
@@ -20,14 +20,31 @@ namespace qlocktoo {
     }
 
 
-    sk Display::realDisplay;
+    NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> Display::realDisplay(110, LEDSTRIP_PIN);
     bool Display::initialized = false;
 
     void Display::begin() {
         if (!initialized) {
-            realDisplay.setRemapFunction(getLedByCoordinate);
-            realDisplay.begin(LEDSTRIP_PIN, WIDTH * HEIGHT);
+            RgbColor dark(2, 2, 0);
+            realDisplay.Begin();
+            // realDisplay.SetBrightness(255);
+            realDisplay.ClearTo(dark);
+            realDisplay.Show();
+            // realDisplay.setRemapFunction(getLedByCoordinate);
+            // realDisplay.Begin begin(LEDSTRIP_PIN, WIDTH * HEIGHT);
             initialized = true;
         }
+    }
+
+    void Display::drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject c) {
+        drawPixel(getLedByCoordinate(x, y), c);
+    };
+
+    void Display::drawPixel(int16_t index, NeoGrbwFeature::ColorObject c) {
+        realDisplay.SetPixelColor(index, c);
+    }
+
+    void Display::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color) {
+        realDisplay.dr
     }
 }

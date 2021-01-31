@@ -12,7 +12,6 @@
 #include "AsyncJson.h"
 #include "RemoteDebugger.h"
 #include "clock.h"
-#include "color.h"
 #include "control.h"
 
 namespace qlocktoo {
@@ -59,32 +58,35 @@ void Webinterface::begin() {
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     ClockConfig config;
-                    uint8_t r, g, b;
+                    uint8_t r, g, b, w;
 
                     auto color = jsonDoc["colorItIs"];
                     r = color["r"] | 0;
                     g = color["g"] | 0;
                     b = color["b"] | 0;
-                    config.colorItIs = RGBW(r, g, b);
-                    Serial.printf("RGB it is: %u, %u, %u\r\n", r, g, b);
+                    w = color["w"] | 0;
+                    config.colorItIs = RgbwColor(r, g, b, w);
+                    Serial.printf("RGB it is: %u, %u, %u, %u\r\n", r, g, b, w);
 
                     color = jsonDoc["colorWords"];
                     r = color["r"] | 0;
                     g = color["g"] | 0;
                     b = color["b"] | 0;
-                    config.colorWords = RGBW(r, g, b);
-                    Serial.printf("RGB words: %u, %u, %u\r\n", r, g, b);
+                    w = color["w"] | 0;
+                    config.colorWords = RgbwColor(r, g, b, w);
+                    Serial.printf("RGB words: %u, %u, %u, %u\r\n", r, g, b, w);
 
                     color = jsonDoc["colorHour"];
                     r = color["r"] | 0;
                     g = color["g"] | 0;
                     b = color["b"] | 0;
-                    config.colorHour = RGBW(r, g, b);
-                    Serial.printf("RGB hour: %u, %u, %u\r\n", r, g, b);
+                    w = color["w"] | 0;
+                    config.colorHour = RgbwColor(r, g, b, w);
+                    Serial.printf("RGBW hour: %u, %u, %u, %u\r\n", r, g, b, w);
 
                     // TODO: iets met kleurtjes
                     Mode newMode = Mode::CLOCK;
-                    xQueueSend(xChangeAppQueue, &newMode, 0);
+                    // xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }
 
@@ -123,6 +125,32 @@ void Webinterface::begin() {
 
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
+
+            if ((request->url() == "/api/leds") &&
+                (request->method() == HTTP_POST)) {
+                StaticJsonDocument<512> jsonDoc;
+
+                if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
+                    uint8_t leds, dur1, dur2, dur3, dur4;
+                    auto config = jsonDoc["config"];
+                    leds = config["leds"] | 10;
+                    dur1 = config["dur1"] | 10;
+                    dur2 = config["dur2"] | 10;
+                    dur3 = config["dur3"] | 10;
+                    dur4 = config["dur4"] | 10;
+
+                    debugI("durations: %u, %u, %u, %u", dur1, dur2, dur3, dur4);
+                    Serial.printf("leds: %d, durations: %d, %d, %d, %d", leds, dur1, dur2, dur3, dur4);
+                    // Display::setConfig(110, dur1, dur2, dur3, dur4);
+                    // Display::clear();
+                    // Display::show();
+                    Display::setConfig(leds, dur1, dur2, dur3, dur4);
+                    Display::show();
+                }
+
+                request->send(200, "application/json", "{ \"status\": \"success\" }");
+            }
+
         });
 
     server.onNotFound([&](AsyncWebServerRequest *request) {

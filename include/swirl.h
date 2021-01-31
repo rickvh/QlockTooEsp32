@@ -19,7 +19,7 @@ class Swirl : public App {
     uint8_t x_start = 1;
     uint8_t y_start = 1;
     uint8_t speed = 50, acc = 50, dir = 1;
-    uint16_t hue = 0;
-    uint8_t saturation = 255, brightness = 255;
+    float hue = 0.0f;
+    float saturation = 1.0f, brightness = 1.0f;
 };
 }  // namespace qlocktoo
