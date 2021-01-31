@@ -3,7 +3,7 @@
 
 namespace qlocktoo {
 void Animation::setup() {
-    Display::begin();
+    // Display::begin();
     currentImage = Image::Preset::WIFI1;
 }
 
@@ -22,8 +22,8 @@ void Animation::loop() {
             currentImage = Image::Preset::ERROR;
             break;
     }
-    // currentFrame = std::shared_ptr<Image>(new Image(currentImage));
-    if (currentFrame) {
+    currentFrame = std::shared_ptr<Image>(new Image(currentImage));
+    if (currentFrame.get()) {
         currentFrame.get()->show();
     }
 

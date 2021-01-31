@@ -4,16 +4,15 @@
 #include <array>
 #include <string>
 #include "display.h"
-#include "RemoteDebugger.h"
 
 namespace qlocktoo {
-Image::Image(RemoteDebug &debug) : App(Mode::IMAGE), Debug(debug) {
+Image::Image() : App(Mode::IMAGE) {
     pixels.fill(RgbwColor(0, 0, 0, 0));
 }
 
-Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug) {
-    Debug = debug;
+Image::Image(Preset preset) : App(Mode::IMAGE) {
     RgbwColor color(0, 0, 0, 0);
+    pixels.fill(color);
 
     switch (preset) {
         case ERROR:
@@ -180,16 +179,15 @@ void Image::show() {
 }
 
 void Image::setup() {
-    Display::begin();
     show();
-    debugI("Image-setup");
+    // debugI("Image-setup");
 }
 
 void Image::loop() {
     // Since there's really nothing to do, we'll suspend ourself.
     // vTaskSuspend(NULL);
-    delay(3000);
-    debugI("Image-loop");
+    delay(300);
+    // debugI("Image-loop");
     // show();
     // Display::begin();
 }

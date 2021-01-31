@@ -116,7 +116,7 @@ void setupOTA() {
 
       // Unmount SPIFFS
       SPIFFS.end();
-      changeMode(qlocktoo::NO_WIFI);
+      changeMode(qlocktoo::WIFI_ANIMATION);
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -235,16 +235,17 @@ void changeMode(qlocktoo::Mode mode) {
       currentApp = new Clock(Debug);
       break;
     case NO_WIFI:
+    case WIFI_ANIMATION:
       currentApp = new Animation();
       break;
     case XMAS:
-      currentApp = new Image(Debug, Image::Preset::XMAS_TREE);
+      currentApp = new Image(Image::Preset::XMAS_TREE);
       break;
     case SNOW:
-      currentApp = new Image(Debug, Image::Preset::SNOWMAN);
+      currentApp = new Image(Image::Preset::SNOWMAN);
       break;
     case ERROR:
-      currentApp = new Image(Debug, Image::Preset::ERROR);
+      currentApp = new Image(Image::Preset::ERROR);
       break;
     case SWIRL:
       currentApp = new Swirl();
