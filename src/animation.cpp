@@ -22,10 +22,10 @@ void Animation::loop() {
             currentImage = Image::Preset::ERROR;
             break;
     }
-    currentFrame = std::shared_ptr<Image>(new Image(currentImage));
-    if (currentFrame.get()) {
-        currentFrame.get()->show();
-    }
+    // currentFrame = std::shared_ptr<Image>(new Image(currentImage));
+    // if (currentFrame.get()) {
+        // currentFrame.get()->show();
+    // }
 
     delay(300);
 }

@@ -5,6 +5,7 @@
 #include "Arduino.h"
 #include "display.h"
 #include "image.h"
+#include "RemoteDebugger.h"
 
 extern QueueHandle_t xDrawQueue;
 
@@ -12,8 +13,12 @@ namespace qlocktoo {
 
 class Draw : public App {
    public:
-    Draw() : App(Mode::DRAW) {}
-    // ~Draw();
+    Draw(RemoteDebug &debug) : App(Mode::DRAW), Debug(debug) {
+        image = new Image(Debug);
+    }
+    ~Draw() {
+        delete image;
+    };
 
     enum Operation {
         READ,
@@ -35,6 +40,7 @@ class Draw : public App {
 
     const uint8_t width = Display::WIDTH;
     const uint8_t height = Display::HEIGHT;
-    Image image;
+    Image *image = NULL;
+    RemoteDebug &Debug;
 };
 }  // namespace qlocktoo

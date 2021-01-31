@@ -5,7 +5,7 @@
 using namespace qlocktoo;
 
 void Draw::setup() {
-    image.show();
+    image->show();
 }
 
 void Draw::loop() {
@@ -13,22 +13,23 @@ void Draw::loop() {
     if (xQueueReceive(xDrawQueue, &command, 0) == pdTRUE) {
         switch (command.operation) {
             case Operation::READ:
-                image.readFile("/img/test.spr");
+                image->readFile("/img/test.spr");
                 break;
             case Operation::WRITE:
-                image.writeFile("/img/test.spr");
+                image->writeFile("/img/test.spr");
                 break;
             case Operation::DRAW:
-                image.setColor(command.x, command.y, RgbwColor(command.r, command.g, command.b, command.w));
+                image->setColor(command.x, command.y, RgbwColor(command.r, command.g, command.b, command.w));
                 break;
             case Operation::CLEAR:
-                image = Image();
+                delete image;
+                image = new Image(Debug);
                 break;
             default:
                 break;
         }
 
-        image.show();
+        image->show();
     }
 
     delay(100);

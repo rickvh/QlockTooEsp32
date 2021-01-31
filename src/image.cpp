@@ -4,13 +4,14 @@
 #include <array>
 #include <string>
 #include "display.h"
+#include "RemoteDebugger.h"
 
 namespace qlocktoo {
-Image::Image() : App(Mode::IMAGE) {
+Image::Image(RemoteDebug &debug) : App(Mode::IMAGE), Debug(debug) {
     pixels.fill(RgbwColor(0, 0, 0, 0));
 }
 
-Image::Image(Preset preset) : App(Mode::IMAGE) {
+Image::Image(RemoteDebug &debug, Preset preset) : App(Mode::IMAGE), Debug(debug) {
     RgbwColor color(0, 0, 0, 0);
     pixels.fill(color);
 

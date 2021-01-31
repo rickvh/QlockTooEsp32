@@ -7,6 +7,7 @@
 
 #include "app.h"
 #include "display.h"
+#include "RemoteDebugger.h"
 
 namespace qlocktoo {
 const static uint8_t PROGMEM IMG_WIFI_FRAME_1[] = {
@@ -32,6 +33,7 @@ class Image : public App {
     const static uint8_t WIDTH = Display::WIDTH;
     const static uint8_t HEIGHT = Display::HEIGHT;
     std::array<NeoGrbwFeature::ColorObject, WIDTH * HEIGHT> pixels;
+    RemoteDebug &Debug;
 
     // App implementation
     void setup();
@@ -47,10 +49,10 @@ class Image : public App {
         SNOWMAN
     };
 
-    Image();
-    // Image(RemoteDebug &debug);
-    Image(Preset file);
-    // Image(RemoteDebug &debug, Preset file);
+    // Image();
+    Image(RemoteDebug &debug);
+    // Image(Preset file);
+    Image(RemoteDebug &debug, Preset file);
     void readFile(std::string filename);
     void writeFile(std::string filename);
     NeoGrbwFeature::ColorObject getColor(uint8_t x, uint8_t y);
