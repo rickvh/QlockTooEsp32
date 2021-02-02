@@ -1,5 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import iro from '@jaames/iro';
+import IroColorValue from '@jaames/iro';
+import HsvColor from '@jaames/iro';
 
 
 @Component({
@@ -10,10 +12,13 @@ export class ColorpickerComponent implements OnInit {
   private colorpicker: any;
 
   constructor(private el: ElementRef) {
-      this.color = '';
+      // this.color.Color = { h: 20, s: 20, v:20 }
+      this.color = '#ff0000';
   }
   @Input()
-  color: string;
+  // color: typeof IroColorValue;
+  // color: typeof HsvColor;
+  color: string
 
   @Output()
   colorChange = new EventEmitter();
@@ -22,7 +27,7 @@ export class ColorpickerComponent implements OnInit {
     // this.jqElement = $(this.el.nativeElement);
     // this.jqElement.fullCalendar(this.options);
     console.log(this.color);
-    this.colorpicker = iro.ColorPicker(this.el.nativeElement, { color: '#ffff00' })
+    this.colorpicker = iro.ColorPicker(this.el.nativeElement, { color: this.color });
   }
 
   // ngOnChanges(changes:{[k:string]:SimpleChange}){

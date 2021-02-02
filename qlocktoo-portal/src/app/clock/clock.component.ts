@@ -12,7 +12,7 @@ export class ClockComponent implements OnInit {
   mode: String = '';
   cssColor: string = '';
 
-  itIsColor: string = '#ff0000'
+  itIsColor: string = '#ffffff'
 
   color = {
     red: 20,
