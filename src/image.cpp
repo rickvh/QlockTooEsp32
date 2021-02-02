@@ -156,7 +156,7 @@ void Image::readFile(std::string filename) {
     size_t size = pixels.size();
     uint8_t counter = 0;
 
-    for(int i=0; i<size; i+=sizeof(NeoGrbwFeature::ColorObject)){
+    for(int i=0; i<size * sizeof(NeoGrbwFeature::ColorObject); i+=sizeof(NeoGrbwFeature::ColorObject)){
               
         for(int j=0;j<sizeof(NeoGrbwFeature::ColorObject);j++){
             pixel[j] = file.read();
@@ -164,7 +164,7 @@ void Image::readFile(std::string filename) {
               
         NeoGrbwFeature::ColorObject *thePixel = (NeoGrbwFeature::ColorObject *) pixel;
         NeoGrbwFeature::ColorObject *currentPixel = &pixels[counter];
-        memcpy (currentPixel , thePixel , sizeof(NeoGrbwFeature::ColorObject));
+        memcpy(currentPixel , thePixel , sizeof(NeoGrbwFeature::ColorObject));
         counter++;
     }
 
