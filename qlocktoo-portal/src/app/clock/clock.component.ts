@@ -1,10 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { NgZone } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-// import { ColorPickerControl, ColorsTable } from '@iplab/ngx-color-picker';
-import iro from '@jaames/iro';
-// declare var iro: any;
-
 
 
 @Component({
@@ -15,9 +10,9 @@ import iro from '@jaames/iro';
 export class ClockComponent implements OnInit {
   busy = false;
   mode: String = '';
-
   cssColor: string = '';
 
+  itIsColor: string = '#ff0000'
 
   color = {
     red: 20,
@@ -25,13 +20,8 @@ export class ClockComponent implements OnInit {
     blue: 100
   }
 
-  colorpicker: any;
-  constructor(private http: HttpClient, private ngZone: NgZone) { }
 
-  // public colorPickerControl = new ColorPickerControl()
-    // .setValueFrom(ColorsTable.yellowgreen)
-    // .showPresets()
-    // .hideAlphaChannel();
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.http.post('/api/clock', { color: this.color }).subscribe(data => {
@@ -39,7 +29,7 @@ export class ClockComponent implements OnInit {
     })
 
 
-    this.colorpicker = iro.ColorPicker('#picker', {})
+    // this.colorpicker = iro.ColorPicker('#picker', {})
     // this.colorPicker = new iro.ColorPicker('#picker', {});
     // this.colorPicker.on('color:change', this.onColorChange);
 

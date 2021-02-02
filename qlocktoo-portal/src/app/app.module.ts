@@ -13,6 +13,7 @@ import { DrawComponent } from './draw/draw.component';
 import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ImageComponent } from './image/image.component';
+import { ColorpickerComponent } from './colorpicker/colorpicker.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { ImageComponent } from './image/image.component';
     ClockComponent,
     SwirlComponent,
     DrawComponent,
-    ImageComponent
+    ImageComponent,
+    ColorpickerComponent
   ],
   imports: [
     BrowserModule,
