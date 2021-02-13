@@ -35,7 +35,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "./node_modules/@jaames/iro/dist/iro.js.min"
+              "./node_modules/@jaames/iro/dist/iro.min.js"
             ]
           },
           "configurations": {

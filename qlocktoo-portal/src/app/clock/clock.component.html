@@ -1,25 +1,28 @@
-<h2>Configure clock</h2>
+<h1>Clock</h1>
 
-
-<section>
-  <h3>Het is</h3>
-
-  <app-colorpicker [(color)]=itIsColor></app-colorpicker>
-
-  <app-colorpicker [(color)]=itIsColor></app-colorpicker>
-
-  <!-- <mat-checkbox [(ngModel)]="itIsEnabled">Enabled</mat-checkbox> -->
-  <!-- <div class="colorpicker">
-    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
-  </div>
-
-  <h3>Words</h3>
-  <div class="colorpicker">
-    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
-  </div>
-
-  <h3>Uur</h3>
-  <div class="colorpicker">
-    <github-picker [(color)]="cssColor" [control]="colorPickerControl"></github-picker>
-  </div> -->
-</section>
+<mat-accordion>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Het is
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <app-colorpicker [(color)]=itIsColor></app-colorpicker>
+  </mat-expansion-panel>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        vijf/tien/kwart/voor/over
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <app-colorpicker [(color)]=itIsColor></app-colorpicker>
+  </mat-expansion-panel>
+  <mat-expansion-panel hideToggle>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        uur van de dag
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <p>This is the primary content of the panel.</p>
+  </mat-expansion-panel>
+</mat-accordion>
