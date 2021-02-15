@@ -19,11 +19,15 @@ export class ColorpickerComponent implements OnInit {
   @Output()
   colorChange = new EventEmitter();
 
+  @Output()
+  colorChanged = new EventEmitter();
+
   ngOnInit(){
     let $this= this;
     this.colorpicker = iro.ColorPicker(this.el.nativeElement, { color: this.color });
     this.colorpicker.on('input:change', function(color: IroColorValue.Color) {
       $this.colorChange.emit(color);
+      $this.colorChanged.emit(color);
     });
   }
 }

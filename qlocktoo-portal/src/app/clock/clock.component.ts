@@ -1,6 +1,6 @@
-import IroColorValue from '@jaames/iro';
-import { HttpClient } from '@angular/common/http';
+import { ClockService } from './clock.service';
 import { Component, OnInit } from '@angular/core';
+import { ClockConfig } from './clock.config';
 
 
 @Component({
@@ -9,47 +9,21 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./clock.component.scss']
 })
 export class ClockComponent implements OnInit {
-  busy = false;
-  mode: String = '';
-  cssColor: string = '';
+  config: ClockConfig;
 
-  itIsColor: IroColorValue.Color = new IroColorValue.Color('#ff00ff');
-  wordsColor: IroColorValue.Color = new IroColorValue.Color('#9addaf');
-  hourColor: IroColorValue.Color = new IroColorValue.Color('#00dddd');
-
-  constructor(private http: HttpClient) { }
+  constructor(private clockService: ClockService) {
+    this.config = clockService.getConfig();
+  }
 
   ngOnInit(): void {
     this.submitToClock();
   }
 
-  private submitToClock() {
-    if (!this.busy) {
-      this.busy = true;
-      this.http.post('/api/clock', {
-        colorItIs: this.itIsColor.hsv,
-        colorWords: this.wordsColor.hsv,
-        colorHour: this.hourColor.hsv
-      }).subscribe(data => {
-        this.busy = false;
-        console.log(data);
-      },
-      error => {
-        this.busy = false;
-        console.log(error);
-      });
-    }
-  }
-
-  colorChanged(): void {
+  onColorChanged(): void {
     this.submitToClock();
   }
-}
 
-// TODO: moet deze gebruikt worden ?!
-export interface ClockConfig {
-  itIs: {
-    enabled: boolean,
-    color: string | null
+  private submitToClock() {
+    this.clockService.saveConfig(this.config);
   }
 }
