@@ -1,3 +1,4 @@
+import IroColorValue from '@jaames/iro';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 
@@ -12,43 +13,24 @@ export class ClockComponent implements OnInit {
   mode: String = '';
   cssColor: string = '';
 
-  itIsColor: string = '#ffffff'
-
-  color = {
-    red: 20,
-    green: 40,
-    blue: 100
-  }
-
+  itIsColor: IroColorValue.Color = new IroColorValue.Color('#ff00ff');
+  wordsColor: IroColorValue.Color = new IroColorValue.Color('#9addaf');
+  hourColor: IroColorValue.Color = new IroColorValue.Color('#00dddd');
 
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
-    this.http.post('/api/clock', { color: this.color }).subscribe(data => {
-      console.log(data);
-    })
-
-
-    // this.colorpicker = iro.ColorPicker('#picker', {})
-    // this.colorPicker = new iro.ColorPicker('#picker', {});
-    // this.colorPicker.on('color:change', this.onColorChange);
-
-    // this.colorPicker.on('color:change', (color: string, changes: any) =>  this.ngZone.run(() => this.onColorChange(color, changes)));
+    this.submitToClock();
   }
 
-  ngOnDestroy(): void {
-    // TODO
-  }
-
-  onColorChange(color: string, changes: any) {
-    // this.selectedColor = color.hexString;
-    console.log(color);
-  }
-
-  colorChanged(): void {
+  private submitToClock() {
     if (!this.busy) {
       this.busy = true;
-      this.http.post('/api/clock', { color: this.color }).subscribe(data => {
+      this.http.post('/api/clock', {
+        colorItIs: this.itIsColor.hsv,
+        colorWords: this.wordsColor.hsv,
+        colorHour: this.hourColor.hsv
+      }).subscribe(data => {
         this.busy = false;
         console.log(data);
       },
@@ -58,8 +40,13 @@ export class ClockComponent implements OnInit {
       });
     }
   }
+
+  colorChanged(): void {
+    this.submitToClock();
+  }
 }
 
+// TODO: moet deze gebruikt worden ?!
 export interface ClockConfig {
   itIs: {
     enabled: boolean,

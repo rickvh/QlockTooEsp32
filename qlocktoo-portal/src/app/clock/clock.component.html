@@ -1,7 +1,7 @@
 <h1>Clock</h1>
 
 <mat-accordion>
-  <mat-expansion-panel hideToggle>
+  <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
         Het is
@@ -9,20 +9,45 @@
     </mat-expansion-panel-header>
     <app-colorpicker [(color)]=itIsColor></app-colorpicker>
   </mat-expansion-panel>
-  <mat-expansion-panel hideToggle>
+
+  <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        vijf/tien/kwart/voor/over
+        Vijf/tien/kwart/voor/over/half
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <app-colorpicker [(color)]=itIsColor></app-colorpicker>
+    <app-colorpicker [(color)]=wordsColor></app-colorpicker>
   </mat-expansion-panel>
-  <mat-expansion-panel hideToggle>
+
+  <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        uur van de dag
+        Uur van de dag
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <p>This is the primary content of the panel.</p>
+    <app-colorpicker [(color)]=hourColor></app-colorpicker>
   </mat-expansion-panel>
 </mat-accordion>
+
+<h1>Config</h1>
+
+<mat-accordion>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Minuten
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-slide-toggle>Hoek LED's</mat-slide-toggle>
+  </mat-expansion-panel>
+</mat-accordion>
+
+<section>
+  <h3>Debug</h3>
+  <hr/>
+  <p>Het is: {{ itIsColor.hexString }}</p>
+  <p>Vijf/tien/kwart/voor/over/half: {{ wordsColor.hexString }}</p>
+  <p>Uur van de dag: {{ hourColor.hexString }}</p>
+  <p>Hoekleds: {{ true }}</p>
+  <hr/>
+</section>
