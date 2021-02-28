@@ -27,27 +27,16 @@
     </mat-expansion-panel-header>
     <app-colorpicker [(color)]=config.colorHour (colorChanged)=onColorChanged()></app-colorpicker>
   </mat-expansion-panel>
-</mat-accordion>
 
-<h1>Config</h1>
-
-<mat-accordion>
   <mat-expansion-panel>
     <mat-expansion-panel-header>
       <mat-panel-title>
-        Minuten
+        Opties
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <mat-slide-toggle>Hoek LED's</mat-slide-toggle>
+    <mat-slide-toggle>Toon minuten</mat-slide-toggle>
+    <mat-slide-toggle>Dim wanneer donker</mat-slide-toggle>
   </mat-expansion-panel>
+
 </mat-accordion>
 
-<section>
-  <h3>Debug</h3>
-  <hr/>
-  <p>Het is: {{ config.colorItIs.hexString }}</p>
-  <p>Vijf/tien/kwart/voor/over/half: {{ config.colorWords.hexString }}</p>
-  <p>Uur van de dag: {{ config.colorHour.hexString }}</p>
-  <p>Hoekleds: {{ true }}</p>
-  <hr/>
-</section>

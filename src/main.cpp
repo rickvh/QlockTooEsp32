@@ -281,7 +281,7 @@ void setup() {
   Serial.println("setup Webinterface");
   webinterface.begin();
   
-  xChangeAppQueue = xQueueCreate(5, sizeof(Mode));
+  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
   xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
   Serial.println("Queues created");
 

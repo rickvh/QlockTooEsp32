@@ -58,31 +58,31 @@ void Webinterface::begin() {
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     ClockConfig config;
-                    uint8_t r, g, b, w;
+                    float h, s, v;
 
                     auto color = jsonDoc["colorItIs"];
-                    r = color["r"] | 0;
-                    g = color["g"] | 0;
-                    b = color["b"] | 0;
-                    w = color["w"] | 0;
-                    config.colorItIs = RgbwColor(r, g, b, w);
-                    Serial.printf("RGB it is: %u, %u, %u, %u\r\n", r, g, b, w);
+                    h = color["h"] | 0.0f;
+                    s = color["s"] | 0.0f;
+                    v = color["v"] | 0.0f;
+                    config.colorItIs = HsbColor(h, s, v);
+                    // Serial.printf("RGB it is: %u, %u, %u, %u\r\n", r, g, b, w);
 
                     color = jsonDoc["colorWords"];
-                    r = color["r"] | 0;
-                    g = color["g"] | 0;
-                    b = color["b"] | 0;
-                    w = color["w"] | 0;
-                    config.colorWords = RgbwColor(r, g, b, w);
-                    Serial.printf("RGB words: %u, %u, %u, %u\r\n", r, g, b, w);
+                    h = color["h"] | 0.0f;
+                    s = color["s"] | 0.0f;
+                    v = color["v"] | 0.0f;
+                    config.colorWords = HsbColor(h, s, v);
+                    // Serial.printf("RGB words: %u, %u, %u, %u\r\n", r, g, b, w);
+                    float ref = 3.23f;
+                    debugD("Reftest: %f", ref);
+                    debugD("HSV: %f, %f, %f", h, s, v);
 
                     color = jsonDoc["colorHour"];
-                    r = color["r"] | 0;
-                    g = color["g"] | 0;
-                    b = color["b"] | 0;
-                    w = color["w"] | 0;
-                    config.colorHour = RgbwColor(r, g, b, w);
-                    Serial.printf("RGBW hour: %u, %u, %u, %u\r\n", r, g, b, w);
+                    h = color["h"] | 0.0f;
+                    s = color["s"] | 0.0f;
+                    v = color["v"] | 0.0f;
+                    config.colorHour = HsbColor(h, s, v);
+                    // Serial.printf("RGBW hour: %u, %u, %u, %u\r\n", r, g, b, w);
 
                     // TODO: iets met kleurtjes
                     Mode newMode = Mode::CLOCK;

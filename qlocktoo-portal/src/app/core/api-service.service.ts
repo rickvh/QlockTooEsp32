@@ -15,7 +15,8 @@ export class ApiService {
     action: string
   ): string {
     const urlBuilder: UrlBuilder = new UrlBuilder(
-      this.settings.API_ENDPOINT,
+      // this.settings.API_ENDPOINT,
+      '/api',
       action
     );
     return urlBuilder.toString();

@@ -26,7 +26,28 @@ export class ClockService extends ApiService {
   }
 
   public saveConfig(config: ClockConfig) {
-    // console.info('send config to Qlock');
-    this.post('clock', config);
+    console.info('send config to Qlock');
+    console.log(config.colorItIs.hsv);
+
+    this.post('clock', {
+      colorItIs: {
+        h: config.colorItIs.hsv.h!! / 360,
+        // s: config.colorItIs.hsv.s!! / 100,
+        s: 1,
+        v: config.colorItIs.hsv.v!! / 100,
+      },
+      colorWords: {
+        h: config.colorWords.hsv.h!! / 360,
+        // s: config.colorWords.hsv.s!! / 100,
+        s: 1,
+        v: config.colorWords.hsv.v!! / 100,
+      },
+      colorHour: {
+        h: config.colorHour.hsv.h!! / 360,
+        // s: config.colorHour.hsv.s!! / 100,
+        s: 1,
+        v: config.colorHour.hsv.v!! / 100,
+      }
+    });
   }
 }
