@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "RemoteDebugger.h"
 #include "time.h"
+#include "configservice.h"
 
 #define NTP_TIMEOUT 1500
 
@@ -42,10 +43,11 @@ namespace qlocktoo {
 void Clock::setup() {
     debugI("Clock setup");
 
-    ClockConfig config;
-    config.colorItIs = RgbwColor(0, 0, 255, 0);
-    config.colorWords = RgbwColor(0, 200, 0, 0);
-    config.colorHour = RgbwColor(255, 0, 0, 0);
+    ConfigService configService;
+    ClockConfig config = configService.CONFIG.clockConfig;
+    config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
+    config.colorWords = HsbColor(0.3f, 1.0f, 1.0f);
+    config.colorHour = HsbColor(0.6f, 1.0f, 1.0f);
     applyConfig(config);
 
     Display::begin();
@@ -182,7 +184,7 @@ uint8_t Clock::timeBrightness() {
     return 0;
 }
 
-void Clock::setColor(const std::vector<int> leds, NeoGrbwFeature::ColorObject color) {
+void Clock::setColor(const std::vector<int> leds, HsbColor color) {
     uint8_t brightness = timeBrightness();
 
     for (uint8_t led : leds) {

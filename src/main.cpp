@@ -183,8 +183,6 @@ void processCmdRemoteDebug() {
   } else if (cmd == "clock") {
     changeMode(CLOCK);
     debugI("* Mode set to CLOCK");
-  } else if (cmd == "web") {
-    webinterface.test("Kiekeboe");
   } else if (cmd == "ls") {
     debugI("Partitions:");
     listPartitions();
@@ -274,6 +272,9 @@ void setup() {
   setupOTA();
   Serial.println("setup Logging");
   setupLogging();
+
+  delay
+
   Serial.println("setup LED Display");
   setupDisplay();
   Serial.println("setup NTP");

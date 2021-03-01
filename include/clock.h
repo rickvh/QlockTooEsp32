@@ -4,15 +4,12 @@
 #include "app.h"
 #include "display.h"
 #include "control.h"
+#include "configservice.h"
 
 extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
-typedef struct {
-    NeoGrbwFeature::ColorObject colorItIs;
-    NeoGrbwFeature::ColorObject colorWords;
-    NeoGrbwFeature::ColorObject colorHour;
-} ClockConfig;
+
 
 class Clock : public App {
    private:
@@ -25,7 +22,7 @@ class Clock : public App {
     RemoteDebug &Debug;
     struct tm currentTime;
     uint8_t timeBrightness();
-    void setColor(const std::vector<int> leds, NeoGrbwFeature::ColorObject color);
+    void setColor(const std::vector<int> leds, HsbColor color);
     void handleConfigQueue();
     const std::vector<std::vector<int>> ledsbyword = {
         {0, 37, 38, 36, 39},        // HET IS

@@ -27,8 +27,6 @@ class Display {
     static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);
 
-    static void setConfig(uint8_t leds, uint8_t dur1, uint8_t dur2, uint8_t dur3, uint8_t dur4) { };
-
     // Helper methods
     static uint32_t ColorHSV(uint16_t hue, uint8_t sat, uint8_t val) {
         uint8_t r, g, b;
