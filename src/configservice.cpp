@@ -2,9 +2,7 @@
 #include <SPIFFS.h>
 
 namespace qlocktoo {
-ConfigService::ConfigService() {
-    reload();
-}
+Config ConfigService::CONFIG;
 
 void ConfigService::save() {
     if (!SPIFFS.begin()) {
@@ -12,7 +10,7 @@ void ConfigService::save() {
         return;
     }
 
-    File configfile = SPIFFS.open(CONFIGFILE);
+    File configfile = SPIFFS.open(CONFIGFILE, "w");
     if (!configfile) {
         Serial.println("Failed to save configfile");
     }
@@ -23,8 +21,8 @@ void ConfigService::save() {
     SPIFFS.end();
 }
 
-void ConfigService::reload() {
-    if (!SPIFFS.begin() || !SPIFFS.exists(CONFIGFILE)) {
+void ConfigService::init() {
+    if (!SPIFFS.begin(true) || !SPIFFS.exists(CONFIGFILE)) {
         Serial.println("No configfile found...Initializing defaults");
         CONFIG = Config();
         return;
@@ -35,7 +33,7 @@ void ConfigService::reload() {
         Serial.println("Failed to open configfile");
     }
 
-    unsigned char * buffer = (unsigned char *) &this->CONFIG;
+    unsigned char * buffer = (unsigned char *) &CONFIG;
     for(uint16_t i = 0; i < sizeof(Config); i++){
         buffer[i] = configfile.read();
     }

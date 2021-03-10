@@ -10,7 +10,7 @@ typedef struct {
 } ClockConfig;
 
 typedef struct {
-    char* hostname;
+    std::string hostname;
 } NetworkConfig;
 
 typedef struct {
@@ -21,13 +21,12 @@ typedef struct {
 
 class ConfigService {
     private:
-        const char* CONFIGFILE = "settings.cfg";
+        static constexpr const char* CONFIGFILE = "/settings.cfg";
     
     public:
-        ConfigService();
         // Holds the configuration of QlockToo. Configuration is loaded upon class initialisation.
-        Config CONFIG;
-        void save();
-        void reload();
+        static Config CONFIG;
+        static void save();
+        static void init();
 };
 }

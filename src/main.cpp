@@ -266,15 +266,19 @@ void setup() {
     Serial.println("SPIFFS cannot be opened");
     debugE("SPIFFS cannot be opened");
   };
+  Serial.println("Load Configuration");
+  ConfigService::init();
+  Serial.printf("Hostname: %s\n", ConfigService::CONFIG.networkConfig.hostname.c_str());
+
+  ConfigService::CONFIG.networkConfig.hostname = "Testje";
+  ConfigService::save();
+
   Serial.println("setup Wifi");
   setupWifi();
   Serial.println("setup OTA");
   setupOTA();
   Serial.println("setup Logging");
   setupLogging();
-
-  delay
-
   Serial.println("setup LED Display");
   setupDisplay();
   Serial.println("setup NTP");
@@ -363,6 +367,7 @@ void listPartitions(void)
 }
 
 void listFiles() {
+  SPIFFS.begin();
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  
