@@ -2,7 +2,6 @@
 
 #include <ESPAsyncWebServer.h>
 #include "RemoteDebugger.h"
-#include "configservice.h"
 
 using namespace std;
 
@@ -19,7 +18,6 @@ class Webinterface {
 
     RemoteDebug &Debug;
     AsyncWebServer server;
-    ConfigService configService;
     
     void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 

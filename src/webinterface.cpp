@@ -27,21 +27,21 @@ void Webinterface::begin() {
     // API: Get current clock configuration
     server.on("/api/clock", HTTP_GET, [&](AsyncWebServerRequest *request) {
         debugD("Current clock config requested");
-        ClockConfig config = this->configService.CONFIG.clockConfig;
+        ClockConfig* config = &ConfigService::CONFIG.clockConfig;
         
         StaticJsonDocument<512> jsonDoc;
         auto colorItIs = jsonDoc.createNestedObject("colorItIs");
         auto colorWords = jsonDoc.createNestedObject("colorWords");
         auto colorHour = jsonDoc.createNestedObject("colorHour");
-        colorItIs[KEY_HUE] = config.colorItIs.H;
-        colorItIs[KEY_SATURATION] = config.colorItIs.S;
-        colorItIs[KEY_VALUE] = config.colorItIs.B;
-        colorWords[KEY_HUE] = config.colorWords.H;
-        colorWords[KEY_SATURATION] = config.colorWords.S;
-        colorWords[KEY_VALUE] = config.colorWords.B;
-        colorHour[KEY_HUE] = config.colorHour.H;
-        colorHour[KEY_SATURATION] = config.colorHour.S;
-        colorHour[KEY_VALUE] = config.colorHour.B;
+        colorItIs[KEY_HUE] = config->colorItIs.H;
+        colorItIs[KEY_SATURATION] = config->colorItIs.S;
+        colorItIs[KEY_VALUE] = config->colorItIs.B;
+        colorWords[KEY_HUE] = config->colorWords.H;
+        colorWords[KEY_SATURATION] = config->colorWords.S;
+        colorWords[KEY_VALUE] = config->colorWords.B;
+        colorHour[KEY_HUE] = config->colorHour.H;
+        colorHour[KEY_SATURATION] = config->colorHour.S;
+        colorHour[KEY_VALUE] = config->colorHour.B;
         
         String response;
         serializeJsonPretty(jsonDoc, response);
@@ -57,7 +57,7 @@ void Webinterface::begin() {
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     debugD("Updating clock config");
-                    ClockConfig* config = &this->configService.CONFIG.clockConfig;
+                    ClockConfig* config = &ConfigService::CONFIG.clockConfig;
                     float h, s, v;
 
                     auto color = jsonDoc["colorItIs"];
@@ -82,6 +82,7 @@ void Webinterface::begin() {
                     debugD("HSV colorHour: %f, %f, %f\r\n", h, s, v);
 
                     Mode newMode = Mode::CLOCK;
+                    ConfigService::save();
                     xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }

@@ -15,10 +15,12 @@ void ConfigService::save() {
         Serial.println("Failed to save configfile");
     }
 
-    size_t bytes = configfile.write((unsigned char*) &CONFIG, sizeof(Config));
+    configfile.write((unsigned char*) &CONFIG, sizeof(Config));
 
     configfile.close();
     SPIFFS.end();
+
+    Serial.println("Config saved to filesystem");
 }
 
 void ConfigService::init() {
@@ -40,5 +42,7 @@ void ConfigService::init() {
             
     configfile.close();
     SPIFFS.end();
+
+    Serial.println("Config loaded from filesystem");
 }
 }

@@ -18,7 +18,7 @@ class Clock : public App {
     const static uint8_t dayHour = 8;     // Start increasing brightness
     const static uint8_t nightHour = 17;  // Start decreasing brightness
 
-    ClockConfig config;
+    ClockConfig* config;
     RemoteDebug &Debug;
     struct tm currentTime;
     uint8_t timeBrightness();
@@ -53,7 +53,7 @@ class Clock : public App {
     Clock(RemoteDebug &debug) : App(Mode::CLOCK), Debug(debug) {};
     void setup();
     void loop();
-    void applyConfig(ClockConfig config);
+    void applyConfig(ClockConfig *config);
     //~Clock();
 };
 }
