@@ -6,18 +6,18 @@ FIX COLOR ISSUES door RMT-feature te gebruiken??
 ============
 
 Bugs
-[ ] - Wifi animation tijdens OTA
+[x] - Wifi animation tijdens OTA
 
 
 Display
 [x] - display buffer obv X,Y
-
+[ ] - support multiple display configurations
 
 Animation (&display)
-[ ] - interface die het display kan beschrijven
+[x] - interface die het display kan beschrijven
 
 Clock
-[ ] - obv tijd het display updaten
+[x] - obv tijd het display updaten
 
 
 
@@ -52,11 +52,11 @@ Prio:
       - /api/config -> {status: uninitialized}
 [ ] 
 [ ] - klok-pagina uitbreiden met settings:
-      - Het is: kleur
-      - tussenwoorden: kleur
-      - uur: kleur
-      - transition: none, fade, ?
-      - Tijdzone via: https://github.com/nayarsystems/posix_tz_db
+[x]   - Het is: kleur
+[x]   - tussenwoorden: kleur
+[x]   - uur: kleur
+[ ]   - transition: none, fade, ?
+[ ]   - Tijdzone via: https://github.com/nayarsystems/posix_tz_db
 [ ] - 
 [ ] - 
 [ ] - 

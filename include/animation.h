@@ -15,6 +15,6 @@ class Animation : public App {
     std::shared_ptr<Image> currentFrame = NULL;
 
    public:
-    Animation() : App(Mode::WIFI_ANIMATION) {}
+    Animation() : App(Mode::OTA_UPDATE) {}
 };
 }  // namespace qlocktoo

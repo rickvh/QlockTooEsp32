@@ -6,6 +6,7 @@
 using namespace std;
 
 extern QueueHandle_t xChangeAppQueue;
+extern QueueHandle_t xWifiConfigChangedQueue;
 extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
@@ -15,6 +16,10 @@ class Webinterface {
     const char *KEY_HUE = "h";
     const char *KEY_SATURATION = "s";
     const char *KEY_VALUE = "v";
+
+    const char *KEY_HOSTNAME = "hostname";
+    const char *KEY_SSID = "ssid";
+    const char *KEY_PASSWORD = "password";
 
     RemoteDebug &Debug;
     AsyncWebServer server;

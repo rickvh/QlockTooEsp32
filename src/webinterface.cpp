@@ -15,6 +15,8 @@
 #include "control.h"
 #include "configservice.h"
 
+using namespace std;
+
 namespace qlocktoo {
 Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
     debugI("Webinterface started on port: %u\r\n", port);
@@ -81,13 +83,32 @@ void Webinterface::begin() {
                     config->colorHour = HsbColor(h, s, v);
                     debugD("HSV colorHour: %f, %f, %f\r\n", h, s, v);
 
+                    Serial.println("/api/clock");
                     Mode newMode = Mode::CLOCK;
-                    ConfigService::save();
                     xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
+
+            if (request->url() == "/api/config") {
+                StaticJsonDocument<512> jsonDoc;
+
+                if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
+                    debugD("Updating system config");
+                    NetworkConfig networkConfig;
+                    string ssid, password;
+
+                    auto network = jsonDoc["network"];
+                    networkConfig.hostname = network[KEY_HOSTNAME].as<String>().c_str();
+                    networkConfig.ssid = network[KEY_SSID].as<String>().c_str();
+                    networkConfig.password = network[KEY_PASSWORD].as<String>().c_str();
+
+                    xQueueSend(xWifiConfigChangedQueue, &networkConfig, 0);
+                }
+                request->send(200, "application/json", "{ \"status\": \"success\" }");
+            }
+
 
             if (request->url() == "/api/swirl") {
                 debugI("Mode set to SWIRL");

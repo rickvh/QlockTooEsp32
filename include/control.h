@@ -5,9 +5,9 @@
 namespace qlocktoo {
 
 typedef enum {
-    NOT_SET,
+    UNKNOWN,
     NO_WIFI,
-    WIFI_ANIMATION,
+    OTA_UPDATE,
     CLOCK,
     SWIRL,
     TEXT,

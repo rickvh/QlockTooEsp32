@@ -1,14 +1,8 @@
-#define VERSION         "0.2"
-
-// #define CONFIG_FREERTOS_USE_TRACE_FACILITY              1
-// #define CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS  1
-
 #define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
 
 //#define DEBUG_DISABLED // uncomment for production release
 #define WEBSOCKET_DISABLED // disbale logging via websockets
-// #include "utils/split.h"
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
@@ -19,12 +13,9 @@
 #include "utils/stringutils.h"
 #include "nvs_flash.h"
 #include "nvs.h"
-
-#include <WiFi.h>
-#include <WiFiClient.h>
+#include "wifimanager.h"
 #include <DNSServer.h>
 #include "ESPmDNS.h"
-// #include <WiFiUdp.h>
 #include "control.h"
 #include "webinterface.h"
 #include "swirl.h"
@@ -32,22 +23,19 @@
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
-
+#include "buildinformation.h"
 #include <SPIFFS.h>
-#include "wifipassword.h"
 
-
-#define NTP_TIMEOUT 1500
 
 using namespace qlocktoo;
 using namespace std;
 
-const char* build_str = "Version: " VERSION " " __DATE__ " " __TIME__;
 const uint8_t   timeZone        = 1;     // Central European Time
 int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
 
 RemoteDebug Debug;
+WifiManager Wifi;
 Webinterface webinterface(80, Debug);
 
 void changeMode(qlocktoo::Mode mode);
@@ -58,29 +46,50 @@ void runImportantStuffTask(void * parameter);
 
 TaskHandle_t currentAppTask = NULL;
 App* currentApp = NULL;
-qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
+qlocktoo::Mode currentMode = qlocktoo::UNKNOWN;
 
 /**
  * FreeRTOS stuff
  */
 QueueHandle_t xChangeAppQueue = NULL;
+QueueHandle_t xWifiConfigChangedQueue = NULL;
 QueueHandle_t xClockConfigQueue = NULL;
 
 
 void setupWifi() {
   debugI("Connecting to Wifi...");
-  Serial.println("Connecting to Wifi...");
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  // Serial.println("Connecting to Wifi...");
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(ssid, password);
+  
+  // set mode to CONNECTING_WIFI
+  // check if wifi config availiable
+  // yes: start connecting
 
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    debugE("Connection Failed! Rebooting...");
-    delay(5000);
-    ESP.restart();
-  }
+  // listeners
+  //  - wifi connected: set mode TO CLOCK
+  //  - wifi lost / failed: set mode NO_WIFI
+
+  // start AP
+  // - wifi config received:
+  //   - stop AP
+  //   - setupWifi()
+
+  // WiFi.printDiag(Serial);
+  // WiFi.onEvent(std::bind(&WiFiManager::WiFiEvent,this,_1,_2));
+
+
+  // while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    // debugE("Connection Failed! Rebooting...");
+    // delay(5000);
+    // ESP.restart();
+  // }
+
+  Wifi.begin();
+
   debugI("Wifi connected");
   Serial.print("Wifi connected: ");
-  Serial.println(WiFi.localIP());
+  // Serial.println(WiFi.localIP());
 
 
   #if defined USE_MDNS && defined HOST_NAME
@@ -116,7 +125,7 @@ void setupOTA() {
 
       // Unmount SPIFFS
       SPIFFS.end();
-      changeMode(qlocktoo::WIFI_ANIMATION);
+      changeMode(qlocktoo::OTA_UPDATE);
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -171,7 +180,7 @@ void processCmdRemoteDebug() {
       changeMode(SNOW);
       debugI("* Image set to SNOW");
     } else if (tokens[1] == "wifi") {
-      changeMode(WIFI_ANIMATION);
+      changeMode(OTA_UPDATE);
       debugI("* Image set to WIFI");
     } else {
       return;
@@ -233,7 +242,7 @@ void changeMode(qlocktoo::Mode mode) {
       currentApp = new Clock(Debug);
       break;
     case NO_WIFI:
-    case WIFI_ANIMATION:
+    case OTA_UPDATE:
       currentApp = new Animation();
       break;
     case XMAS:
@@ -266,13 +275,8 @@ void setup() {
     Serial.println("SPIFFS cannot be opened");
     debugE("SPIFFS cannot be opened");
   };
-  Serial.println("Load Configuration");
+  Serial.println("setup persistable configuration");
   ConfigService::init();
-  Serial.printf("Hostname: %s\n", ConfigService::CONFIG.networkConfig.hostname.c_str());
-
-  ConfigService::CONFIG.networkConfig.hostname = "Testje";
-  ConfigService::save();
-
   Serial.println("setup Wifi");
   setupWifi();
   Serial.println("setup OTA");
@@ -287,6 +291,7 @@ void setup() {
   webinterface.begin();
   
   xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
   xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
   Serial.println("Queues created");
 
@@ -299,21 +304,22 @@ void setup() {
 
 // Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
 void loop() {
-  // ArduinoOTA.handle();
-  // Debug.handle();
-  // delay(300);
   delay(300);
 
-  // Display::drawPixelRaw(1, RgbColor(red+=10, green+=2, blue+=10));
-  // Display::show();
-
   Mode newMode;
-  // uint8_t newMode;
   if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
     debugI("We hebben een nieuwe mode!!!!");
     Serial.printf("Queue data received: %u\r\n", newMode);
     changeMode(newMode);
   }
+
+  NetworkConfig networkConfig;
+  if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
+    debugI("Wifi settings updated");
+    Wifi.updateConfig(networkConfig);
+  }
+
+  Serial.println("New clockconfig received from queue");
 };
 
 void runImportantStuffTask(void * parameter) {
@@ -367,7 +373,6 @@ void listPartitions(void)
 }
 
 void listFiles() {
-  SPIFFS.begin();
   File root = SPIFFS.open("/");
   File file = root.openNextFile();
  
@@ -376,5 +381,4 @@ void listFiles() {
  
     file = root.openNextFile();
   }
-  SPIFFS.end();
 }

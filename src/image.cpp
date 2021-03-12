@@ -141,7 +141,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
 }
 
 void Image::readFile(std::string filename) {
-    if (!SPIFFS.begin() || !SPIFFS.exists(filename.c_str())) {
+    if (!SPIFFS.exists(filename.c_str())) {
         return;
     }
 
@@ -158,7 +158,6 @@ void Image::readFile(std::string filename) {
     //     buffer[l] = 0;
     //     if (strcmp)
     // }
-    SPIFFS.end();
 }
 
 NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {

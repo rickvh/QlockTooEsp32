@@ -1,6 +1,8 @@
 #pragma once
 #include "display.h"
 
+using namespace std;
+
 namespace qlocktoo {
 
 typedef struct {
@@ -10,7 +12,9 @@ typedef struct {
 } ClockConfig;
 
 typedef struct {
-    std::string hostname;
+    string hostname;
+    string ssid;
+    string password;
 } NetworkConfig;
 
 typedef struct {
@@ -22,6 +26,7 @@ typedef struct {
 class ConfigService {
     private:
         static constexpr const char* CONFIGFILE = "/settings.cfg";
+        static void printConfig();
     
     public:
         // Holds the configuration of QlockToo. Configuration is loaded upon class initialisation.

@@ -39,7 +39,6 @@ namespace qlocktoo {
 void Clock::setup() {
     debugI("Clock setup");
 
-    ConfigService configService;
     ClockConfig* config = &ConfigService::CONFIG.clockConfig;
     // config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
     // config.colorWords = HsbColor(0.3f, 1.0f, 1.0f);
@@ -182,8 +181,6 @@ uint8_t Clock::timeBrightness() {
 }
 
 void Clock::setColor(const std::vector<int> leds, HsbColor color) {
-    uint8_t brightness = timeBrightness();
-
     for (uint8_t led : leds) {
         Display::drawPixel(led, color);
     }
