@@ -38,6 +38,7 @@ namespace qlocktoo {
         const IPAddress subnet(255, 255, 255, 0);
         WiFi.softAPConfig(ip, ip, subnet);
         WiFi.softAP(AP_SSID, AP_PASSWORD);
+        showWifiAnimation();
     }
 
     void WifiManager::updateConfig(NetworkConfig &config) {
@@ -54,7 +55,6 @@ namespace qlocktoo {
     }
 
     void WifiManager::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
-
         switch (event) {
             case SYSTEM_EVENT_STA_DISCONNECTED:
                 Serial.println(TAG + "STA Disconnected: " + info.disconnected.reason);
@@ -63,11 +63,15 @@ namespace qlocktoo {
                 WiFi.reconnect();
                 if (reconnectCount == 10) {
                     startAP();
+                    showSetupNeeded();
+                } else {
+                    showWifiAnimation();
                 }
                 break;
             case SYSTEM_EVENT_STA_CONNECTED:
                 Serial.println(TAG + "STA Connected");
                 reconnectCount = 0;
+                showClock();
                 break;
             case SYSTEM_EVENT_WIFI_READY:
                 Serial.println(TAG + "ready");
@@ -83,5 +87,20 @@ namespace qlocktoo {
                 Serial.println(TAG + "event " + event);
                 break;
         }
+    }
+
+    void WifiManager::showWifiAnimation() {
+        auto newMode = Mode::WifiConnecting;
+        xQueueSend(xChangeAppQueue, &newMode, 0);
+    }
+
+    void WifiManager::showSetupNeeded() {
+        auto newMode = Mode::WifiSetupNeeded;
+        xQueueSend(xChangeAppQueue, &newMode, 0);
+    }
+
+    void WifiManager::showClock() {
+        auto newMode = Mode::Clock;
+        xQueueSend(xChangeAppQueue, &newMode, 0);
     }
 }

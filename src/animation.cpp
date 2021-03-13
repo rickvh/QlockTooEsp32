@@ -5,36 +5,26 @@ namespace qlocktoo {
 Animation::Animation(Preset preset) : App(Mode::Animation) {
     switch(preset) {
         case Preset::Wifi:
-            // frames/pu
-            // currentImage = Image::Preset::WIFI1;
+            frames.push_back(Image::Preset::Wifi1);
+            frames.push_back(Image::Preset::Wifi2);
+            frames.push_back(Image::Preset::Wifi3);
         break;
     }
 }
 
 void Animation::setup() {
-    // currentImage = Image::Preset::WIFI1;
+    // NOOP
 }
 
 void Animation::loop() {
-    // switch (currentImage) {
-    //     case Image::Preset::WIFI1:
-    //         currentImage = Image::Preset::WIFI2;
-    //         break;
-    //     case Image::Preset::WIFI2:
-    //         currentImage = Image::Preset::WIFI3;
-    //         break;
-    //     case Image::Preset::WIFI3:
-    //         currentImage = Image::Preset::WIFI1;
-    //         break;
-    //     default:
-    //         currentImage = Image::Preset::ERROR;
-    //         break;
-    // }
-    // currentFrame = std::shared_ptr<Image>(new Image(currentImage));
-    // if (currentFrame.get()) {
-    //     currentFrame.get()->show();
-    // }
-
+    if (currentFrame < frames.size() - 1)
+    {
+        currentFrame++;
+    } else {
+        currentFrame = 0;
+    }
+    Image image(frames.at(currentFrame));
+    image.show();
     delay(300);
 }
-}  // namespace qlocktoo
+}

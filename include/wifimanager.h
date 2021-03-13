@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include "configservice.h"
 
+extern QueueHandle_t xChangeAppQueue;
 extern QueueHandle_t xWifiConfigChangedQueue;
 
 namespace qlocktoo {
@@ -15,6 +16,9 @@ namespace qlocktoo {
             uint8_t reconnectCount;
             void WiFiEvent(WiFiEvent_t event, system_event_info_t info);
             void connectToWifi();
+            void showWifiAnimation();
+            void showSetupNeeded();
+            void showClock();
 
         public:
             WifiManager();

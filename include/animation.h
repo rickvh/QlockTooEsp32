@@ -15,7 +15,7 @@ class Animation : public App {
     void loop();
 
     vector<Image::Preset> frames;
-    shared_ptr<Image> currentFrame = NULL;
+    uint8_t currentFrame;
 
    public:
     enum class Preset {
