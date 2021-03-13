@@ -38,13 +38,13 @@ class Image : public App {
     void loop();
 
    public:
-    enum Preset {
-        ERROR,
-        WIFI1,
-        WIFI2,
-        WIFI3,
-        XMAS_TREE,
-        SNOWMAN
+    enum class Preset {
+        Error,
+        Wifi1,
+        Wifi2,
+        Wifi3,
+        XmasTree,
+        Snowman
     };
 
     Image();

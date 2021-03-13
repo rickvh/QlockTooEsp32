@@ -46,7 +46,7 @@ void runImportantStuffTask(void * parameter);
 
 TaskHandle_t currentAppTask = NULL;
 App* currentApp = NULL;
-qlocktoo::Mode currentMode = qlocktoo::UNKNOWN;
+qlocktoo::Mode currentMode = Mode::Unknown;
 
 /**
  * FreeRTOS stuff
@@ -125,7 +125,7 @@ void setupOTA() {
 
       // Unmount SPIFFS
       SPIFFS.end();
-      changeMode(qlocktoo::OTA_UPDATE);
+      changeMode(Mode::OTAinProgress);
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -141,7 +141,7 @@ void setupOTA() {
       else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
       else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
-      changeMode(qlocktoo::Mode::ERROR);
+      changeMode(Mode::Error);
       delay(5000);
     });
 
@@ -162,7 +162,7 @@ void processCmdRemoteDebug() {
   string const& cmd = tokens[index++];
   
   if (cmd == "swirl") {
-    changeMode(SWIRL);
+    changeMode(Mode::Swirl);
     debugI("* Mode set to SWIRL");
   } else if (cmd == "mem") {
     auto free = xPortGetFreeHeapSize();
@@ -174,23 +174,23 @@ void processCmdRemoteDebug() {
     }
 
     if (tokens[1] == "xmas") {
-      changeMode(XMAS);
+      changeMode(Mode::Xmas);
       debugI("* Image set to XMAS");
     } else if (tokens[1] == "snow") {
-      changeMode(SNOW);
+      changeMode(Mode::Snow);
       debugI("* Image set to SNOW");
     } else if (tokens[1] == "wifi") {
-      changeMode(OTA_UPDATE);
+      changeMode(Mode::OTAinProgress);
       debugI("* Image set to WIFI");
     } else {
       return;
     }
   }
   else if (cmd == "text") {
-    changeMode(TEXT);
+    changeMode(Mode::Text);
     debugI("* Mode set to TEXT");
   } else if (cmd == "clock") {
-    changeMode(CLOCK);
+    changeMode(Mode::Clock);
     debugI("* Mode set to CLOCK");
   } else if (cmd == "ls") {
     debugI("Partitions:");
@@ -226,7 +226,7 @@ void setupLogging() {
 
 }
 
-void changeMode(qlocktoo::Mode mode) {
+void changeMode(Mode mode) {
   if (currentMode == mode) {
     return;
   }
@@ -238,23 +238,23 @@ void changeMode(qlocktoo::Mode mode) {
   }
 
   switch (currentMode) {
-    case CLOCK:
+    case Mode::Clock:
       currentApp = new Clock(Debug);
       break;
-    case NO_WIFI:
-    case OTA_UPDATE:
-      currentApp = new Animation();
+    case Mode::WifiConnecting:
+      currentApp = new Animation(Animation::Preset::Wifi);
       break;
-    case XMAS:
-      currentApp = new Image(Image::Preset::XMAS_TREE);
+    case Mode::Xmas:
+      currentApp = new Image(Image::Preset::XmasTree);
       break;
-    case SNOW:
-      currentApp = new Image(Image::Preset::SNOWMAN);
+    case Mode::Snow:
+      currentApp = new Image(Image::Preset::Snowman);
       break;
-    case ERROR:
-      currentApp = new Image(Image::Preset::ERROR);
+    case Mode::WifiSetupNeeded:
+    case Mode::Error:
+      currentApp = new Image(Image::Preset::Error);
       break;
-    case SWIRL:
+    case Mode::Swirl:
       currentApp = new Swirl();
       break;
     default:
@@ -298,7 +298,7 @@ void setup() {
   xTaskCreatePinnedToCore(runImportantStuffTask, "OTA_and_Debug", 8192, NULL, 2, &currentAppTask, 0);
 
   // Start in Clock mode
-  changeMode(qlocktoo::CLOCK);
+  changeMode(Mode::Clock);
   xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 1);
 }
 
@@ -308,16 +308,13 @@ void loop() {
 
   Mode newMode;
   if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
-    debugI("We hebben een nieuwe mode!!!!");
-    Serial.printf("Queue data received: %u\r\n", newMode);
+    debugI("Mode changed");
     changeMode(newMode);
   }
 
   NetworkConfig networkConfig;
   if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
     debugI("Wifi settings updated");
-    Serial.println("MAIN::Wifi settings received from queue");
-
     Serial.printf("SSID: %s\n", (char*) networkConfig.ssid);
     Serial.printf("PWD: %s\n", (char*) networkConfig.password);
     Wifi.updateConfig(networkConfig);

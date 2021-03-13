@@ -50,7 +50,7 @@ class Clock : public App {
     };
 
    public:
-    Clock(RemoteDebug &debug) : App(Mode::CLOCK), Debug(debug) {};
+    Clock(RemoteDebug &debug) : App(Mode::Clock), Debug(debug) {};
     void setup();
     void loop();
     void applyConfig(ClockConfig *config);

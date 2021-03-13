@@ -84,7 +84,7 @@ void Webinterface::begin() {
                     debugD("HSV colorHour: %f, %f, %f\r\n", h, s, v);
 
                     Serial.println("/api/clock");
-                    auto newMode = Mode::CLOCK;
+                    auto newMode = Mode::Clock;
                     xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }
@@ -112,7 +112,7 @@ void Webinterface::begin() {
 
             if (request->url() == "/api/swirl") {
                 debugI("Mode set to SWIRL");
-                auto newMode = Mode::SWIRL;
+                auto newMode = Mode::Swirl;
                 xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }

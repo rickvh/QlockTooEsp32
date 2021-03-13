@@ -6,7 +6,7 @@ namespace qlocktoo {
 class App {
    private:
     bool initialized;
-    Mode app;
+    qlocktoo::Mode app;
 
    protected:
     App(Mode app) : initialized(false), app(app) {};

@@ -8,7 +8,7 @@
 namespace qlocktoo {
 class Swirl : public App {
    public:
-    Swirl() : App(Mode::SWIRL) {}
+    Swirl() : App(Mode::Swirl) {}
 
    private:
     void setup();
