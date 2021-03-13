@@ -38,6 +38,9 @@ void ConfigService::init() {
     } else {
         Serial.println("Config corrupt...Initializing defaults");
         CONFIG = Config();
+        strcpy(CONFIG.networkConfig.hostname, "qlocktoo");
+        strcpy(CONFIG.networkConfig.ssid, "");
+        strcpy(CONFIG.networkConfig.password, "");
     }
 
 // reset anyway, as we're still trying to fix some issues

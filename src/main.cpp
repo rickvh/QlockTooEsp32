@@ -275,6 +275,12 @@ void setup() {
     Serial.println("SPIFFS cannot be opened");
     debugE("SPIFFS cannot be opened");
   };
+
+  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
+  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
+  Serial.println("Queues created");
+
   Serial.println("setup persistable configuration");
   ConfigService::init();
   Serial.println("setup Wifi");
@@ -290,10 +296,7 @@ void setup() {
   Serial.println("setup Webinterface");
   webinterface.begin();
   
-  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
-  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
-  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
-  Serial.println("Queues created");
+  
 
   xTaskCreatePinnedToCore(runImportantStuffTask, "OTA_and_Debug", 8192, NULL, 2, &currentAppTask, 0);
 

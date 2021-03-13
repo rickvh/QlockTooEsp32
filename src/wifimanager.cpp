@@ -26,7 +26,9 @@ namespace qlocktoo {
         reconnectCount = 0;
         WiFi.mode(WIFI_MODE_STA);
         WiFi.enableSTA(true);
-        WiFi.begin((char*) config->ssid, (char*) config->password);
+        if (WiFi.begin((char*) config->ssid, (char*) config->password) == WL_CONNECT_FAILED) {
+            startAP();
+        };
     }
 
     void WifiManager::startAP() {
