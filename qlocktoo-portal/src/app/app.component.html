@@ -51,6 +51,10 @@
     <div class="card card-small" (click)="mode.value = 'draw'" tabindex="0">
       <span>Draw</span>
     </div>
+
+    <div class="card card-small" (click)="mode.value = 'network'" tabindex="0">
+      <span>Network</span>
+    </div>
   </div>
 
   <!-- Mode inclusion -->
@@ -59,6 +63,7 @@
       <p *ngSwitchCase="'clock'"><app-clock mode="digital"></app-clock></p>
       <p *ngSwitchCase="'swirl'"><app-swirl></app-swirl></p>
       <p *ngSwitchCase="'draw'"><app-draw></app-draw></p>
+      <p *ngSwitchCase="'network'"><app-network></app-network></p>
   </div>
 
   <!-- Footer -->

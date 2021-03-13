@@ -1,0 +1,30 @@
+<h1>Network configuration</h1>
+
+<form [formGroup]="form" (ngSubmit)="onFormSubmit()">
+  <p>
+    <mat-form-field appearance="standard">
+      <mat-label>Enter your SSID</mat-label>
+      <input matInput placeholder="mynetwork" formControlName="ssid" required>
+    </mat-form-field>
+  </p>
+  <p>
+    <mat-form-field appearance="standard">
+      <mat-label>Enter your password</mat-label>
+      <input matInput placeholder="secret1234" formControlName="password" required>
+    </mat-form-field>
+  </p>
+  <p>
+    <mat-form-field appearance="standard">
+      <mat-label>Enter Qlocktoo hostname</mat-label>
+      <input matInput placeholder="qlocktoo" formControlName="hostname" required>
+    </mat-form-field>
+  </p>
+
+  <button mat-flat-button
+    color="primary"
+    type="submit"
+    [disabled]="form.invalid || form.pending">
+    Submit
+  </button>
+
+</form>

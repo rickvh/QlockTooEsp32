@@ -91,16 +91,14 @@ void Webinterface::begin() {
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
 
-            if (request->url() == "/api/config") {
+            if (request->url() == "/api/network") {
                 StaticJsonDocument<512> jsonDoc;
-
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
-                    debugD("Updating system config");
+                    debugD("Updating network config");
                     NetworkConfig networkConfig;
-                    auto network = jsonDoc["network"];
-                    auto hostname = network[KEY_HOSTNAME].as<char*>();
-                    auto ssid = network[KEY_SSID].as<char*>();
-                    auto password = network[KEY_PASSWORD].as<char*>();
+                    auto hostname = jsonDoc[KEY_HOSTNAME].as<char*>();
+                    auto ssid = jsonDoc[KEY_SSID].as<char*>();
+                    auto password = jsonDoc[KEY_PASSWORD].as<char*>();
                     strcpy(networkConfig.hostname, hostname);
                     strcpy(networkConfig.ssid, ssid);
                     strcpy(networkConfig.password, password);
