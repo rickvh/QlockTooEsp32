@@ -29,7 +29,7 @@ void Webinterface::begin() {
     // API: Get current clock configuration
     server.on("/api/clock", HTTP_GET, [&](AsyncWebServerRequest *request) {
         debugD("Current clock config requested");
-        ClockConfig* config = &ConfigService::CONFIG.clockConfig;
+        auto config = &ConfigService::CONFIG.clockConfig;
         
         StaticJsonDocument<512> jsonDoc;
         auto colorItIs = jsonDoc.createNestedObject("colorItIs");
@@ -59,7 +59,7 @@ void Webinterface::begin() {
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     debugD("Updating clock config");
-                    ClockConfig* config = &ConfigService::CONFIG.clockConfig;
+                    auto config = &ConfigService::CONFIG.clockConfig;
                     float h, s, v;
 
                     auto color = jsonDoc["colorItIs"];
@@ -84,7 +84,7 @@ void Webinterface::begin() {
                     debugD("HSV colorHour: %f, %f, %f\r\n", h, s, v);
 
                     Serial.println("/api/clock");
-                    Mode newMode = Mode::CLOCK;
+                    auto newMode = Mode::CLOCK;
                     xQueueSend(xChangeAppQueue, &newMode, 0);
                     xQueueSend(xClockConfigQueue, &config, 0);
                 }
@@ -97,13 +97,13 @@ void Webinterface::begin() {
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     debugD("Updating system config");
                     NetworkConfig networkConfig;
-                    string ssid, password;
-
                     auto network = jsonDoc["network"];
-                    networkConfig.hostname = network[KEY_HOSTNAME].as<String>().c_str();
-                    networkConfig.ssid = network[KEY_SSID].as<String>().c_str();
-                    networkConfig.password = network[KEY_PASSWORD].as<String>().c_str();
-
+                    auto hostname = network[KEY_HOSTNAME].as<char*>();
+                    auto ssid = network[KEY_SSID].as<char*>();
+                    auto password = network[KEY_PASSWORD].as<char*>();
+                    strcpy(networkConfig.hostname, hostname);
+                    strcpy(networkConfig.ssid, ssid);
+                    strcpy(networkConfig.password, password);
                     xQueueSend(xWifiConfigChangedQueue, &networkConfig, 0);
                 }
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -112,7 +112,8 @@ void Webinterface::begin() {
 
             if (request->url() == "/api/swirl") {
                 debugI("Mode set to SWIRL");
-                xQueueSend(xChangeAppQueue, (void *) Mode::SWIRL, 0);
+                auto newMode = Mode::SWIRL;
+                xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
         }

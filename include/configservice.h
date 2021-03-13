@@ -12,9 +12,9 @@ typedef struct {
 } ClockConfig;
 
 typedef struct {
-    string hostname;
-    string ssid;
-    string password;
+    char hostname[32];
+    char ssid[32];
+    char password[64];
 } NetworkConfig;
 
 typedef struct {

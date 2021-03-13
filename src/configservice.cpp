@@ -39,14 +39,18 @@ void ConfigService::init() {
         Serial.println("Config corrupt...Initializing defaults");
         CONFIG = Config();
     }
-    configfile.close();
+
+// reset anyway, as we're still trying to fix some issues
+// CONFIG = Config();
+
+    // configfile.close();
     printConfig();
 }
 
 void ConfigService::printConfig() {
     Serial.println("Configuration:");
-    Serial.printf("- Hostname: %s\n", CONFIG.networkConfig.hostname.c_str());
-    Serial.printf("- AP SSID: %s\n", CONFIG.networkConfig.ssid.c_str());
-    Serial.printf("- AP password: %s\n", CONFIG.networkConfig.password.c_str());
+    Serial.printf("- Hostname: %s\n", (char*) CONFIG.networkConfig.hostname);
+    Serial.printf("- AP SSID: %s\n", (char*) CONFIG.networkConfig.ssid);
+    Serial.printf("- AP password: %s\n", (char*) CONFIG.networkConfig.password);
 }
 }

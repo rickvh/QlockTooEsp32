@@ -12,6 +12,7 @@ namespace qlocktoo {
             const char* AP_PASSWORD = "qlocktoo";
             
             wifi_event_id_t wm_event_id;
+            uint8_t reconnectCount;
             void WiFiEvent(WiFiEvent_t event, system_event_info_t info);
             void connectToWifi();
 

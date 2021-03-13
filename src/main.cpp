@@ -316,10 +316,12 @@ void loop() {
   NetworkConfig networkConfig;
   if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
     debugI("Wifi settings updated");
+    Serial.println("MAIN::Wifi settings received from queue");
+
+    Serial.printf("SSID: %s\n", (char*) networkConfig.ssid);
+    Serial.printf("PWD: %s\n", (char*) networkConfig.password);
     Wifi.updateConfig(networkConfig);
   }
-
-  Serial.println("New clockconfig received from queue");
 };
 
 void runImportantStuffTask(void * parameter) {

@@ -7,17 +7,18 @@
 namespace qlocktoo {
     const String TAG = "WIFI::";
     WifiManager::WifiManager() {
-        WiFi.removeEvent(wm_event_id);
     }
 
     WifiManager::~WifiManager() {
+        WiFi.removeEvent(wm_event_id);
     }
 
 
     void WifiManager::begin() {
         using namespace std::placeholders;
+        WiFi.disconnect(true);
+        delay(1000);
         WiFi.onEvent(std::bind(&WifiManager::WiFiEvent, this, _1, _2));
-
         connectToWifi();
     }
 
@@ -25,31 +26,35 @@ namespace qlocktoo {
         // Check if there's some valid configuration
         NetworkConfig* config = &ConfigService::CONFIG.networkConfig;
 
-        if (!config) {
-            Serial.println(TAG + "config is NULL");
+        // if (strlen(config->ssid.empty() || config->password.empty()) {
+        //     Serial.println(TAG + "No config found");
+        //     startAP();
+        //     return;
+        // }
+        // startAP();
+
+        // Serial.printf("testvalue: %u\n", config->corruptme);
+        // Serial.printf("SSID: %s\n", (char*) config->ssid);
+        // Serial.printf("password: %s\n", (char*) config->password);
+        Serial.printf("%sConnecting to previously stored Wifi-network: %s\n", TAG.c_str(), (char*) config->ssid);
+        if (WiFi.begin((char*) config->ssid, (char*) config->password) == WL_CONNECT_FAILED) {
+            // startAP();
         }
-
-        if (config->ssid.empty() || config->password.empty()) {
-            Serial.println(TAG + "No config found");
-            startAP();
-            return;
-        }
-
-        Serial.printf("SSID: %s\n", config->ssid.c_str());
-        Serial.printf("password: %s\n", config->password.c_str());
-
-        Serial.println(TAG + "Connecting to AP");
-        WiFi.begin(config->ssid.c_str(), config->password.c_str());
     }
 
     void WifiManager::startAP() {
         Serial.println(TAG + "Starting AP");
-        WiFi.enableSTA(false);
+        WiFi.mode(WIFI_MODE_AP);
+        delay(5000);
         WiFi.enableAP(true);
-        delay(100);
         const IPAddress ip(192, 168, 1, 1);
         const IPAddress subnet(255, 255, 255, 0);
         WiFi.softAPConfig(ip, ip, subnet);
+        WiFi.softAP(AP_SSID, AP_PASSWORD);
+
+
+        Serial.println("===");
+        delay(5000);
         WiFi.softAP(AP_SSID, AP_PASSWORD);
     }
 
@@ -57,9 +62,8 @@ namespace qlocktoo {
         NetworkConfig* currentConfig = &ConfigService::CONFIG.networkConfig;
         if (config.ssid != currentConfig->ssid || config.password != currentConfig->password) {
             Serial.println("Wifi settings changed");
-
-            currentConfig->ssid = config.ssid;
-            currentConfig->password = config.password;
+            strcpy(currentConfig->ssid, config.ssid);
+            strcpy(currentConfig->password, config.password);
             ConfigService::save();
             connectToWifi();
         } else {
@@ -68,21 +72,29 @@ namespace qlocktoo {
     }
 
     void WifiManager::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
-        
+
         switch (event) {
             case SYSTEM_EVENT_STA_DISCONNECTED:
                 Serial.println(TAG + "STA Disconnected: " + info.disconnected.reason);
-                startAP();
+                reconnectCount++;
+                Serial.printf("Retry (%u/10)\n", reconnectCount);
+                    // WiFi.reconnect();
+                // } else {
+                    // WiFi.enableSTA(false);
+                if (reconnectCount == 10) {
+                    startAP();
+                }
                 break;
             case SYSTEM_EVENT_STA_CONNECTED:
                 Serial.println(TAG + "STA Connected");
-                // WiFi.enableAP(false);
+                reconnectCount = 0;
                 break;
             case SYSTEM_EVENT_WIFI_READY:
                 Serial.println(TAG + "ready");
                 break;
             case SYSTEM_EVENT_STA_GOT_IP:
-                Serial.println(TAG + "STA Got IP");
+                Serial.println(TAG + "STA Got IP: " + WiFi.localIP().toString());
+                WiFi.enableAP(false);
                 break;
             case SYSTEM_EVENT_STA_START:
                 Serial.println(TAG + "STA Start");
