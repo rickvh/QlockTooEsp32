@@ -23,7 +23,7 @@ class Clock : public App {
     struct tm currentTime;
     uint8_t timeBrightness();
     void setColor(const std::vector<int> leds, HsbColor color);
-    void handleConfigQueue();
+    // void handleConfigQueue();
     const std::vector<std::vector<int>> ledsbyword = {
         {0, 37, 38, 36, 39},        // HET IS
         {17, 19, 54},               // een
@@ -53,7 +53,7 @@ class Clock : public App {
     Clock(RemoteDebug &debug) : App(Mode::Clock), Debug(debug) {};
     void setup();
     void loop();
-    void applyConfig(ClockConfig *config);
+    // void applyConfig(ClockConfig *config);
     //~Clock();
 };
 }

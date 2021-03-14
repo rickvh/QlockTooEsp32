@@ -242,6 +242,7 @@ void changeMode(Mode mode) {
       currentApp = new Clock(Debug);
       break;
     case Mode::WifiConnecting:
+    case Mode::OTAinProgress:
       currentApp = new Animation(Animation::Preset::Wifi);
       break;
     case Mode::Xmas:

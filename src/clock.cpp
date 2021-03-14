@@ -39,11 +39,11 @@ namespace qlocktoo {
 void Clock::setup() {
     debugI("Clock setup");
 
-    ClockConfig* config = &ConfigService::CONFIG.clockConfig;
+    config = &ConfigService::CONFIG.clockConfig;
     // config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
     // config.colorWords = HsbColor(0.3f, 1.0f, 1.0f);
     // config.colorHour = HsbColor(0.6f, 1.0f, 1.0f);
-    applyConfig(config);
+    // applyConfig(config);
 
     Display::begin();
     Display::clear();
@@ -53,20 +53,20 @@ void Clock::setup() {
     // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
-void Clock::applyConfig(ClockConfig *config) {
-    this->config = config;
-}
+// void Clock::applyConfig(ClockConfig *config) {
+    // this->config = config;
+// }
 
 // TODO: config is static geworden, dus niet meer meegeven in queueu
-void Clock::handleConfigQueue() {
-    ClockConfig config;
-    if (xQueueReceive(xClockConfigQueue, &config, 0) == pdFALSE) {
-        return;
-    }
+// void Clock::handleConfigQueue() {
+    // ClockConfig config;
+    // if (xQueueReceive(xClockConfigQueue, &config, 0) == pdFALSE) {
+        // return;
+    // }
 
-    Serial.println("New clockconfig received from queue");
-    applyConfig(&config);
-}
+    // Serial.println("New clockconfig received from queue");
+    // applyConfig(&config);
+// }
 
 void Clock::loop() {
     if (!getLocalTime(&this->currentTime)) {
@@ -74,7 +74,7 @@ void Clock::loop() {
         return;
     }
 
-    handleConfigQueue();
+    // handleConfigQueue();
 
     uint8_t hour = currentTime.tm_hour;
     uint8_t minute = currentTime.tm_min;

@@ -8,6 +8,7 @@ Animation::Animation(Preset preset) : App(Mode::Animation) {
             frames.push_back(Image::Preset::Wifi1);
             frames.push_back(Image::Preset::Wifi2);
             frames.push_back(Image::Preset::Wifi3);
+            frames.push_back(Image::Preset::Error);
         break;
     }
 }
