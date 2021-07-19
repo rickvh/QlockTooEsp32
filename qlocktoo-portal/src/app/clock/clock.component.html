@@ -7,7 +7,7 @@
         Het is
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <app-colorpicker [(color)]=config.colorItIs (colorChanged)=onColorChanged()></app-colorpicker>
+    <app-colorpicker [(color)]="config.colorItIs" (colorChanged)=onColorChanged()></app-colorpicker>
   </mat-expansion-panel>
 
   <mat-expansion-panel>
@@ -16,7 +16,7 @@
         Vijf/tien/kwart/voor/over/half
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <app-colorpicker [(color)]=config.colorWords (colorChanged)=onColorChanged()></app-colorpicker>
+    <app-colorpicker [(color)]="config.colorWords" (colorChanged)=onColorChanged()></app-colorpicker>
   </mat-expansion-panel>
 
   <mat-expansion-panel>
@@ -25,7 +25,7 @@
         Uur van de dag
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <app-colorpicker [(color)]=config.colorHour (colorChanged)=onColorChanged()></app-colorpicker>
+    <app-colorpicker [(color)]="config.colorHour" (colorChanged)=onColorChanged()></app-colorpicker>
   </mat-expansion-panel>
 
   <mat-expansion-panel>

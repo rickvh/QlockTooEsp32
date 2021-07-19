@@ -31,7 +31,7 @@ void Webinterface::begin() {
         debugD("Current clock config requested");
         auto config = &ConfigService::CONFIG.clockConfig;
         
-        StaticJsonDocument<512> jsonDoc;
+        StaticJsonDocument<256> jsonDoc;
         auto colorItIs = jsonDoc.createNestedObject("colorItIs");
         auto colorWords = jsonDoc.createNestedObject("colorWords");
         auto colorHour = jsonDoc.createNestedObject("colorHour");
@@ -51,11 +51,27 @@ void Webinterface::begin() {
     }
     );
 
+        // API: Get current network configuration
+    server.on("/api/network", HTTP_GET, [&](AsyncWebServerRequest *request) {
+        debugD("Current network config requested");
+        auto config = &ConfigService::CONFIG.networkConfig;
+        
+        StaticJsonDocument<256> jsonDoc;
+        jsonDoc[KEY_HOSTNAME] = config->hostname;
+        jsonDoc[KEY_SSID] = config->ssid;
+        jsonDoc[KEY_WIFI_CONNECTED] = ConfigService::connectedToWifi;
+        
+        String response;
+        serializeJsonPretty(jsonDoc, response);
+        request->send(200, "application/json", response);
+    }
+    );
+
     server.onRequestBody(
         [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
             // API: Get current clock configuration
             if (request->url() == "/api/clock") {
-                StaticJsonDocument<512> jsonDoc;
+                StaticJsonDocument<256> jsonDoc;
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     debugD("Updating clock config");
@@ -92,16 +108,13 @@ void Webinterface::begin() {
             }
 
             if (request->url() == "/api/network") {
-                StaticJsonDocument<512> jsonDoc;
+                StaticJsonDocument<256> jsonDoc;
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     debugD("Updating network config");
                     NetworkConfig networkConfig;
-                    auto hostname = jsonDoc[KEY_HOSTNAME].as<char*>();
-                    auto ssid = jsonDoc[KEY_SSID].as<char*>();
-                    auto password = jsonDoc[KEY_PASSWORD].as<char*>();
-                    strcpy(networkConfig.hostname, hostname);
-                    strcpy(networkConfig.ssid, ssid);
-                    strcpy(networkConfig.password, password);
+                    strlcpy(networkConfig.hostname, jsonDoc[KEY_HOSTNAME] | "", sizeof(networkConfig.hostname));
+                    strlcpy(networkConfig.ssid, jsonDoc[KEY_SSID] | "", sizeof(networkConfig.ssid));
+                    strlcpy(networkConfig.password, jsonDoc[KEY_PASSWORD] | "", sizeof(networkConfig.password));
                     xQueueSend(xWifiConfigChangedQueue, &networkConfig, 0);
                 }
                 request->send(200, "application/json", "{ \"status\": \"success\" }");

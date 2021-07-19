@@ -14,29 +14,30 @@ export class NetworkComponent implements OnInit {
   public readonly form: FormGroup;
 
   onFormSubmit(): void {
-    console.log('SSID:' + this.form.get('ssid')!!.value);
-    console.log('PWD:' + this.form.get('password')!!.value);
-    this.form.getRawValue();
     let config = this.form.getRawValue();
     this.networkService.saveConfig(config);
+    this.form.markAsPristine();
   }
 
   constructor(private readonly formBuilder: FormBuilder, private networkService: NetworkService) {
     this.form = this.formBuilder.group({
       ssid: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required]),
+      password: new FormControl(),
       hostname: new FormControl('', [Validators.required])
     });
-    this.config = networkService.getConfig();
-    this.form.patchValue(this.config);
+    this.config = {
+      hostname: '',
+      ssid: '',
+      password: '',
+      connectedToWifi: true
+    };
   }
 
   ngOnInit(): void {
-    this.submitToClock();
-  }
-
-  onColorChanged(): void {
-    this.submitToClock();
+    this.networkService.getConfig().subscribe((config) => {
+      this.config = config;
+      this.form.patchValue(this.config);
+    });
   }
 
   private submitToClock() {

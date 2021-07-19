@@ -12,7 +12,8 @@ export class ClockComponent implements OnInit {
   config: ClockConfig;
 
   constructor(private clockService: ClockService) {
-    this.config = clockService.getConfig();
+    this.config = this.clockService.getDefault();
+    clockService.getConfig().subscribe((config) => this.config = config);
   }
 
   ngOnInit(): void {
@@ -24,6 +25,8 @@ export class ClockComponent implements OnInit {
   }
 
   private submitToClock() {
-    this.clockService.saveConfig(this.config);
+    if (this.config) {
+      this.clockService.saveConfig(this.config);
+    }
   }
 }

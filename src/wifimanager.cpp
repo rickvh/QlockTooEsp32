@@ -45,7 +45,12 @@ namespace qlocktoo {
 
     void WifiManager::updateConfig(NetworkConfig &config) {
         NetworkConfig* currentConfig = &ConfigService::CONFIG.networkConfig;
-        if (config.ssid != currentConfig->ssid || config.password != currentConfig->password) {
+        if (config.hostname != currentConfig->hostname) {
+            Serial.println("Hostname changed");
+            strcpy(currentConfig->hostname, config.hostname);
+            ConfigService::save();
+        }
+        if (config.ssid != currentConfig->ssid || (strlen(config.password) > 0 && config.password != currentConfig->password)) {
             Serial.println("Wifi settings changed");
             strcpy(currentConfig->ssid, config.ssid);
             strcpy(currentConfig->password, config.password);
@@ -60,6 +65,7 @@ namespace qlocktoo {
         switch (event) {
             case SYSTEM_EVENT_STA_DISCONNECTED:
                 Serial.println(TAG + "STA Disconnected: " + info.disconnected.reason);
+                ConfigService::connectedToWifi = false;
                 reconnectCount++;
                 Serial.printf("Retry (%u/10)\n", reconnectCount);
                 WiFi.reconnect();
@@ -72,6 +78,7 @@ namespace qlocktoo {
                 break;
             case SYSTEM_EVENT_STA_CONNECTED:
                 Serial.println(TAG + "STA Connected");
+                ConfigService::connectedToWifi = true;
                 reconnectCount = 0;
                 showClock();
                 break;

@@ -3,6 +3,7 @@
 
 namespace qlocktoo {
 Config ConfigService::CONFIG;
+bool ConfigService::connectedToWifi;
 
 void ConfigService::save() {
     File configfile = SPIFFS.open(CONFIGFILE, "w");

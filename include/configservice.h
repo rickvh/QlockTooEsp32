@@ -15,6 +15,7 @@ typedef struct {
     char hostname[32];
     char ssid[32];
     char password[64];
+    bool connectedToWifi;
 } NetworkConfig;
 
 typedef struct {
@@ -31,6 +32,7 @@ class ConfigService {
     public:
         // Holds the configuration of QlockToo. Configuration is loaded upon class initialisation.
         static Config CONFIG;
+        static bool connectedToWifi;
         static void save();
         static void init();
 };

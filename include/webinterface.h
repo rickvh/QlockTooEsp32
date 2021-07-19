@@ -20,6 +20,7 @@ class Webinterface {
     const char *KEY_HOSTNAME = "hostname";
     const char *KEY_SSID = "ssid";
     const char *KEY_PASSWORD = "password";
+    const char *KEY_WIFI_CONNECTED = "connectedToWifi";
 
     RemoteDebug &Debug;
     AsyncWebServer server;

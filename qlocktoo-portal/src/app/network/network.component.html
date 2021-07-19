@@ -10,7 +10,7 @@
   <p>
     <mat-form-field appearance="standard">
       <mat-label>Enter your password</mat-label>
-      <input matInput placeholder="secret1234" formControlName="password" required>
+      <input matInput placeholder="secret1234" formControlName="password">
     </mat-form-field>
   </p>
   <p>
@@ -23,7 +23,7 @@
   <button mat-flat-button
     color="primary"
     type="submit"
-    [disabled]="form.invalid || form.pending">
+    [disabled]="form.invalid || form.pending || form.pristine">
     Submit
   </button>
 

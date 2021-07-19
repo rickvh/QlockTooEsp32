@@ -1,27 +1,24 @@
-import { ApiService } from '../core/api-service.service';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Constants } from '../config/constants';
 import { NetworkConfig } from './network.config';
+import { Observable, EMPTY } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NetworkService extends ApiService {
-
-  constructor(http: HttpClient, settings: Constants) {
-    super(http, settings);
+export class NetworkService {
+  constructor(private http: HttpClient) {
   }
 
-  public getConfig(): NetworkConfig {
+  public getConfig(): Observable<NetworkConfig> {
     console.info('get config from Qlock');
-    return {
-      hostname: '',
-      ssid: '',
-      password: ''
-    }
 
-    // return this.get('clock', {}).;
+    return this.http.get<NetworkConfig>('/api/network', {}).pipe(
+      map((data: NetworkConfig) => {
+        console.log('networkconfig from Qlock received');
+        return data;
+      }));
   }
 
   public saveConfig(config: NetworkConfig) {
@@ -29,6 +26,11 @@ export class NetworkService extends ApiService {
     console.log(config.hostname);
     console.log(config.ssid);
 
-    this.post('network', config);
+    this.http.post('/api/network', config).subscribe(data => {
+      console.log(data);
+    },
+    error => {
+      console.log(error);
+    });
   }
 }
