@@ -1,5 +1,5 @@
 // AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
-
+//
 // PIO Unified Debugger
 //
 // Documentation: https://docs.platformio.org/page/plus/debugging.html
@@ -12,22 +12,22 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "/Users/richal/projects/QlockToo/.pio/build/live/firmware.elf",
-            "projectEnvName": "live",
-            "toolchainBinDir": "/Users/richal/.platformio/packages/toolchain-xtensa32/bin",
+            "executable": "/Users/richal/projects/QlockToo/.pio/build/usb/firmware.elf",
+            "projectEnvName": "usb",
+            "toolchainBinDir": "/Users/richal/.platformio/packages/toolchain-xtensa32@2.50200.80/bin",
+            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug (live)"
-            },
-            "internalConsoleOptions": "openOnSessionStart"
+                "task": "Pre-Debug (usb)"
+            }
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "/Users/richal/projects/QlockToo/.pio/build/live/firmware.elf",
-            "projectEnvName": "live",
-            "toolchainBinDir": "/Users/richal/.platformio/packages/toolchain-xtensa32/bin",
+            "executable": "/Users/richal/projects/QlockToo/.pio/build/usb/firmware.elf",
+            "projectEnvName": "usb",
+            "toolchainBinDir": "/Users/richal/.platformio/packages/toolchain-xtensa32@2.50200.80/bin",
             "internalConsoleOptions": "openOnSessionStart"
         }
     ]

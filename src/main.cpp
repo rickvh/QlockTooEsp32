@@ -34,7 +34,7 @@
 #include "animation.h"
 
 #include <SPIFFS.h>
-#include "wifipassword.h"
+// #include "wifipassword.h"
 
 
 #define NTP_TIMEOUT 1500
