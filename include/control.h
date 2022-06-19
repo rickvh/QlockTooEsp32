@@ -13,7 +13,7 @@ enum class Mode {
     
     // actual modes
     WifiConnecting,
-    WifiSetupNeeded,
+    WifiSetupRequired,
     OTAinProgress,
     Clock,
     Swirl,

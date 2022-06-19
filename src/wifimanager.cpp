@@ -16,7 +16,7 @@ namespace qlocktoo {
         using namespace std::placeholders;
         WiFi.disconnect(true); // for stability
         delay(1000);
-        WiFi.onEvent(std::bind(&WifiManager::WiFiEvent, this, _1, _2));
+        WiFi.onEvent(std::bind(&WifiManager::WiFiEvent, this, _1));
         connectToWifi();
     }
 
@@ -61,35 +61,35 @@ namespace qlocktoo {
         }
     }
 
-    void WifiManager::WiFiEvent(WiFiEvent_t event, system_event_info_t info) {
+    void WifiManager::WiFiEvent(arduino_event_id_t event) {
         switch (event) {
-            case SYSTEM_EVENT_STA_DISCONNECTED:
-                Serial.println(TAG + "STA Disconnected: " + info.disconnected.reason);
+            case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+                Serial.println(TAG + "STA Disconnected: ");// + info.disconnected.reason);
                 ConfigService::connectedToWifi = false;
                 reconnectCount++;
                 Serial.printf("Retry (%u/10)\n", reconnectCount);
                 WiFi.reconnect();
                 if (reconnectCount == 10) {
                     startAP();
-                    showSetupNeeded();
+                    showSetupRequired();
                 } else {
                     showWifiAnimation();
                 }
                 break;
-            case SYSTEM_EVENT_STA_CONNECTED:
+            case ARDUINO_EVENT_WIFI_STA_CONNECTED:
                 Serial.println(TAG + "STA Connected");
                 ConfigService::connectedToWifi = true;
                 reconnectCount = 0;
                 showClock();
                 break;
-            case SYSTEM_EVENT_WIFI_READY:
+            case ARDUINO_EVENT_WIFI_READY:
                 Serial.println(TAG + "ready");
                 break;
-            case SYSTEM_EVENT_STA_GOT_IP:
+            case ARDUINO_EVENT_WIFI_STA_GOT_IP:
                 Serial.println(TAG + "STA Got IP: " + WiFi.localIP().toString());
                 WiFi.enableAP(false);
                 break;
-            case SYSTEM_EVENT_STA_START:
+            case ARDUINO_EVENT_WIFI_STA_START:
                 Serial.println(TAG + "STA Start");
                 break;
             default:
@@ -103,8 +103,8 @@ namespace qlocktoo {
         xQueueSend(xChangeAppQueue, &newMode, 0);
     }
 
-    void WifiManager::showSetupNeeded() {
-        auto newMode = Mode::WifiSetupNeeded;
+    void WifiManager::showSetupRequired() {
+        auto newMode = Mode::WifiSetupRequired;
         xQueueSend(xChangeAppQueue, &newMode, 0);
     }
 

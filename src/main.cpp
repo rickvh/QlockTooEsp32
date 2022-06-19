@@ -251,7 +251,7 @@ void changeMode(Mode mode) {
     case Mode::Snow:
       currentApp = new Image(Image::Preset::Snowman);
       break;
-    case Mode::WifiSetupNeeded:
+    case Mode::WifiSetupRequired:
     case Mode::Error:
       currentApp = new Image(Image::Preset::Error);
       break;

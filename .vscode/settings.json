@@ -44,6 +44,12 @@
         "typeinfo": "cpp",
         "regex": "cpp",
         "bitset": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "atomic": "cpp",
+        "iterator": "cpp",
+        "map": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "string_view": "cpp"
     }
 }

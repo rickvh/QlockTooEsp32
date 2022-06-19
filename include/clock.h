@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "RemoteDebugger.h"
 #include "app.h"
 #include "display.h"
