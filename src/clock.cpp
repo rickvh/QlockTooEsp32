@@ -1,8 +1,8 @@
 #include "clock.h"
 #include <vector>
 #include <WiFi.h>
-#include "RemoteDebugger.h"
 #include "time.h"
+#include "configservice.h"
 
 #define NTP_TIMEOUT 1500
 
@@ -34,19 +34,15 @@
 #define VOOR2 20
 #define OVER2 21
 
-#define PIEK 0
-#define BOOM 1
-#define STAM 2
-
 namespace qlocktoo {
 void Clock::setup() {
-    debugI("Clock setup");
+    Serial.println("Clock setup");
 
-    ClockConfig config;
-    config.colorItIs = RgbwColor(0, 0, 255, 0);
-    config.colorWords = RgbwColor(0, 200, 0, 0);
-    config.colorHour = RgbwColor(255, 0, 0, 0);
-    applyConfig(config);
+    config = &ConfigService::CONFIG.clockConfig;
+    // config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
+    // config.colorWords = HsbColor(0.3f, 1.0f, 1.0f);
+    // config.colorHour = HsbColor(0.6f, 1.0f, 1.0f);
+    // applyConfig(config);
 
     Display::begin();
     Display::clear();
@@ -56,27 +52,28 @@ void Clock::setup() {
     // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
 
-void Clock::applyConfig(ClockConfig config) {
-    this->config = config;
-}
+// void Clock::applyConfig(ClockConfig *config) {
+    // this->config = config;
+// }
 
-void Clock::handleConfigQueue() {
-    ClockConfig config;
-    if (xQueueReceive(xClockConfigQueue, &config, 0) == pdFALSE) {
-        return;
-    }
+// TODO: config is static geworden, dus niet meer meegeven in queueu
+// void Clock::handleConfigQueue() {
+    // ClockConfig config;
+    // if (xQueueReceive(xClockConfigQueue, &config, 0) == pdFALSE) {
+        // return;
+    // }
 
-    Serial.println("New clockconfig received from queue");
-    applyConfig(config);
-}
+    // Serial.println("New clockconfig received from queue");
+    // applyConfig(&config);
+// }
 
 void Clock::loop() {
     if (!getLocalTime(&this->currentTime)) {
-        debugD("Failed to obtain time");
+        Serial.println("Failed to obtain time");
         return;
     }
 
-    handleConfigQueue();
+    // handleConfigQueue();
 
     uint8_t hour = currentTime.tm_hour;
     uint8_t minute = currentTime.tm_min;
@@ -92,69 +89,69 @@ void Clock::loop() {
 
     Display::clear();
 
-    setColor(ledsbyword[HETIS], config.colorItIs);
+    setColor(ledsbyword[HETIS], config->colorItIs);
     switch ((minute % 60) / 5) {
         case 0:
-            setColor(ledsbyword[current_hourword], config.colorHour);
-            setColor(ledsbyword[UUR], config.colorWords);
+            setColor(ledsbyword[current_hourword], config->colorHour);
+            setColor(ledsbyword[UUR], config->colorWords);
             break;
         case 1:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsbyword[VIJF], config->colorWords);
+            setColor(ledsbyword[OVER1], config->colorWords);
+            setColor(ledsbyword[current_hourword], config->colorHour);
             break;
         case 2:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[OVER2], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsbyword[TIEN], config->colorWords);
+            setColor(ledsbyword[OVER2], config->colorWords);
+            setColor(ledsbyword[current_hourword], config->colorHour);
             break;
         case 3:
-            setColor(ledsbyword[KWART], config.colorWords);
-            setColor(ledsbyword[OVER2], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsbyword[KWART], config->colorWords);
+            setColor(ledsbyword[OVER2], config->colorWords);
+            setColor(ledsbyword[current_hourword], config->colorHour);
             break;
         case 4:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[TIEN], config->colorWords);
+            setColor(ledsbyword[VOOR1], config->colorWords);
+            setColor(ledsbyword[HALF], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 5:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[VIJF], config->colorWords);
+            setColor(ledsbyword[VOOR1], config->colorWords);
+            setColor(ledsbyword[HALF], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 6:
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[HALF], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 7:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[VIJF], config->colorWords);
+            setColor(ledsbyword[OVER1], config->colorWords);
+            setColor(ledsbyword[HALF], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 8:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[TIEN], config->colorWords);
+            setColor(ledsbyword[OVER1], config->colorWords);
+            setColor(ledsbyword[HALF], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 9:
-            setColor(ledsbyword[KWART], config.colorWords);
-            setColor(ledsbyword[VOOR2], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[KWART], config->colorWords);
+            setColor(ledsbyword[VOOR2], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 10:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[TIEN], config->colorWords);
+            setColor(ledsbyword[VOOR1], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
         case 11:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[VOOR2], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsbyword[VIJF], config->colorWords);
+            setColor(ledsbyword[VOOR2], config->colorWords);
+            setColor(ledsbyword[next_hourword], config->colorHour);
             break;
     }
 
@@ -182,9 +179,7 @@ uint8_t Clock::timeBrightness() {
     return 0;
 }
 
-void Clock::setColor(const std::vector<int> leds, NeoGrbwFeature::ColorObject color) {
-    uint8_t brightness = timeBrightness();
-
+void Clock::setColor(const std::vector<int> leds, HsbColor color) {
     for (uint8_t led : leds) {
         Display::drawPixel(led, color);
     }

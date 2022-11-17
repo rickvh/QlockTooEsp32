@@ -1,30 +1,20 @@
-#define VERSION         "0.2"
-
-// #define CONFIG_FREERTOS_USE_TRACE_FACILITY              1
-// #define CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS  1
-
 #define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
 
 //#define DEBUG_DISABLED // uncomment for production release
 #define WEBSOCKET_DISABLED // disbale logging via websockets
-// #include "utils/split.h"
 
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <WiFiClient.h>
-#include <RemoteDebugger.h> 
 #include <string>
 #include <utility>
 #include "utils/stringutils.h"
 #include "nvs_flash.h"
 #include "nvs.h"
-
-#include <WiFi.h>
-#include <WiFiClient.h>
+#include "wifimanager.h"
 #include <DNSServer.h>
 #include "ESPmDNS.h"
-// #include <WiFiUdp.h>
 #include "control.h"
 #include "webinterface.h"
 #include "swirl.h"
@@ -32,23 +22,19 @@
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
-
+#include "buildinformation.h"
 #include <SPIFFS.h>
-// #include "wifipassword.h"
 
-
-#define NTP_TIMEOUT 1500
 
 using namespace qlocktoo;
 using namespace std;
 
-const char* build_str = "Version: " VERSION " " __DATE__ " " __TIME__;
 const uint8_t   timeZone        = 1;     // Central European Time
 int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
 
-RemoteDebug Debug;
-Webinterface webinterface(80, Debug);
+WifiManager Wifi;
+Webinterface webinterface(80);
 
 void changeMode(qlocktoo::Mode mode);
 void listPartitions();
@@ -58,40 +44,56 @@ void runImportantStuffTask(void * parameter);
 
 TaskHandle_t currentAppTask = NULL;
 App* currentApp = NULL;
-qlocktoo::Mode currentMode = qlocktoo::NOT_SET;
+qlocktoo::Mode currentMode = Mode::Unknown;
 
 /**
  * FreeRTOS stuff
  */
 QueueHandle_t xChangeAppQueue = NULL;
+QueueHandle_t xWifiConfigChangedQueue = NULL;
 QueueHandle_t xClockConfigQueue = NULL;
 
 
 void setupWifi() {
-  debugI("Connecting to Wifi...");
   Serial.println("Connecting to Wifi...");
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
+  // Serial.println("Connecting to Wifi...");
+  // WiFi.mode(WIFI_STA);
+  // WiFi.begin(ssid, password);
+  
+  // set mode to CONNECTING_WIFI
+  // check if wifi config availiable
+  // yes: start connecting
 
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    debugE("Connection Failed! Rebooting...");
-    delay(5000);
-    ESP.restart();
-  }
-  debugI("Wifi connected");
-  Serial.print("Wifi connected: ");
-  Serial.println(WiFi.localIP());
+  // listeners
+  //  - wifi connected: set mode TO CLOCK
+  //  - wifi lost / failed: set mode NO_WIFI
 
+  // start AP
+  // - wifi config received:
+  //   - stop AP
+  //   - setupWifi()
+
+  // WiFi.printDiag(Serial);
+  // WiFi.onEvent(std::bind(&WiFiManager::WiFiEvent,this,_1,_2));
+
+
+  // while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    // debugE("Connection Failed! Rebooting...");
+    // delay(5000);
+    // ESP.restart();
+  // }
+
+  Wifi.begin();
+  Serial.printf("Wifi connected: %s\n", WiFi.localIP());
 
   #if defined USE_MDNS && defined HOST_NAME
 	if (MDNS.begin(HOST_NAME)) {
-		debugI("* MDNS responder started. Hostname -> ");
-		debugI(HOST_NAME);
+		Serial.printf("* MDNS responder started. Hostname -> ", HOST_NAME);
     MDNS.addService("http", "tcp", 80);
     MDNS.addService("telnet", "tcp", 23);
 	}
   #else
-  debugI("mDNS disabled");
+  Serial.println("mDNS disabled");
   #endif
 }
 
@@ -116,7 +118,7 @@ void setupOTA() {
 
       // Unmount SPIFFS
       SPIFFS.end();
-      changeMode(qlocktoo::WIFI_ANIMATION);
+      changeMode(Mode::OTAinProgress);
       Serial.println("Start updating " + type);
     })
     .onEnd([]() {
@@ -132,7 +134,7 @@ void setupOTA() {
       else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
       else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
       else if (error == OTA_END_ERROR) Serial.println("End Failed");
-      changeMode(qlocktoo::Mode::ERROR);
+      changeMode(Mode::Error);
       delay(5000);
     });
 
@@ -143,73 +145,71 @@ void setupDisplay() {
   Display::begin();
 }
 
-void processCmdRemoteDebug() {
-  using namespace qlocktoo;
-  
-  vector<string> tokens = split(Debug.getLastCommand().c_str(), ' ');
-  if (! tokens.size()) return;
-  
-  uint8_t index = 0;
-  string const& cmd = tokens[index++];
-  
-  if (cmd == "swirl") {
-    changeMode(SWIRL);
-    debugI("* Mode set to SWIRL");
-  } else if (cmd == "mem") {
-    auto free = xPortGetFreeHeapSize();
-    debugI("Free memory: %u", free);
-  } else if (cmd == "img") {
-    if (tokens.size() != 2) {
-      debugE("Command \'img\' requires 1 parameter: [xmas, snow, wifi]");
-      return;
-    }
+// void processCmdRemoteDebug() {
+//   using namespace qlocktoo;
 
-    if (tokens[1] == "xmas") {
-      changeMode(XMAS);
-      debugI("* Image set to XMAS");
-    } else if (tokens[1] == "snow") {
-      changeMode(SNOW);
-      debugI("* Image set to SNOW");
-    } else if (tokens[1] == "wifi") {
-      changeMode(WIFI_ANIMATION);
-      debugI("* Image set to WIFI");
-    } else {
-      return;
-    }
-  }
-  else if (cmd == "text") {
-    changeMode(TEXT);
-    debugI("* Mode set to TEXT");
-  } else if (cmd == "clock") {
-    changeMode(CLOCK);
-    debugI("* Mode set to CLOCK");
-  } else if (cmd == "web") {
-    webinterface.test("Kiekeboe");
-  } else if (cmd == "ls") {
-    debugI("Partitions:");
-    listPartitions();
-    debugI("Files:");
-    listFiles();
-  } else if (cmd == "version") {
-    debugI("%s", build_str);
-  }
-}
+//   vector<string> tokens = split(Debug.getLastCommand().c_str(), ' ');
+//   if (! tokens.size()) return;
+
+//   uint8_t index = 0;
+//   string const& cmd = tokens[index++];
+
+//   if (cmd == "swirl") {
+//     changeMode(Mode::Swirl);
+//     Serial.println("* Mode set to SWIRL");
+//   } else if (cmd == "mem") {
+//     auto free = xPortGetFreeHeapSize();
+//     Serial.printf("Free memory: %u\n", free);
+//   } else if (cmd == "img") {
+//     if (tokens.size() != 2) {
+//       Serial.println("Command \'img\' requires 1 parameter: [xmas, snow, wifi]");
+//       return;
+//     }
+
+//     if (tokens[1] == "xmas") {
+//       changeMode(Mode::Xmas);
+//       Serial.println("* Image set to XMAS");
+//     } else if (tokens[1] == "snow") {
+//       changeMode(Mode::Snow);
+//       Serial.println("* Image set to SNOW");
+//     } else if (tokens[1] == "wifi") {
+//       changeMode(Mode::OTAinProgress);
+//       Serial.println("* Image set to WIFI");
+//     } else {
+//       return;
+//     }
+//   }
+//   else if (cmd == "text") {
+//     changeMode(Mode::Text);
+//     Serial.println("* Mode set to TEXT");
+//   } else if (cmd == "clock") {
+//     changeMode(Mode::Clock);
+//     Serial.println("* Mode set to CLOCK");
+//   } else if (cmd == "ls") {
+//     Serial.println("Partitions:");
+//     listPartitions();
+//     Serial.println("Files:");
+//     listFiles();
+//   } else if (cmd == "version") {
+//     Serial.printlf("%s\n", build_str);
+//   }
+// }
 
 
 void setupLogging() {
 
-  Debug.begin("qlocktoo"); // Initialize the WiFi server
-	Debug.setResetCmdEnabled(true); // Enable the reset command
-  // Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
-	Debug.showColors(true); // Colors
+  // Debug.begin("qlocktoo"); // Initialize the WiFi server
+	// Debug.setResetCmdEnabled(true); // Enable the reset command
+  // // Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
+	// Debug.showColors(true); // Colors
 
-	String helpCmd = "clear - Clear display\n";
-  helpCmd.concat("red - Set red color");
-	helpCmd.concat("rgb <r,g,b> - Set RGB value");
+	// String helpCmd = "clear - Clear display\n";
+  // helpCmd.concat("red - Set red color");
+	// helpCmd.concat("rgb <r,g,b> - Set RGB value");
 
-	Debug.setHelpProjectsCmds(helpCmd);
-	Debug.setCallBackProjectCmds(&processCmdRemoteDebug);
-	Debug.initDebugger(debugGetDebuggerEnabled, debugHandleDebugger, debugGetHelpDebugger, debugProcessCmdDebugger); // Set the callbacks
+	// Debug.setHelpProjectsCmds(helpCmd);
+	// Debug.setCallBackProjectCmds(&processCmdRemoteDebug);
+	// Debug.initDebugger(debugGetDebuggerEnabled, debugHandleDebugger, debugGetHelpDebugger, debugProcessCmdDebugger); // Set the callbacks
 
 	// debugInitDebugger(&Debug); // Init the debugger
 
@@ -219,35 +219,40 @@ void setupLogging() {
 
 }
 
-void changeMode(qlocktoo::Mode mode) {
+void changeMode(Mode mode) {
   if (currentMode == mode) {
     return;
   }
   currentMode = mode;
 
   if (currentApp) {
+    while (!currentApp->canTerminate) {
+      Serial.println("wait till termination is safe...");
+      delay(50);
+    }
     delete currentApp;
     currentApp = NULL;
   }
 
   switch (currentMode) {
-    case CLOCK:
-      currentApp = new Clock(Debug);
+    case Mode::Clock:
+      currentApp = new Clock();
       break;
-    case NO_WIFI:
-    case WIFI_ANIMATION:
-      currentApp = new Animation();
+    case Mode::WifiConnecting:
+    case Mode::OTAinProgress:
+      currentApp = new Animation(Animation::Preset::Wifi);
       break;
-    case XMAS:
-      currentApp = new Image(Image::Preset::XMAS_TREE);
+    case Mode::Xmas:
+      currentApp = new Image(Image::Preset::XmasTree);
       break;
-    case SNOW:
-      currentApp = new Image(Image::Preset::SNOWMAN);
+    case Mode::Snow:
+      currentApp = new Image(Image::Preset::Snowman);
       break;
-    case ERROR:
-      currentApp = new Image(Image::Preset::ERROR);
+    case Mode::WifiSetupRequired:
+    case Mode::Error:
+      currentApp = new Image(Image::Preset::Error);
       break;
-    case SWIRL:
+    case Mode::Swirl:
       currentApp = new Swirl();
       break;
     default:
@@ -255,19 +260,25 @@ void changeMode(qlocktoo::Mode mode) {
   }
 
   //debugI("Start new app: %s", currentApp->getApp());
-  debugI("Start new app");
+  Serial.println("Start new app");
 }
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting QlockToo");
-  debugI("Booting QlockToo");
-  debugI("%s", build_str);
+  Serial.printf("%s\n", build_str);
 
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS cannot be opened");
-    debugE("SPIFFS cannot be opened");
   };
+
+  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
+  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
+  Serial.println("Queues created");
+
+  Serial.println("setup persistable configuration");
+  ConfigService::init();
   Serial.println("setup Wifi");
   setupWifi();
   Serial.println("setup OTA");
@@ -281,40 +292,37 @@ void setup() {
   Serial.println("setup Webinterface");
   webinterface.begin();
   
-  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
-  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
-  Serial.println("Queues created");
+  
 
   xTaskCreatePinnedToCore(runImportantStuffTask, "OTA_and_Debug", 8192, NULL, 2, &currentAppTask, 0);
 
   // Start in Clock mode
-  changeMode(qlocktoo::CLOCK);
+  changeMode(Mode::Clock);
   xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 1);
 }
 
 // Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
 void loop() {
-  // ArduinoOTA.handle();
-  // Debug.handle();
-  // delay(300);
   delay(300);
 
-  // Display::drawPixelRaw(1, RgbColor(red+=10, green+=2, blue+=10));
-  // Display::show();
-
   Mode newMode;
-  // uint8_t newMode;
   if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
-    debugI("We hebben een nieuwe mode!!!!");
-    Serial.printf("Queue data received: %u\r\n", newMode);
+    Serial.println("Mode changed");
     changeMode(newMode);
+  }
+
+  NetworkConfig networkConfig;
+  if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
+    Serial.println("Wifi settings updated");
+    Serial.printf("SSID: %s\n", (char*) networkConfig.ssid);
+    Serial.printf("PWD: %s\n", (char*) networkConfig.password);
+    Wifi.updateConfig(networkConfig);
   }
 };
 
 void runImportantStuffTask(void * parameter) {
   for (;;) {
     ArduinoOTA.handle();
-    Debug.handle();
     delay(300);
   }
 }
@@ -337,15 +345,15 @@ void listPartitions(void)
   esp_partition_iterator_t _mypartiterator;
   const esp_partition_t *_mypart;
   ul = spi_flash_get_chip_size();
-  debugI("Flash chip size: %u", ul);
-  debugI("Partiton table:");
+  Serial.printf("Flash chip size: %u\n", ul);
+  Serial.println("Partiton table:");
   _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
   if (_mypartiterator)
   {
     do
     {
       _mypart = esp_partition_get(_mypartiterator);
-      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+      Serial.printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
     } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
   }
   esp_partition_iterator_release(_mypartiterator);
@@ -355,7 +363,7 @@ void listPartitions(void)
     do
     {
       _mypart = esp_partition_get(_mypartiterator);
-      debugI("%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+      Serial.printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
     } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
   }
   esp_partition_iterator_release(_mypartiterator);
@@ -366,9 +374,8 @@ void listFiles() {
   File file = root.openNextFile();
  
   while(file){
-    debugI("File: %s", file.name());
+    Serial.printf("File: %s\n", file.name());
  
     file = root.openNextFile();
   }
-  SPIFFS.end();
 }

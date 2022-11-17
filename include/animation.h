@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "app.h"
 #include "control.h"
 #include "image.h"
+
+using namespace std;
 
 namespace qlocktoo {
 class Animation : public App {
@@ -11,10 +14,14 @@ class Animation : public App {
     void setup();
     void loop();
 
-    Image::Preset currentImage;
-    std::shared_ptr<Image> currentFrame = NULL;
+    vector<Image::Preset> frames;
+    uint8_t currentFrame;
 
    public:
-    Animation() : App(Mode::WIFI_ANIMATION) {}
+    enum class Preset {
+        Wifi
+    };
+
+    Animation(Preset animation);
 };
-}  // namespace qlocktoo
+}

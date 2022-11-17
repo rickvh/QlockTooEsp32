@@ -6,16 +6,16 @@
 #include "display.h"
 
 namespace qlocktoo {
-Image::Image() : App(Mode::IMAGE) {
+Image::Image() : App(Mode::Image) {
     pixels.fill(RgbwColor(0, 0, 0, 0));
 }
 
-Image::Image(Preset preset) : App(Mode::IMAGE) {
+Image::Image(Preset preset) : App(Mode::Image) {
     RgbwColor color(0, 0, 0, 0);
     pixels.fill(color);
 
     switch (preset) {
-        case ERROR:
+        case Preset::Error:
             color.R = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
@@ -30,7 +30,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
                 }
             }
             break;
-        case WIFI1:
+        case Preset::Wifi1:
             color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
@@ -45,7 +45,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
                 }
             }
             break;
-        case WIFI2:
+        case Preset::Wifi2:
             color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
@@ -60,7 +60,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
                 }
             }
             break;
-        case WIFI3:
+        case Preset::Wifi3:
             color.B = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
@@ -76,7 +76,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
             }
             break;
 
-        case XMAS_TREE:
+        case Preset::XmasTree:
             color.G = 200;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
@@ -94,7 +94,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
             pixels[104] = RgbwColor(200, 0, 0, 0);
             break;
 
-        case SNOWMAN:
+        case Preset::Snowman:
             color.W = 200;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -141,7 +141,7 @@ Image::Image(Preset preset) : App(Mode::IMAGE) {
 }
 
 void Image::readFile(std::string filename) {
-    if (!SPIFFS.begin() || !SPIFFS.exists(filename.c_str())) {
+    if (!SPIFFS.exists(filename.c_str())) {
         return;
     }
 
@@ -158,7 +158,6 @@ void Image::readFile(std::string filename) {
     //     buffer[l] = 0;
     //     if (strcmp)
     // }
-    SPIFFS.end();
 }
 
 NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {

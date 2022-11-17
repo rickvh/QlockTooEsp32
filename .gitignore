@@ -16,3 +16,4 @@ data/qlocktoo-portal
 
 include/wifipassword.h
 
+compile_commands.json

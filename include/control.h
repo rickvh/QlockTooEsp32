@@ -4,18 +4,22 @@
 
 namespace qlocktoo {
 
-typedef enum {
-    NOT_SET,
-    NO_WIFI,
-    WIFI_ANIMATION,
-    CLOCK,
-    SWIRL,
-    TEXT,
-    IMAGE,
-    ERROR,
-    DEBUG,
-    XMAS,
-    SNOW
-} Mode;
+enum class Mode {
+    // don't use these directly to set a mode. Should be refactored.
+    Unknown,
+    Image,
+    Animation,
+    Text,
+    
+    // actual modes
+    WifiConnecting,
+    WifiSetupRequired,
+    OTAinProgress,
+    Clock,
+    Swirl,
+    Xmas,
+    Snow,
+    Error
+};
 
 }
