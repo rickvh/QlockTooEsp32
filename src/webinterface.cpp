@@ -13,6 +13,7 @@
 #include "clock.h"
 #include "control.h"
 #include "configservice.h"
+#include "buildinfo.h"
 
 using namespace std;
 
@@ -50,7 +51,7 @@ void Webinterface::begin() {
     }
     );
 
-        // API: Get current network configuration
+    // API: Get current network configuration
     server.on("/api/network", HTTP_GET, [&](AsyncWebServerRequest *request) {
         Serial.println("Current network config requested");
         auto config = &ConfigService::CONFIG.networkConfig;
@@ -60,6 +61,20 @@ void Webinterface::begin() {
         jsonDoc[KEY_SSID] = config->ssid;
         jsonDoc[KEY_WIFI_CONNECTED] = ConfigService::connectedToWifi;
         
+        String response;
+        serializeJsonPretty(jsonDoc, response);
+        request->send(200, "application/json", response);
+    }
+    );
+
+    server.on("/api/status", HTTP_GET, [&](AsyncWebServerRequest *request) {
+        Serial.println("Current status requested");
+        auto config = &ConfigService::CONFIG.networkConfig;
+        
+        // TODO: move network status here
+        StaticJsonDocument<256> jsonDoc;
+        jsonDoc[KEY_VERSION] = BuildInfo::version;
+
         String response;
         serializeJsonPretty(jsonDoc, response);
         request->send(200, "application/json", response);
@@ -118,7 +133,6 @@ void Webinterface::begin() {
                 }
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
-
 
             if (request->url() == "/api/swirl") {
                 Serial.println("Mode set to SWIRL");

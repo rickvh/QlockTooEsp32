@@ -21,6 +21,8 @@ class Webinterface {
     const char *KEY_PASSWORD = "password";
     const char *KEY_WIFI_CONNECTED = "connectedToWifi";
 
+    const char *KEY_VERSION = "version";
+
     AsyncWebServer server;
     
     void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);

@@ -22,7 +22,7 @@
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
-#include "buildinformation.h"
+#include "buildinfo.h"
 #include <SPIFFS.h>
 
 
@@ -266,7 +266,7 @@ void changeMode(Mode mode) {
 void setup() {
   Serial.begin(115200);
   Serial.println("Booting QlockToo");
-  Serial.printf("%s\n", build_str);
+  Serial.printf("%s\n", BuildInfo::version);
 
   if (!SPIFFS.begin(true)) {
     Serial.println("SPIFFS cannot be opened");
