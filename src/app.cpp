@@ -7,6 +7,8 @@ namespace qlocktoo {
             initialized = true;
         }
 
+        canTerminate = false;
         loop();
+        canTerminate = true;
     }
 }

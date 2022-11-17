@@ -10,7 +10,6 @@
 #include "Arduino.h"
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
-#include "RemoteDebugger.h"
 #include "clock.h"
 #include "control.h"
 #include "configservice.h"
@@ -18,8 +17,8 @@
 using namespace std;
 
 namespace qlocktoo {
-Webinterface::Webinterface(int port, RemoteDebug &debug_) : Debug(debug_), server(AsyncWebServer(port)) {
-    debugI("Webinterface started on port: %u\r\n", port);
+Webinterface::Webinterface(int port) : server(AsyncWebServer(port)) {
+    Serial.printf("Webinterface started on port: %u\r\n", port);
 }
 
 void Webinterface::begin() {
@@ -28,7 +27,7 @@ void Webinterface::begin() {
 
     // API: Get current clock configuration
     server.on("/api/clock", HTTP_GET, [&](AsyncWebServerRequest *request) {
-        debugD("Current clock config requested");
+        Serial.println("Current clock config requested");
         auto config = &ConfigService::CONFIG.clockConfig;
         
         StaticJsonDocument<256> jsonDoc;
@@ -53,7 +52,7 @@ void Webinterface::begin() {
 
         // API: Get current network configuration
     server.on("/api/network", HTTP_GET, [&](AsyncWebServerRequest *request) {
-        debugD("Current network config requested");
+        Serial.println("Current network config requested");
         auto config = &ConfigService::CONFIG.networkConfig;
         
         StaticJsonDocument<256> jsonDoc;
@@ -74,7 +73,7 @@ void Webinterface::begin() {
                 StaticJsonDocument<256> jsonDoc;
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
-                    debugD("Updating clock config");
+                    Serial.println("Updating clock config");
                     auto config = &ConfigService::CONFIG.clockConfig;
                     float h, s, v;
 
@@ -83,21 +82,21 @@ void Webinterface::begin() {
                     s = color[KEY_SATURATION] | 0.0f;
                     v = color[KEY_VALUE] | 0.0f;
                     config->colorItIs = HsbColor(h, s, v);
-                    debugD("HSV colorItIs: %f, %f, %f\r\n", h, s, v);
+                    Serial.printf("HSV colorItIs: %f, %f, %f\r\n", h, s, v);
 
                     color = jsonDoc["colorWords"];
                     h = color[KEY_HUE] | 0.0f;
                     s = color[KEY_SATURATION] | 0.0f;
                     v = color[KEY_VALUE] | 0.0f;
                     config->colorWords = HsbColor(h, s, v);
-                    debugD("HSV colorWords: %f, %f, %f\r\n", h, s, v);
+                    Serial.printf("HSV colorWords: %f, %f, %f\r\n", h, s, v);
 
                     color = jsonDoc["colorHour"];
                     h = color[KEY_HUE] | 0.0f;
                     s = color[KEY_SATURATION] | 0.0f;
                     v = color[KEY_VALUE] | 0.0f;
                     config->colorHour = HsbColor(h, s, v);
-                    debugD("HSV colorHour: %f, %f, %f\r\n", h, s, v);
+                    Serial.printf("HSV colorHour: %f, %f, %f\r\n", h, s, v);
 
                     Serial.println("/api/clock");
                     auto newMode = Mode::Clock;
@@ -110,7 +109,7 @@ void Webinterface::begin() {
             if (request->url() == "/api/network") {
                 StaticJsonDocument<256> jsonDoc;
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
-                    debugD("Updating network config");
+                    Serial.println("Updating network config");
                     NetworkConfig networkConfig;
                     strlcpy(networkConfig.hostname, jsonDoc[KEY_HOSTNAME] | "", sizeof(networkConfig.hostname));
                     strlcpy(networkConfig.ssid, jsonDoc[KEY_SSID] | "", sizeof(networkConfig.ssid));
@@ -122,7 +121,7 @@ void Webinterface::begin() {
 
 
             if (request->url() == "/api/swirl") {
-                debugI("Mode set to SWIRL");
+                Serial.println("Mode set to SWIRL");
                 auto newMode = Mode::Swirl;
                 xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
@@ -131,7 +130,7 @@ void Webinterface::begin() {
     );
 
     server.onNotFound([&](AsyncWebServerRequest *request) {
-        debugI("Not found");
+        Serial.println("Not found");
         request->send(404, "text/plain", "Not found");
     });
 

@@ -39,7 +39,7 @@ void ConfigService::init() {
     } else {
         Serial.println("Config corrupt...Initializing defaults");
         CONFIG = Config();
-        strcpy(CONFIG.networkConfig.hostname, "qlocktoo");
+        strcpy(CONFIG.networkConfig.hostname, "qlocktoo"); // TODO: add unique suffix based on MAC
         strcpy(CONFIG.networkConfig.ssid, "");
         strcpy(CONFIG.networkConfig.password, "");
     }

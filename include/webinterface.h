@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ESPAsyncWebServer.h>
-#include "RemoteDebugger.h"
 
 using namespace std;
 
@@ -22,13 +21,12 @@ class Webinterface {
     const char *KEY_PASSWORD = "password";
     const char *KEY_WIFI_CONNECTED = "connectedToWifi";
 
-    RemoteDebug &Debug;
     AsyncWebServer server;
     
     void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 
    public:
-    Webinterface(int port, RemoteDebug &debug_);
+    Webinterface(int port);
     void begin();
 };
 }

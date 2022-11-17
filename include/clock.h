@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "RemoteDebugger.h"
 #include "app.h"
 #include "display.h"
 #include "control.h"
@@ -20,7 +19,6 @@ class Clock : public App {
     const static uint8_t nightHour = 17;  // Start decreasing brightness
 
     ClockConfig* config;
-    RemoteDebug &Debug;
     struct tm currentTime;
     uint8_t timeBrightness();
     void setColor(const std::vector<int> leds, HsbColor color);
@@ -51,7 +49,7 @@ class Clock : public App {
     };
 
    public:
-    Clock(RemoteDebug &debug) : App(Mode::Clock), Debug(debug) {};
+    Clock() : App(Mode::Clock) {};
     void setup();
     void loop();
     // void applyConfig(ClockConfig *config);

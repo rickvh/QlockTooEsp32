@@ -16,7 +16,7 @@ namespace qlocktoo {
         using namespace std::placeholders;
         WiFi.disconnect(true); // for stability
         delay(1000);
-        WiFi.onEvent(std::bind(&WifiManager::WiFiEvent, this, _1));
+        WiFi.onEvent(std::bind(&WifiManager::WiFiEvent, this, _1, _2));
         connectToWifi();
     }
 
@@ -61,10 +61,10 @@ namespace qlocktoo {
         }
     }
 
-    void WifiManager::WiFiEvent(arduino_event_id_t event) {
+    void WifiManager::WiFiEvent(arduino_event_id_t event, arduino_event_info_t info) {
         switch (event) {
             case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-                Serial.println(TAG + "STA Disconnected: ");// + info.disconnected.reason);
+                Serial.println(TAG + "STA Disconnected: " + info.wifi_sta_disconnected.reason);
                 ConfigService::connectedToWifi = false;
                 reconnectCount++;
                 Serial.printf("Retry (%u/10)\n", reconnectCount);

@@ -14,7 +14,7 @@ namespace qlocktoo {
             
             wifi_event_id_t wm_event_id;
             uint8_t reconnectCount;
-            void WiFiEvent(arduino_event_id_t info);
+            void WiFiEvent(arduino_event_id_t event, arduino_event_info_t info);
             void connectToWifi();
             void showWifiAnimation();
             void showSetupRequired();

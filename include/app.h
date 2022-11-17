@@ -17,5 +17,6 @@ class App {
     virtual ~App() {};
     Mode getApp() const { return app; };
     void handle();
+    volatile bool canTerminate;
 };
 }  // namespace qlocktoo

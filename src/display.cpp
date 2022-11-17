@@ -12,6 +12,7 @@
 
 namespace qlocktoo {
     static uint16_t getLedByCoordinate(uint16_t x, uint16_t y) {
+        #ifdef BOARD_FREESTYLE
         static uint8_t mapping[11][10] = {
             {73, 80, 102, 96, 58, 51, 22, 7, 30, 0},
             {81, 66, 65, 88, 89, 15, 14, 44, 43, 37},
@@ -24,8 +25,13 @@ namespace qlocktoo {
             {70, 108, 84, 61, 93, 19, 48, 27, 4, 40},
             {76, 77, 107, 99, 55, 54, 25, 10, 33, 3},
             {106, 69, 62, 85, 92, 18, 11, 47, 26, 34}};
-
-        return mapping[x][9 - y];
+            
+            return mapping[x][9 - y];
+        #endif
+        #ifdef BOARD_WS2811
+            return y * 10 + x + 1; 
+        #endif
+        
     }
 
 

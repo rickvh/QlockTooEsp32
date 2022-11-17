@@ -1,7 +1,6 @@
 #include "clock.h"
 #include <vector>
 #include <WiFi.h>
-#include "RemoteDebugger.h"
 #include "time.h"
 #include "configservice.h"
 
@@ -37,7 +36,7 @@
 
 namespace qlocktoo {
 void Clock::setup() {
-    debugI("Clock setup");
+    Serial.println("Clock setup");
 
     config = &ConfigService::CONFIG.clockConfig;
     // config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
@@ -70,7 +69,7 @@ void Clock::setup() {
 
 void Clock::loop() {
     if (!getLocalTime(&this->currentTime)) {
-        debugD("Failed to obtain time");
+        Serial.println("Failed to obtain time");
         return;
     }
 
