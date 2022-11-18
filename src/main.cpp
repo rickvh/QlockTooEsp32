@@ -29,7 +29,7 @@
 using namespace qlocktoo;
 using namespace std;
 
-const uint8_t   timeZone        = 1;     // Central European Time
+const uint8_t   timeZone = 1;     // Central European Time
 int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
 
@@ -42,6 +42,7 @@ void listFiles();
 void runAppTask(void * parameter);
 void runImportantStuffTask(void * parameter);
 
+TaskHandle_t otaTask = NULL;
 TaskHandle_t currentAppTask = NULL;
 App* currentApp = NULL;
 qlocktoo::Mode currentMode = Mode::Unknown;
@@ -56,32 +57,6 @@ QueueHandle_t xClockConfigQueue = NULL;
 
 void setupWifi() {
   Serial.println("Connecting to Wifi...");
-  // Serial.println("Connecting to Wifi...");
-  // WiFi.mode(WIFI_STA);
-  // WiFi.begin(ssid, password);
-  
-  // set mode to CONNECTING_WIFI
-  // check if wifi config availiable
-  // yes: start connecting
-
-  // listeners
-  //  - wifi connected: set mode TO CLOCK
-  //  - wifi lost / failed: set mode NO_WIFI
-
-  // start AP
-  // - wifi config received:
-  //   - stop AP
-  //   - setupWifi()
-
-  // WiFi.printDiag(Serial);
-  // WiFi.onEvent(std::bind(&WiFiManager::WiFiEvent,this,_1,_2));
-
-
-  // while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    // debugE("Connection Failed! Rebooting...");
-    // delay(5000);
-    // ESP.restart();
-  // }
 
   Wifi.begin();
   Serial.printf("Wifi connected: %s\n", WiFi.localIP());
@@ -98,11 +73,10 @@ void setupWifi() {
 }
 
 void setupNTP() {
-  // const long  gmtOffset_sec = 3600;
-  // const int   daylightOffset_sec = 3600;
-  // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
-  configTzTime(getTimezone().c_str(), "pool.ntp.org");
+  const long  gmtOffset_sec = 3600;
+  const int   daylightOffset_sec = 3600;
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  configTzTime(getTimezone().c_str(), ntpServer);
 }
 
 void setupOTA() {
@@ -139,84 +113,6 @@ void setupOTA() {
     });
 
   ArduinoOTA.begin();
-}
-
-void setupDisplay() {
-  Display::begin();
-}
-
-// void processCmdRemoteDebug() {
-//   using namespace qlocktoo;
-
-//   vector<string> tokens = split(Debug.getLastCommand().c_str(), ' ');
-//   if (! tokens.size()) return;
-
-//   uint8_t index = 0;
-//   string const& cmd = tokens[index++];
-
-//   if (cmd == "swirl") {
-//     changeMode(Mode::Swirl);
-//     Serial.println("* Mode set to SWIRL");
-//   } else if (cmd == "mem") {
-//     auto free = xPortGetFreeHeapSize();
-//     Serial.printf("Free memory: %u\n", free);
-//   } else if (cmd == "img") {
-//     if (tokens.size() != 2) {
-//       Serial.println("Command \'img\' requires 1 parameter: [xmas, snow, wifi]");
-//       return;
-//     }
-
-//     if (tokens[1] == "xmas") {
-//       changeMode(Mode::Xmas);
-//       Serial.println("* Image set to XMAS");
-//     } else if (tokens[1] == "snow") {
-//       changeMode(Mode::Snow);
-//       Serial.println("* Image set to SNOW");
-//     } else if (tokens[1] == "wifi") {
-//       changeMode(Mode::OTAinProgress);
-//       Serial.println("* Image set to WIFI");
-//     } else {
-//       return;
-//     }
-//   }
-//   else if (cmd == "text") {
-//     changeMode(Mode::Text);
-//     Serial.println("* Mode set to TEXT");
-//   } else if (cmd == "clock") {
-//     changeMode(Mode::Clock);
-//     Serial.println("* Mode set to CLOCK");
-//   } else if (cmd == "ls") {
-//     Serial.println("Partitions:");
-//     listPartitions();
-//     Serial.println("Files:");
-//     listFiles();
-//   } else if (cmd == "version") {
-//     Serial.printlf("%s\n", build_str);
-//   }
-// }
-
-
-void setupLogging() {
-
-  // Debug.begin("qlocktoo"); // Initialize the WiFi server
-	// Debug.setResetCmdEnabled(true); // Enable the reset command
-  // // Debug.showProfiler(true); // Profiler (Good to measure times, to optimize codes)
-	// Debug.showColors(true); // Colors
-
-	// String helpCmd = "clear - Clear display\n";
-  // helpCmd.concat("red - Set red color");
-	// helpCmd.concat("rgb <r,g,b> - Set RGB value");
-
-	// Debug.setHelpProjectsCmds(helpCmd);
-	// Debug.setCallBackProjectCmds(&processCmdRemoteDebug);
-	// Debug.initDebugger(debugGetDebuggerEnabled, debugHandleDebugger, debugGetHelpDebugger, debugProcessCmdDebugger); // Set the callbacks
-
-	// debugInitDebugger(&Debug); // Init the debugger
-
-  // if (debugAddFunctionVoid("benchInt", &benchInt) >= 0) {
-  // debugSetLastFunctionDescription("To run a benchmark of integers");
-// }
-
 }
 
 void changeMode(Mode mode) {
@@ -259,8 +155,7 @@ void changeMode(Mode mode) {
       return;
   }
 
-  //debugI("Start new app: %s", currentApp->getApp());
-  Serial.println("Start new app");
+  Serial.printf("Start new app");
 }
 
 void setup() {
@@ -283,22 +178,17 @@ void setup() {
   setupWifi();
   Serial.println("setup OTA");
   setupOTA();
-  Serial.println("setup Logging");
-  setupLogging();
   Serial.println("setup LED Display");
-  setupDisplay();
+  Display::begin();
   Serial.println("setup NTP");
   setupNTP();
   Serial.println("setup Webinterface");
   webinterface.begin();
-  
-  
 
-  xTaskCreatePinnedToCore(runImportantStuffTask, "OTA_and_Debug", 8192, NULL, 2, &currentAppTask, 0);
-
-  // Start in Clock mode
+  // Start OTA and Clock app
   changeMode(Mode::Clock);
-  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 1);
+  xTaskCreatePinnedToCore(runImportantStuffTask, "OTA", 8192, NULL, 2, &otaTask, 1);
+  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 0);
 }
 
 // Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.

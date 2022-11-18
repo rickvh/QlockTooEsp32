@@ -37,35 +37,10 @@
 namespace qlocktoo {
 void Clock::setup() {
     Serial.println("Clock setup");
-
     config = &ConfigService::CONFIG.clockConfig;
-    // config.colorItIs = HsbColor(0.0f, 1.0f, 1.0f);
-    // config.colorWords = HsbColor(0.3f, 1.0f, 1.0f);
-    // config.colorHour = HsbColor(0.6f, 1.0f, 1.0f);
-    // applyConfig(config);
-
     Display::begin();
     Display::clear();
-    // TODO: verplaatsen naar main
-    // const long  gmtOffset_sec = 3600;
-    // const int   daylightOffset_sec = 3600;
-    // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 }
-
-// void Clock::applyConfig(ClockConfig *config) {
-    // this->config = config;
-// }
-
-// TODO: config is static geworden, dus niet meer meegeven in queueu
-// void Clock::handleConfigQueue() {
-    // ClockConfig config;
-    // if (xQueueReceive(xClockConfigQueue, &config, 0) == pdFALSE) {
-        // return;
-    // }
-
-    // Serial.println("New clockconfig received from queue");
-    // applyConfig(&config);
-// }
 
 void Clock::loop() {
     if (!getLocalTime(&this->currentTime)) {
@@ -73,12 +48,9 @@ void Clock::loop() {
         return;
     }
 
-    // handleConfigQueue();
-
     uint8_t hour = currentTime.tm_hour;
     uint8_t minute = currentTime.tm_min;
 
-    // calculate target brightnesses:
     int current_hourword = hour;
     if (current_hourword > 12) current_hourword = current_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
     if (current_hourword == 0) current_hourword = 12;                     // 0 is also called 12
@@ -157,26 +129,6 @@ void Clock::loop() {
 
     Display::show();
     delay(1000);
-}
-
-uint8_t Clock::timeBrightness() {
-    uint8_t hour = currentTime.tm_hour;
-    uint8_t minute = currentTime.tm_min;
-
-    if (hour > dayHour && hour < nightHour) {
-        return MAX_BRIGHTNESS;
-    } else if (hour < dayHour || hour > nightHour) {
-        return MIN_BRIGHTNESS;
-    } else if (hour == dayHour) {
-        return constrain(
-            map(minute, 0, 29, MIN_BRIGHTNESS, MAX_BRIGHTNESS),
-            MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-    } else if (hour == nightHour) {
-        return constrain(
-            map(minute, 0, 29, MAX_BRIGHTNESS, MIN_BRIGHTNESS),
-            MIN_BRIGHTNESS, MAX_BRIGHTNESS);
-    }
-    return 0;
 }
 
 void Clock::setColor(const std::vector<int> leds, HsbColor color) {

@@ -83,9 +83,9 @@ void Webinterface::begin() {
 
     server.onRequestBody(
         [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-            // API: Get current clock configuration
+            // API: Set clock configuration
             if (request->url() == "/api/clock") {
-                StaticJsonDocument<256> jsonDoc;
+                StaticJsonDocument<512> jsonDoc;
 
                 if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
                     Serial.println("Updating clock config");

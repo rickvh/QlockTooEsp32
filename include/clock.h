@@ -9,15 +9,8 @@
 extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
-
-
 class Clock : public App {
    private:
-    const static uint8_t MIN_BRIGHTNESS = 15;
-    const static uint8_t MAX_BRIGHTNESS = 140;
-    const static uint8_t dayHour = 8;     // Start increasing brightness
-    const static uint8_t nightHour = 17;  // Start decreasing brightness
-
     ClockConfig* config;
     struct tm currentTime;
     uint8_t timeBrightness();
@@ -52,7 +45,5 @@ class Clock : public App {
     Clock() : App(Mode::Clock) {};
     void setup();
     void loop();
-    // void applyConfig(ClockConfig *config);
-    //~Clock();
 };
 }
