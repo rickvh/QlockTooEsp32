@@ -2,20 +2,19 @@ import { NetworkComponent } from './network/network.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatLegacySliderModule as MatSliderModule } from '@angular/material/legacy-slider';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
+import { MatLegacyCheckboxModule as MatCheckboxModule } from '@angular/material/legacy-checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatLegacyFormFieldModule as MatFormFieldModule } from '@angular/material/legacy-form-field';
+import { MatLegacyInputModule as MatInputModule } from '@angular/material/legacy-input';
 import { HttpClientModule } from '@angular/common/http';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatLegacySlideToggleModule as MatSlideToggleModule } from '@angular/material/legacy-slide-toggle';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ClockComponent } from './clock/clock.component';
 import { SwirlComponent } from './swirl/swirl.component';
 import { DrawComponent } from './draw/draw.component';
-import { ColorPickerModule } from '@iplab/ngx-color-picker';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ImageComponent } from './image/image.component';
 import { ColorpickerComponent } from './colorpicker/colorpicker.component';
@@ -32,7 +31,6 @@ import { ColorpickerComponent } from './colorpicker/colorpicker.component';
   ],
   imports: [
     BrowserModule,
-    ColorPickerModule,
     FormsModule,
     MatInputModule,
     NoopAnimationsModule,

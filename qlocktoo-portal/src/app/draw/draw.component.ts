@@ -1,6 +1,6 @@
+import IroColorValue from '@jaames/iro';
 import { RGBW } from './../image/image';
 import { Component, OnInit } from '@angular/core';
-import { ColorPickerControl, ColorsTable } from '@iplab/ngx-color-picker';
 import { Image } from '../image/image';
 
 @Component({
@@ -10,17 +10,13 @@ import { Image } from '../image/image';
   inputs: ['image']
 })
 export class DrawComponent implements OnInit {
-  color: string = "";
+  color: IroColorValue.Color;
   image: Image;
 
   constructor() {
     this.image = new Image();
+    this.color = new IroColorValue.Color('#00')
   }
-
-  public colorPickerControl = new ColorPickerControl()
-    .setValueFrom(ColorsTable.yellowgreen)
-    .showPresets()
-    .hideAlphaChannel();
 
   clear() {
     this.image = new Image();

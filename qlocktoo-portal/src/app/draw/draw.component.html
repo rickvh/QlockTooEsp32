@@ -2,12 +2,10 @@
 
 <div class="toolbox">
   <div class="colorpicker">
-    <github-picker [(color)]="color" [control]="colorPickerControl"></github-picker>
+    <app-colorpicker [(color)]="color"></app-colorpicker>
   </div>
-
-  <button mat-raised-button color="accent" (click)="color='rgb(0, 0, 0)'">Erase</button>
 </div>
 
-<app-image [brushColor]="hexToColor(color)" [image]="image"></app-image>
+<app-image [brushColor]="hexToColor('ff0000')" [image]="image"></app-image>
 
 <button mat-raised-button color="warn" (click)="clear()">Clear</button>

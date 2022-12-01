@@ -1,6 +1,6 @@
 import { NetworkService } from './network.service';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { NetworkConfig } from './network.config';
 
 
@@ -11,7 +11,7 @@ import { NetworkConfig } from './network.config';
 })
 export class NetworkComponent implements OnInit {
   config: NetworkConfig;
-  public readonly form: FormGroup;
+  public readonly form: UntypedFormGroup;
 
   onFormSubmit(): void {
     let config = this.form.getRawValue();
@@ -19,11 +19,11 @@ export class NetworkComponent implements OnInit {
     this.form.markAsPristine();
   }
 
-  constructor(private readonly formBuilder: FormBuilder, private networkService: NetworkService) {
+  constructor(private readonly formBuilder: UntypedFormBuilder, private networkService: NetworkService) {
     this.form = this.formBuilder.group({
-      ssid: new FormControl('', [Validators.required]),
-      password: new FormControl(),
-      hostname: new FormControl('', [Validators.required])
+      ssid: new UntypedFormControl('', [Validators.required]),
+      password: new UntypedFormControl(),
+      hostname: new UntypedFormControl('', [Validators.required])
     });
     this.config = {
       hostname: '',
