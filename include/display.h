@@ -14,6 +14,7 @@ class Display {
 #else
     static NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> realDisplay;
 #endif
+    static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
 
    public:
     static void begin();
@@ -32,7 +33,6 @@ class Display {
 #endif
     static void show() { realDisplay.Show(); };
     static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
-    static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);
 
     // Helper methods

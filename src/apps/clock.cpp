@@ -23,16 +23,7 @@
    ...
 */
 
-#define HETIS 0
-#define VIJF 13
-#define TIEN 14
-#define KWART 15
-#define VOOR1 16
-#define OVER1 17
-#define HALF 18
-#define UUR 19
-#define VOOR2 20
-#define OVER2 21
+
 
 namespace qlocktoo {
 void Clock::setup() {
@@ -131,9 +122,9 @@ void Clock::loop() {
     delay(1000);
 }
 
-void Clock::setColor(const std::vector<int> leds, HsbColor color) {
+void Clock::setColor(const std::vector<uint8_t> leds, HsbColor color) {
     for (uint8_t led : leds) {
-        Display::drawPixel(led, color);
+        Display::drawPixel(led % Display::WIDTH, led / Display::WIDTH, color);
     }
 }
 
