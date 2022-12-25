@@ -9,7 +9,11 @@ class Display {
    private:
     const static uint8_t LEDSTRIP_PIN = 13;
     static bool initialized;
+#ifdef BOARD_WS2811
+    static NeoPixelBus<NeoGrbFeature, NeoWs2811Method> realDisplay;
+#else
     static NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> realDisplay;
+#endif
 
    public:
     static void begin();
@@ -21,7 +25,11 @@ class Display {
     static uint8_t setbrightness(uint8_t brightness) { return brightness; }; // TODO
     static uint8_t getbrightness() { return 255; }; // TODO
 
+#ifdef BOARD_WS2811
+    static void clear() { realDisplay.ClearTo(RgbColor(0,0,0)); };
+#else
     static void clear() { realDisplay.ClearTo(RgbwColor(0,0,0,0)); };
+#endif
     static void show() { realDisplay.Show(); };
     static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
     static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);

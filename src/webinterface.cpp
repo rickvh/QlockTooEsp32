@@ -10,7 +10,7 @@
 #include "Arduino.h"
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
-#include "clock.h"
+#include "apps/clock.h"
 #include "control.h"
 #include "configservice.h"
 #include "buildinfo.h"
@@ -137,6 +137,13 @@ void Webinterface::begin() {
             if (request->url() == "/api/swirl") {
                 Serial.println("Mode set to SWIRL");
                 auto newMode = Mode::Swirl;
+                xQueueSend(xChangeAppQueue, &newMode, 0);
+                request->send(200, "application/json", "{ \"status\": \"success\" }");
+            }
+
+            if (request->url() == "/api/ledtest") {
+                Serial.println("Mode set to LEDTEST");
+                auto newMode = Mode::Ledtest;
                 xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }

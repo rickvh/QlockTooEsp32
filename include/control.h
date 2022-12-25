@@ -17,6 +17,7 @@ enum class Mode {
     OTAinProgress,
     Clock,
     Swirl,
+    Ledtest,
     Xmas,
     Snow,
     Error

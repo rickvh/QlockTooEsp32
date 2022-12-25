@@ -12,7 +12,8 @@
 
 namespace qlocktoo {
     static uint16_t getLedByCoordinate(uint16_t x, uint16_t y) {
-        #ifdef BOARD_FREESTYLE
+#ifdef BOARD_FREESTYLE
+            #pragma message("Compiling for SK6812")
         static uint8_t mapping[11][10] = {
             {73, 80, 102, 96, 58, 51, 22, 7, 30, 0},
             {81, 66, 65, 88, 89, 15, 14, 44, 43, 37},
@@ -27,15 +28,24 @@ namespace qlocktoo {
             {106, 69, 62, 85, 92, 18, 11, 47, 26, 34}};
             
             return mapping[x][9 - y];
-        #endif
-        #ifdef BOARD_WS2811
-            return y * 10 + x + 1; 
-        #endif
-        
+#endif
+#ifdef BOARD_WS2811
+            #pragma message("Compiling for WS2812")
+            if (y%2 == 0) {
+                return y * Display::WIDTH + x; 
+            } else {
+                return (y + 1) * Display::WIDTH - x - 1; 
+            }
+#endif
     }
 
 
+#ifdef BOARD_WS2811
+    NeoPixelBus<NeoGrbFeature, NeoWs2811Method> Display::realDisplay(110, LEDSTRIP_PIN);
+#else
     NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> Display::realDisplay(110, LEDSTRIP_PIN);
+#endif
+
     bool Display::initialized = false;
 
     void Display::begin() {
@@ -56,7 +66,12 @@ namespace qlocktoo {
     };
 
     void Display::drawPixel(int16_t index, NeoGrbwFeature::ColorObject c) {
+#ifdef BOARD_WS2811
+        // TODO: incorporate white calculation
+        realDisplay.SetPixelColor(index, RgbColor(c.R / 4, c.G / 4, c.B / 4));
+#else
         realDisplay.SetPixelColor(index, c);
+#endif
     }
 
     void Display::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color) {

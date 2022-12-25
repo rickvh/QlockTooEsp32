@@ -1,4 +1,4 @@
-#include "swirl.h"
+#include "apps/swirl.h"
 #include "display.h"
 
 using namespace qlocktoo;

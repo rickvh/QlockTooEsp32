@@ -17,8 +17,9 @@
 #include "ESPmDNS.h"
 #include "control.h"
 #include "webinterface.h"
-#include "swirl.h"
-#include "clock.h"
+#include "apps/ledtest.h"
+#include "apps/swirl.h"
+#include "apps/clock.h"
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
@@ -148,6 +149,9 @@ void changeMode(Mode mode) {
     case Mode::Error:
       currentApp = new Image(Image::Preset::Error);
       break;
+    case Mode::Ledtest:
+      currentApp = new Ledtest();
+      break;
     case Mode::Swirl:
       currentApp = new Swirl();
       break;
@@ -155,7 +159,7 @@ void changeMode(Mode mode) {
       return;
   }
 
-  Serial.printf("Start new app");
+  Serial.println("Start new app");
 }
 
 void setup() {

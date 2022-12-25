@@ -1,33 +1,5 @@
-FIX COLOR ISSUES door RMT-feature te gebruiken??
-- ligt aan de gebruikte ledstrip - die is ook buggy op de Arduino Uno
-
-
-
-============
-
-Bugs
-[x] - Wifi animation tijdens OTA
-
-
 Display
-[x] - display buffer obv X,Y
 [ ] - support multiple display configurations
-
-Animation (&display)
-[x] - interface die het display kan beschrijven
-
-Clock
-[x] - obv tijd het display updaten
-
-
-
-Tasks:
-======
-[x] - webserver
-[ ] - ps4 controller
-[x] - app (input queue)
-[x] - debugtask? ()
-
 
 
 Flow:
@@ -81,11 +53,6 @@ Features
         - op tijd
         - lichtsensor
 
-[ ] - Wifi
-      - standaard uit, af en toe aan om tijd op te halen
-      - aan te zetten als de klok op 'dev'-mode wordt gezet
-      - kort aan om de tijd op te halen
-
 [ ] - HTTP
       - Pagina met settings
         - ntp-server
@@ -117,10 +84,6 @@ Features
 [v] - OTA-logger
     - UDP ?
     - via #define in/uit te schakelen
-
-
-
-
 
 Bootanimation -> Clock
 
