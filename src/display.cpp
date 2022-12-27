@@ -30,7 +30,7 @@ namespace qlocktoo {
             return mapping[x][9 - y];
 #endif
 #ifdef BOARD_WS2811
-            #pragma message("Compiling for WS2812")
+            #pragma message("Compiling for WS2811")
             if (y%2 == 0) {
                 return y * Display::WIDTH + x; 
             } else {
@@ -67,8 +67,11 @@ namespace qlocktoo {
 
     void Display::drawPixel(int16_t index, NeoGrbwFeature::ColorObject c) {
 #ifdef BOARD_WS2811
-        // TODO: incorporate white calculation
-        realDisplay.SetPixelColor(index, RgbColor(c.R / 4, c.G / 4, c.B / 4));
+        realDisplay.SetPixelColor(index, RgbColor(
+            max(c.R, c.W) / 4,
+            max(c.G, c.W) / 4,
+            max(c.B, c.W) / 4
+        ));
 #else
         realDisplay.SetPixelColor(index, c);
 #endif
