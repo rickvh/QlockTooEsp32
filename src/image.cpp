@@ -142,6 +142,7 @@ Image::Image(Preset preset) : App(Mode::Image) {
 
 void Image::readFile(std::string filename) {
     if (!SPIFFS.exists(filename.c_str())) {
+        Serial.printf("File not found: %s\n", filename);
         return;
     }
 
@@ -179,15 +180,9 @@ void Image::show() {
 
 void Image::setup() {
     show();
-    // debugI("Image-setup");
 }
 
 void Image::loop() {
-    // Since there's really nothing to do, we'll suspend ourself.
-    // vTaskSuspend(NULL);
     delay(300);
-    // debugI("Image-loop");
-    // show();
-    // Display::begin();
 }
 }  // namespace qlocktoo

@@ -3,7 +3,7 @@
 
 using namespace qlocktoo;
 void Swirl::setup() {
-    // NOOP
+    Display::clear();
 }
 
 void Swirl::loop() {

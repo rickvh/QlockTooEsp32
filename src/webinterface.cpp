@@ -134,6 +134,32 @@ void Webinterface::begin() {
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
 
+            if (request->url() == "/api/image") {
+                StaticJsonDocument<256> jsonDoc;
+                if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {
+                    String image = jsonDoc["image"] | "";
+                    Serial.print("Mode set to show image: ");
+                    Serial.println(image);
+                    
+                    Mode newMode;
+                    if (image.equals("xmas")) {
+                        newMode = Mode::Xmas;
+                    } else if (image.equals("snowman")) {
+                        newMode = Mode::Snow;
+                    } else if (image.equals("error")) {
+                        newMode = Mode::Error;
+                    } else if (image.equals("wifi")) {
+                        newMode = Mode::WifiConnecting;
+                    } else {
+                        request->send(400, "application/json", "{ \"status\": \"image does not exist\" }");
+                        return;
+                    }
+                    xQueueSend(xChangeAppQueue, &newMode, 0);
+                    request->send(200, "application/json", "{ \"status\": \"success\" }");
+                }
+                request->send(400, "application/json", "{ \"status\": \"specify 'image'\" }");
+            }
+
             if (request->url() == "/api/swirl") {
                 Serial.println("Mode set to SWIRL");
                 auto newMode = Mode::Swirl;
