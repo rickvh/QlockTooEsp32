@@ -1,20 +1,27 @@
 #include "configservice.h"
 #include <SPIFFS.h>
+#include "Ticker.h"
 
-namespace qlocktoo {
+using namespace qlocktoo;
+    
 Config ConfigService::CONFIG;
 bool ConfigService::connectedToWifi;
+Ticker ConfigService::flashTicker;
 
-void ConfigService::save() {
-    File configfile = SPIFFS.open(CONFIGFILE, "w");
+void ConfigService::saveInternally() {
+    auto configfile = SPIFFS.open(CONFIGFILE, "w");
     if (!configfile) {
         Serial.println("Failed to save configfile");
     }
 
     configfile.write((unsigned char*) &CONFIG, sizeof(Config));
     configfile.close();
+    ESP_LOGI(LOG_TAG, "Config saved to filesystem");
+}
 
-    Serial.println("Config saved to filesystem");
+void ConfigService::saveEventually() {
+    ESP_LOGI(LOG_TAG, "Configuration scheduled to be stored in flash");
+    flashTicker.once(MIN_INTERVAL_SECONDS, &saveInternally);
 }
 
 void ConfigService::init() {
@@ -24,7 +31,7 @@ void ConfigService::init() {
         return;
     }
 
-    File configfile = SPIFFS.open(CONFIGFILE);
+    auto configfile = SPIFFS.open(CONFIGFILE);
     if (!configfile) {
         Serial.println("Failed to open configfile");
     }
@@ -47,7 +54,7 @@ void ConfigService::init() {
 // reset anyway, as we're still trying to fix some issues
 // CONFIG = Config();
 
-    // configfile.close();
+    configfile.close();
     printConfig();
 }
 

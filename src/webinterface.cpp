@@ -45,6 +45,10 @@ void Webinterface::begin() {
         colorHour[KEY_SATURATION] = config->colorHour.S;
         colorHour[KEY_VALUE] = config->colorHour.B;
         
+        // TODO: tempcode om naar clock-mode te gaan zonder dat er een kleurconfig wordt opgeslagen. TODO: kleurconfig loskoppelen van mode setten
+        auto newMode = Mode::Clock;
+        xQueueSend(xChangeAppQueue, &newMode, 0);
+
         String response;
         serializeJsonPretty(jsonDoc, response);
         request->send(200, "application/json", response);
@@ -117,7 +121,11 @@ void Webinterface::begin() {
                     auto newMode = Mode::Clock;
                     xQueueSend(xChangeAppQueue, &newMode, 0);
                     // xQueueSend(xClockConfigQueue, &config, 0);
+                    // TODO: is this the place to save settings???
+                    ConfigService::saveEventually();
                 }
+                auto newMode = Mode::Clock;
+                xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
 
