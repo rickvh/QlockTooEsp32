@@ -26,7 +26,6 @@ using namespace qlocktoo;
 
 void Clock::setup() {
     ESP_LOGI(LOG_TAG, "Clock setup");
-    config = &ConfigService::CONFIG.clockConfig;
     Display::begin();
     Display::clear();
 }
@@ -50,69 +49,70 @@ void Clock::loop() {
 
     Display::clear();
 
-    setColor(ledsbyword[HETIS], config->colorItIs);
+    const ClockConfig &config = ConfigService::CONFIG.clockConfig;
+    setColor(ledsbyword[HETIS], config.colorItIs);
     switch ((minute % 60) / 5) {
         case 0:
-            setColor(ledsbyword[current_hourword], config->colorHour);
-            setColor(ledsbyword[UUR], config->colorWords);
+            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsbyword[UUR], config.colorWords);
             break;
         case 1:
-            setColor(ledsbyword[VIJF], config->colorWords);
-            setColor(ledsbyword[OVER1], config->colorWords);
-            setColor(ledsbyword[current_hourword], config->colorHour);
+            setColor(ledsbyword[VIJF], config.colorWords);
+            setColor(ledsbyword[OVER1], config.colorWords);
+            setColor(ledsbyword[current_hourword], config.colorHour);
             break;
         case 2:
-            setColor(ledsbyword[TIEN], config->colorWords);
-            setColor(ledsbyword[OVER2], config->colorWords);
-            setColor(ledsbyword[current_hourword], config->colorHour);
+            setColor(ledsbyword[TIEN], config.colorWords);
+            setColor(ledsbyword[OVER2], config.colorWords);
+            setColor(ledsbyword[current_hourword], config.colorHour);
             break;
         case 3:
-            setColor(ledsbyword[KWART], config->colorWords);
-            setColor(ledsbyword[OVER2], config->colorWords);
-            setColor(ledsbyword[current_hourword], config->colorHour);
+            setColor(ledsbyword[KWART], config.colorWords);
+            setColor(ledsbyword[OVER2], config.colorWords);
+            setColor(ledsbyword[current_hourword], config.colorHour);
             break;
         case 4:
-            setColor(ledsbyword[TIEN], config->colorWords);
-            setColor(ledsbyword[VOOR1], config->colorWords);
-            setColor(ledsbyword[HALF], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[TIEN], config.colorWords);
+            setColor(ledsbyword[VOOR1], config.colorWords);
+            setColor(ledsbyword[HALF], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 5:
-            setColor(ledsbyword[VIJF], config->colorWords);
-            setColor(ledsbyword[VOOR1], config->colorWords);
-            setColor(ledsbyword[HALF], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[VIJF], config.colorWords);
+            setColor(ledsbyword[VOOR1], config.colorWords);
+            setColor(ledsbyword[HALF], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 6:
-            setColor(ledsbyword[HALF], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[HALF], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 7:
-            setColor(ledsbyword[VIJF], config->colorWords);
-            setColor(ledsbyword[OVER1], config->colorWords);
-            setColor(ledsbyword[HALF], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[VIJF], config.colorWords);
+            setColor(ledsbyword[OVER1], config.colorWords);
+            setColor(ledsbyword[HALF], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 8:
-            setColor(ledsbyword[TIEN], config->colorWords);
-            setColor(ledsbyword[OVER1], config->colorWords);
-            setColor(ledsbyword[HALF], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[TIEN], config.colorWords);
+            setColor(ledsbyword[OVER1], config.colorWords);
+            setColor(ledsbyword[HALF], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 9:
-            setColor(ledsbyword[KWART], config->colorWords);
-            setColor(ledsbyword[VOOR2], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[KWART], config.colorWords);
+            setColor(ledsbyword[VOOR2], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 10:
-            setColor(ledsbyword[TIEN], config->colorWords);
-            setColor(ledsbyword[VOOR1], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[TIEN], config.colorWords);
+            setColor(ledsbyword[VOOR1], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
         case 11:
-            setColor(ledsbyword[VIJF], config->colorWords);
-            setColor(ledsbyword[VOOR2], config->colorWords);
-            setColor(ledsbyword[next_hourword], config->colorHour);
+            setColor(ledsbyword[VIJF], config.colorWords);
+            setColor(ledsbyword[VOOR2], config.colorWords);
+            setColor(ledsbyword[next_hourword], config.colorHour);
             break;
     }
 

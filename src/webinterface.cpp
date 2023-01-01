@@ -11,7 +11,6 @@
 #include "ArduinoJson.h"
 #include "AsyncJson.h"
 #include "apps/clock.h"
-#include "control.h"
 #include "configservice.h"
 #include "buildinfo.h"
 

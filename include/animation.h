@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 #include "app.h"
-#include "control.h"
 #include "image.h"
 
 using namespace std;

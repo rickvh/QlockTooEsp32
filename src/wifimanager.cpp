@@ -1,7 +1,7 @@
 #include "wifimanager.h"
 #include <WiFi.h>
-#include "control.h"
 #include "configservice.h"
+#include "mode.h"
 
 using namespace qlocktoo;
 

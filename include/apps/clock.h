@@ -3,7 +3,6 @@
 #include <vector>
 #include "app.h"
 #include "display.h"
-#include "control.h"
 #include "configservice.h"
 
 namespace qlocktoo {
@@ -21,7 +20,6 @@ class Clock : public App {
     const uint8_t VOOR2 = 20;
     const uint8_t OVER2 = 21;
 
-    ClockConfig* config;
     struct tm currentTime;
     uint8_t timeBrightness();
     void setColor(const std::vector<uint8_t> leds, HsbColor color);
@@ -52,9 +50,11 @@ class Clock : public App {
         {40, 41, 42, 43}                // OVER2
     };
 
+   protected:
+    void setup() override;
+    void loop() override;
+
    public:
     Clock() : App(Mode::Clock) {};
-    void setup();
-    void loop();
 };
 }

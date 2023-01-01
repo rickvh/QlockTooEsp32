@@ -21,12 +21,11 @@ enum class Mode {
     Error
 };
 
-static const char *enum_str[] =
-        { 
-            "Unknown", "Image", "Animation", "Text",
-            "WifiConnection", "WifiSetupRequired", "OTAinProgress", "Clock", "Swirl", "Ledtest", "Snow", "Error"
-        };
+static const char *mode_str[] =
+    { 
+        "Unknown", "Image", "Animation", "Text",
+        "WifiConnecting", "WifiSetupRequired", "OTAinProgress", "Clock", "Swirl", "Ledtest", "Snow", "Error"
+    };
 
-const char* toString(Mode mode);
-
+const char *modeToString(Mode mode);
 }

@@ -15,7 +15,7 @@
 #include "wifimanager.h"
 #include <DNSServer.h>
 #include "ESPmDNS.h"
-#include "control.h"
+#include "mode.h"
 #include "webinterface.h"
 #include "apps/ledtest.h"
 #include "apps/swirl.h"
@@ -35,26 +35,25 @@ int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
 static constexpr const char* LOG_TAG = "main";
 
-WifiManager Wifi;
-Webinterface webinterface(80);
-
 void changeMode(qlocktoo::Mode mode);
 void listPartitions();
 void listFiles();
-void runAppTask(void * parameter);
-void runImportantStuffTask(void * parameter);
 
-TaskHandle_t otaTask = NULL;
-TaskHandle_t currentAppTask = NULL;
 App* currentApp = NULL;
 qlocktoo::Mode currentMode = Mode::Unknown;
+WifiManager Wifi;
+Webinterface webinterface(80);
+
 
 /**
  * FreeRTOS stuff
  */
+void runAppTask(void * parameter);
+void runOtaTask(void * parameter);
+TaskHandle_t otaTask = NULL;
+TaskHandle_t currentAppTask = NULL;
 QueueHandle_t xChangeAppQueue = NULL;
 QueueHandle_t xWifiConfigChangedQueue = NULL;
-
 
 void setupWifi() {
   ESP_LOGI(LOG_TAG, "Connecting to Wifi...");
@@ -115,17 +114,84 @@ void setupOTA() {
   ArduinoOTA.begin();
 }
 
-void changeMode(Mode mode) {
+void setup() {
+  Serial.begin(115200);
+  ESP_LOGI(LOG_TAG, "QlockToo version %s", BuildInfo::version);
+
+  if (!SPIFFS.begin(true)) {
+    ESP_LOGE(LOG_TAG, "SPIFFS cannot be opened\n");
+  };
+
+  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  ESP_LOGI(LOG_TAG, "Setup RTOS queues");
+  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
+  ESP_LOGI(LOG_TAG, "Setup persistent configuration");
+  ConfigService::init();
+  ESP_LOGI(LOG_TAG, "Setup Wifi");
+  setupWifi();
+  ESP_LOGI(LOG_TAG, "Setup OTA");
+  setupOTA();
+  ESP_LOGI(LOG_TAG, "Setup LED Display");
+  Display::begin();
+  ESP_LOGI(LOG_TAG, "Setup NTP");
+  setupNTP();
+  ESP_LOGI(LOG_TAG, "Setup Webinterface");
+  webinterface.begin();
+
+  // Start OTA and Clock tasks
+  xTaskCreatePinnedToCore(runOtaTask, "OTA", 8192, NULL, 2, &otaTask, 1);
+  
+
+  changeMode(Mode::Clock);
+  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 0);
+}
+
+// Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
+void loop() {
+  delay(300);
+
+  NetworkConfig networkConfig;
+  if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
+    ESP_LOGI(LOG_TAG, "Wifi settings updated");
+    ESP_LOGI(LOG_TAG, "SSID: %s", (char*) networkConfig.ssid);
+    ESP_LOGD(LOG_TAG, "PWD: %s", (char*) networkConfig.password);
+    Wifi.updateConfig(networkConfig);
+  }
+};
+
+void runOtaTask(void * parameter) {
+  for (;;) {
+    ArduinoOTA.handle();
+    delay(300);
+  }
+}
+
+
+void runAppTask(void * parameter) {
+  for (;;) {
+    Mode newMode;
+    if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
+      ESP_LOGI(LOG_TAG, "Mode changed: %s -> %s", modeToString(currentMode), modeToString(newMode));
+      changeMode(newMode);
+    }
+    
+    if (currentApp) {
+      currentApp->handle();
+    }
+
+    // For safety reasons - make sure there's at least a chance for FreeRTOS to switch tasks.
+    delay(10);
+  }
+}
+
+void changeMode(qlocktoo::Mode mode) {
   if (currentMode == mode) {
     return;
   }
   currentMode = mode;
 
   if (currentApp) {
-    while (!currentApp->canTerminate) {
-      ESP_LOGI(LOG_TAG, "wait till termination is safe...");
-      delay(500);
-    }
+    currentApp->stop();
     delete currentApp;
     currentApp = NULL;
   }
@@ -158,75 +224,7 @@ void changeMode(Mode mode) {
       return;
   }
 
-  ESP_LOGI(LOG_TAG, "Start new app");
-}
-
-void setup() {
-  Serial.begin(115200);
-  ESP_LOGI(LOG_TAG, "QlockToo version %s", BuildInfo::version);
-
-  if (!SPIFFS.begin(true)) {
-    ESP_LOGE(LOG_TAG, "SPIFFS cannot be opened\n");
-  };
-
-  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
-  ESP_LOGI(LOG_TAG, "Setup RTOS queues");
-  xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
-  ESP_LOGI(LOG_TAG, "Setup persistent configuration");
-  ConfigService::init();
-  ESP_LOGI(LOG_TAG, "Setup Wifi");
-  setupWifi();
-  ESP_LOGI(LOG_TAG, "Setup OTA");
-  setupOTA();
-  ESP_LOGI(LOG_TAG, "Setup LED Display");
-  Display::begin();
-  ESP_LOGI(LOG_TAG, "Setup NTP");
-  setupNTP();
-  ESP_LOGI(LOG_TAG, "Setup Webinterface");
-  webinterface.begin();
-
-  // Start OTA and Clock app
-  changeMode(Mode::Clock);
-  xTaskCreatePinnedToCore(runImportantStuffTask, "OTA", 8192, NULL, 2, &otaTask, 1);
-  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 0);
-}
-
-// Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.
-void loop() {
-  delay(300);
-
-  Mode newMode;
-  if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
-    ESP_LOGI(LOG_TAG, "Mode changed: %s -> %s", toString(currentMode), toString(newMode));
-    changeMode(newMode);
-  }
-
-  NetworkConfig networkConfig;
-  if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
-    ESP_LOGI(LOG_TAG, "Wifi settings updated");
-    ESP_LOGI(LOG_TAG, "SSID: %s", (char*) networkConfig.ssid);
-    ESP_LOGD(LOG_TAG, "PWD: %s", (char*) networkConfig.password);
-    Wifi.updateConfig(networkConfig);
-  }
-};
-
-void runImportantStuffTask(void * parameter) {
-  for (;;) {
-    ArduinoOTA.handle();
-    delay(300);
-  }
-}
-
-
-void runAppTask(void * parameter) {
-  for (;;) {
-    if (currentApp) {
-      currentApp->handle();
-    }
-
-    // For safety reasons - make sure there's at least a chance for FreeRTOS to switch tasks.
-    delay(10);
-  }
+  ESP_LOGI(LOG_TAG, "Start new app '%s'", modeToString(currentMode));
 }
 
 void listPartitions(void)

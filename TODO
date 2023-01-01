@@ -1,5 +1,10 @@
-Display
-[ ] - support multiple display configurations
+Prio's:
+- store clockkleuren to flash
+  - Check ook of de clockconfig niet wordt ingeladen VOORDAT de configuratie correct is ingelezen vanuit flash
+  - Splits apicall voor clock naar switchen en updaten van kleurconfig
+- logmessages via ESP_LOGI()
+- waarom krijg je zo vaak de wifi animatie @boottime???
+- bouw release
 
 
 Flow:

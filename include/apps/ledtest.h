@@ -1,7 +1,6 @@
 #pragma once
 
 #include "app.h"
-#include "control.h"
 #include "Arduino.h"
 #include "display.h"
 
@@ -19,9 +18,11 @@ class Ledtest : public App {
     float hueGreen = 0.25f;
     float hueCurrent = 0.0f;
 
+   protected:
+    void setup() override;
+    void loop() override;
+
    public:
     Ledtest() : App(Mode::Ledtest) {}
-    void setup();
-    void loop();
 };
 }

@@ -8,8 +8,5 @@ void App::handle() {
         initialized = true;
     }
 
-    // TODO: thread-safe
-    canTerminate = false;
     loop();
-    canTerminate = true;
 }
