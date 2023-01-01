@@ -142,7 +142,7 @@ Image::Image(Preset preset) : App(Mode::Image) {
 
 void Image::readFile(std::string filename) {
     if (!SPIFFS.exists(filename.c_str())) {
-        Serial.printf("File not found: %s\n", filename);
+        ESP_LOGE(LOG_TAG, "File not found: %s", filename);
         return;
     }
 

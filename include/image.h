@@ -29,6 +29,7 @@ const static uint8_t PROGMEM IMG_ERROR[] = {
 
 class Image : public App {
    private:
+    static constexpr const char* LOG_TAG = "image";
     const static uint8_t WIDTH = Display::WIDTH;
     const static uint8_t HEIGHT = Display::HEIGHT;
     std::array<NeoGrbwFeature::ColorObject, WIDTH * HEIGHT> pixels;

@@ -2,10 +2,10 @@
 #include <vector>
 #include <WiFi.h>
 #include "time.h"
-#include "configservice.h"
 
 #define NTP_TIMEOUT 1500
 
+using namespace qlocktoo;
 /*
    HET IS X UUR
    HET IS VIJF OVER X
@@ -24,10 +24,8 @@
 */
 
 
-
-namespace qlocktoo {
 void Clock::setup() {
-    Serial.println("Clock setup");
+    ESP_LOGI(LOG_TAG, "Clock setup");
     config = &ConfigService::CONFIG.clockConfig;
     Display::begin();
     Display::clear();
@@ -35,7 +33,7 @@ void Clock::setup() {
 
 void Clock::loop() {
     if (!getLocalTime(&this->currentTime)) {
-        Serial.println("Failed to obtain time");
+        ESP_LOGI(LOG_TAG, "Failed to obtain time");
         return;
     }
 
@@ -127,5 +125,3 @@ void Clock::setColor(const std::vector<uint8_t> leds, HsbColor color) {
         Display::drawPixel(led % Display::WIDTH, led / Display::WIDTH, color);
     }
 }
-
-}  // namespace qlocktoo

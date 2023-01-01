@@ -9,6 +9,7 @@ extern QueueHandle_t xWifiConfigChangedQueue;
 namespace qlocktoo {
     class WifiManager {
         private:
+            static constexpr const char* LOG_TAG = "wifimanager";
             const char* AP_SSID = "Qlocktoo";
             const char* AP_PASSWORD = "qlocktoo";
             

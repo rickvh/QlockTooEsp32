@@ -1,14 +1,15 @@
 #include "app.h"
 
-namespace qlocktoo {
-    void App::handle() {
-        if (! initialized) {
-            setup();
-            initialized = true;
-        }
+using namespace qlocktoo;
 
-        canTerminate = false;
-        loop();
-        canTerminate = true;
+void App::handle() {
+    if (! initialized) {
+        setup();
+        initialized = true;
     }
+
+    // TODO: thread-safe
+    canTerminate = false;
+    loop();
+    canTerminate = true;
 }

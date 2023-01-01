@@ -2,6 +2,7 @@
 #include "display.h"
 
 using namespace qlocktoo;
+
 void Ledtest::setup() {
     Display::clear();
 }
@@ -17,7 +18,7 @@ void Ledtest::loop() {
         }
     }
     
-    Serial.printf("X: %u, Y: %u\n", x, y);
+    ESP_LOGI(LOG_TAG, "X: %u, Y: %u", x, y);
     Display::drawPixel(x, y, HsbColor(hueCurrent, 1.0f, 0.5f));
     Display::show();
     

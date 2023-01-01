@@ -19,4 +19,4 @@ class App {
     void handle();
     volatile bool canTerminate;
 };
-}  // namespace qlocktoo
+}

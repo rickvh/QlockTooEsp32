@@ -2,6 +2,7 @@
 #include "display.h"
 
 using namespace qlocktoo;
+
 void Swirl::setup() {
     Display::clear();
 }

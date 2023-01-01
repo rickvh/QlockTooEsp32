@@ -6,11 +6,10 @@
 #include "control.h"
 #include "configservice.h"
 
-extern QueueHandle_t xClockConfigQueue;
-
 namespace qlocktoo {
 class Clock : public App {
    private:
+    static constexpr const char* LOG_TAG = "clock";
     const uint8_t HETIS = 0;
     const uint8_t VIJF = 13;
     const uint8_t TIEN = 14;
@@ -26,7 +25,6 @@ class Clock : public App {
     struct tm currentTime;
     uint8_t timeBrightness();
     void setColor(const std::vector<uint8_t> leds, HsbColor color);
-    // void handleConfigQueue();
 
     // Every pixel is calculated as: pixel = y * displaywidth + x. Where x and y are zero-based, starting in the top-left corner.
     const std::vector<std::vector<uint8_t>> ledsbyword = {

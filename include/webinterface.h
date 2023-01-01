@@ -6,11 +6,11 @@ using namespace std;
 
 extern QueueHandle_t xChangeAppQueue;
 extern QueueHandle_t xWifiConfigChangedQueue;
-extern QueueHandle_t xClockConfigQueue;
 
 namespace qlocktoo {
 class Webinterface {
    private:
+    static constexpr const char* LOG_TAG = "webinterface";
     const int timeout = 2000;  // timout for connections in milliseconds
     const char *KEY_HUE = "h";
     const char *KEY_SATURATION = "s";

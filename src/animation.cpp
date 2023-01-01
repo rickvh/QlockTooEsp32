@@ -1,7 +1,8 @@
 #include "animation.h"
 #include "image.h"
 
-namespace qlocktoo {
+using namespace qlocktoo;
+
 Animation::Animation(Preset preset) : App(Mode::Animation) {
     switch(preset) {
         case Preset::Wifi:
@@ -27,5 +28,4 @@ void Animation::loop() {
     Image image(frames.at(currentFrame));
     image.show();
     delay(300);
-}
 }

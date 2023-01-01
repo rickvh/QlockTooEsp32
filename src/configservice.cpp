@@ -11,7 +11,7 @@ Ticker ConfigService::flashTicker;
 void ConfigService::saveInternally() {
     auto configfile = SPIFFS.open(CONFIGFILE, "w");
     if (!configfile) {
-        Serial.println("Failed to save configfile");
+        ESP_LOGE(LOG_TAG, "Failed to save config to filesystem");
     }
 
     configfile.write((unsigned char*) &CONFIG, sizeof(Config));
@@ -26,14 +26,14 @@ void ConfigService::saveEventually() {
 
 void ConfigService::init() {
     if (!SPIFFS.exists(CONFIGFILE)) {
-        Serial.println("No configfile found...Initializing defaults");
+        ESP_LOGI(LOG_TAG, "No configfile found...Initializing defaults");
         CONFIG = Config();
         return;
     }
 
     auto configfile = SPIFFS.open(CONFIGFILE);
     if (!configfile) {
-        Serial.println("Failed to open configfile");
+        ESP_LOGE(LOG_TAG, "Failed to open configfile");
     }
 
     // check if filesize matches structsize
@@ -42,9 +42,9 @@ void ConfigService::init() {
         for(uint16_t i = 0; i < sizeof(Config); i++){
             buffer[i] = configfile.read();
         }
-        Serial.println("Config loaded from filesystem");
+        ESP_LOGI(LOG_TAG, "Config loaded from filesystem");
     } else {
-        Serial.println("Config corrupt...Initializing defaults");
+        ESP_LOGE(LOG_TAG, "Config corrupt...Initializing defaults");
         CONFIG = Config();
         strcpy(CONFIG.networkConfig.hostname, "qlocktoo"); // TODO: add unique suffix based on MAC
         strcpy(CONFIG.networkConfig.ssid, "");
@@ -59,9 +59,10 @@ void ConfigService::init() {
 }
 
 void ConfigService::printConfig() {
-    Serial.println("Configuration:");
-    Serial.printf("- Hostname: %s\n", (char*) CONFIG.networkConfig.hostname);
-    Serial.printf("- AP SSID: %s\n", (char*) CONFIG.networkConfig.ssid);
-    Serial.printf("- AP password: %s\n", (char*) CONFIG.networkConfig.password);
-}
+    ESP_LOGI(LOG_TAG, "Hostname: %s", (char*) CONFIG.networkConfig.hostname);
+    ESP_LOGI(LOG_TAG, "AP SSID: %s", (char*) CONFIG.networkConfig.ssid);
+    ESP_LOGI(LOG_TAG, "AP password: %s", (char*) CONFIG.networkConfig.password);
+    ESP_LOGI(LOG_TAG, "Clock color ItIs (H, S, B): %f, %f, %f", CONFIG.clockConfig.colorItIs.H, CONFIG.clockConfig.colorItIs.S, CONFIG.clockConfig.colorItIs.B);
+    ESP_LOGI(LOG_TAG, "Clock color Words (H, S, B): %f, %f, %f", CONFIG.clockConfig.colorWords.H, CONFIG.clockConfig.colorWords.S, CONFIG.clockConfig.colorWords.B);
+    ESP_LOGI(LOG_TAG, "Clock color Hour (H, S, B): %f, %f, %f", CONFIG.clockConfig.colorHour.H, CONFIG.clockConfig.colorHour.S, CONFIG.clockConfig.colorHour.B);
 }

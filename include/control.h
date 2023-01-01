@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Arduino.h>
-
 namespace qlocktoo {
 
 enum class Mode {
@@ -22,5 +20,13 @@ enum class Mode {
     Snow,
     Error
 };
+
+static const char *enum_str[] =
+        { 
+            "Unknown", "Image", "Animation", "Text",
+            "WifiConnection", "WifiSetupRequired", "OTAinProgress", "Clock", "Swirl", "Ledtest", "Snow", "Error"
+        };
+
+const char* toString(Mode mode);
 
 }

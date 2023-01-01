@@ -33,6 +33,7 @@ using namespace std;
 const uint8_t   timeZone = 1;     // Central European Time
 int8_t minutesTimeZone = 0;
 const PROGMEM char *ntpServer = "pool.ntp.org";
+static constexpr const char* LOG_TAG = "main";
 
 WifiManager Wifi;
 Webinterface webinterface(80);
@@ -53,23 +54,21 @@ qlocktoo::Mode currentMode = Mode::Unknown;
  */
 QueueHandle_t xChangeAppQueue = NULL;
 QueueHandle_t xWifiConfigChangedQueue = NULL;
-QueueHandle_t xClockConfigQueue = NULL;
 
 
 void setupWifi() {
-  Serial.println("Connecting to Wifi...");
-
+  ESP_LOGI(LOG_TAG, "Connecting to Wifi...");
   Wifi.begin();
-  Serial.printf("Wifi connected: %s\n", WiFi.localIP());
+  ESP_LOGI(LOG_TAG, "Wifi connected: %s", WiFi.localIP().toString());
 
   #if defined USE_MDNS && defined HOST_NAME
 	if (MDNS.begin(HOST_NAME)) {
-		Serial.printf("* MDNS responder started. Hostname -> ", HOST_NAME);
+		ESP_LOGI(LOG_TAG, "* MDNS responder started. Hostname: %s", HOST_NAME);
     MDNS.addService("http", "tcp", 80);
     MDNS.addService("telnet", "tcp", 23);
 	}
   #else
-  Serial.println("mDNS disabled");
+  ESP_LOGI(LOG_TAG, "mDNS disabled");
   #endif
 }
 
@@ -94,21 +93,21 @@ void setupOTA() {
       // Unmount SPIFFS
       SPIFFS.end();
       changeMode(Mode::OTAinProgress);
-      Serial.println("Start updating " + type);
+      ESP_LOGI(LOG_TAG, "Start updating %s", type);
     })
     .onEnd([]() {
-      Serial.println("\nEnd");
+      ESP_LOGI(LOG_TAG, "\nEnd");
     })
     .onProgress([](unsigned int progress, unsigned int total) {
-      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      ESP_LOGI(LOG_TAG, "Progress: %u%%", (progress / (total / 100)));
     })
     .onError([](ota_error_t error) {
-      Serial.printf("Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      ESP_LOGE(LOG_TAG, "Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) ESP_LOGE(LOG_TAG, "Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) ESP_LOGE(LOG_TAG, "Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) ESP_LOGE(LOG_TAG, "Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) ESP_LOGE(LOG_TAG, "Receive Failed");
+      else if (error == OTA_END_ERROR) ESP_LOGE(LOG_TAG, "End Failed");
       changeMode(Mode::Error);
       delay(5000);
     });
@@ -124,8 +123,8 @@ void changeMode(Mode mode) {
 
   if (currentApp) {
     while (!currentApp->canTerminate) {
-      Serial.println("wait till termination is safe...");
-      delay(50);
+      ESP_LOGI(LOG_TAG, "wait till termination is safe...");
+      delay(500);
     }
     delete currentApp;
     currentApp = NULL;
@@ -159,34 +158,31 @@ void changeMode(Mode mode) {
       return;
   }
 
-  Serial.println("Start new app");
+  ESP_LOGI(LOG_TAG, "Start new app");
 }
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Booting QlockToo");
-  Serial.printf("%s\n", BuildInfo::version);
+  ESP_LOGI(LOG_TAG, "QlockToo version %s", BuildInfo::version);
 
   if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS cannot be opened");
+    ESP_LOGE(LOG_TAG, "SPIFFS cannot be opened\n");
   };
 
   xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  ESP_LOGI(LOG_TAG, "Setup RTOS queues");
   xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
-  xClockConfigQueue = xQueueCreate(1, sizeof(ClockConfig));
-  Serial.println("Queues created");
-
-  Serial.println("setup persistable configuration");
+  ESP_LOGI(LOG_TAG, "Setup persistent configuration");
   ConfigService::init();
-  Serial.println("setup Wifi");
+  ESP_LOGI(LOG_TAG, "Setup Wifi");
   setupWifi();
-  Serial.println("setup OTA");
+  ESP_LOGI(LOG_TAG, "Setup OTA");
   setupOTA();
-  Serial.println("setup LED Display");
+  ESP_LOGI(LOG_TAG, "Setup LED Display");
   Display::begin();
-  Serial.println("setup NTP");
+  ESP_LOGI(LOG_TAG, "Setup NTP");
   setupNTP();
-  Serial.println("setup Webinterface");
+  ESP_LOGI(LOG_TAG, "Setup Webinterface");
   webinterface.begin();
 
   // Start OTA and Clock app
@@ -201,15 +197,15 @@ void loop() {
 
   Mode newMode;
   if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
-    Serial.println("Mode changed");
+    ESP_LOGI(LOG_TAG, "Mode changed: %s -> %s", toString(currentMode), toString(newMode));
     changeMode(newMode);
   }
 
   NetworkConfig networkConfig;
   if (xQueueReceive(xWifiConfigChangedQueue, &networkConfig, 0) == pdTRUE) {
-    Serial.println("Wifi settings updated");
-    Serial.printf("SSID: %s\n", (char*) networkConfig.ssid);
-    Serial.printf("PWD: %s\n", (char*) networkConfig.password);
+    ESP_LOGI(LOG_TAG, "Wifi settings updated");
+    ESP_LOGI(LOG_TAG, "SSID: %s", (char*) networkConfig.ssid);
+    ESP_LOGD(LOG_TAG, "PWD: %s", (char*) networkConfig.password);
     Wifi.updateConfig(networkConfig);
   }
 };
@@ -239,15 +235,15 @@ void listPartitions(void)
   esp_partition_iterator_t _mypartiterator;
   const esp_partition_t *_mypart;
   ul = spi_flash_get_chip_size();
-  Serial.printf("Flash chip size: %u\n", ul);
-  Serial.println("Partiton table:");
+  ESP_LOGI(LOG_TAG, "Flash chip size: %u", ul);
+  ESP_LOGI(LOG_TAG, "Partiton table:");
   _mypartiterator = esp_partition_find(ESP_PARTITION_TYPE_APP, ESP_PARTITION_SUBTYPE_ANY, NULL);
   if (_mypartiterator)
   {
     do
     {
       _mypart = esp_partition_get(_mypartiterator);
-      Serial.printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+      ESP_LOGI(LOG_TAG, "%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
     } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
   }
   esp_partition_iterator_release(_mypartiterator);
@@ -257,7 +253,7 @@ void listPartitions(void)
     do
     {
       _mypart = esp_partition_get(_mypartiterator);
-      Serial.printf("%x - %x - %x - %x - %s - %i\n", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
+      ESP_LOGI(LOG_TAG, "%x - %x - %x - %x - %s - %i", _mypart->type, _mypart->subtype, _mypart->address, _mypart->size, _mypart->label, _mypart->encrypted);
     } while ((_mypartiterator = esp_partition_next(_mypartiterator)));
   }
   esp_partition_iterator_release(_mypartiterator);
@@ -268,8 +264,7 @@ void listFiles() {
   File file = root.openNextFile();
  
   while(file){
-    Serial.printf("File: %s\n", file.name());
- 
+    ESP_LOGI(LOG_TAG, "File: %s", file.name());
     file = root.openNextFile();
   }
 }

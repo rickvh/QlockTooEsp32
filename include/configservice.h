@@ -27,6 +27,7 @@ typedef struct {
 
 class ConfigService {
     private:
+        static constexpr const char* LOG_TAG = "configservice";
         static constexpr const char* CONFIGFILE = "/settings.cfg";
         static const uint16_t MIN_INTERVAL_SECONDS = 60;
         static void printConfig();
