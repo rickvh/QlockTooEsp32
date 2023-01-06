@@ -1,4 +1,6 @@
 #include "apps/clock.h"
+#include "transitions/slideshow.h"
+#include <memory>
 #include <vector>
 #include <WiFi.h>
 #include "time.h"
@@ -6,23 +8,6 @@
 #define NTP_TIMEOUT 1500
 
 using namespace qlocktoo;
-/*
-   HET IS X UUR
-   HET IS VIJF OVER X
-   HET IS TIEN OVER X
-   HET IS KWART OVER X
-   HET IS TIEN VOOR HALF (X+1)
-   HET IS VIJF VOOR HALF (X+1)
-   HET IS HALF (X+1)
-   HET IS VIJF OVER HALF (X+1)
-   HET IS TIEN OVER HALF (X+1)
-   HET IS KWART VOOR (X+1)
-   HET IS TIEN VOOR (X+1)
-   HET IS VIJF VOOR (X+1)
-   HET IS (X+1) UUR
-   ...
-*/
-
 
 void Clock::setup() {
     ESP_LOGI(LOG_TAG, "Clock setup");
@@ -30,28 +15,48 @@ void Clock::setup() {
     Display::clear();
 }
 
+std::unique_ptr<Image> Clock::getImageFromTime(const tm &time) {
+    // TODO
+}
+
+
 void Clock::loop() {
+    // update time
     if (!getLocalTime(&this->currentTime)) {
         ESP_LOGI(LOG_TAG, "Failed to obtain time");
         return;
     }
 
-    uint8_t hour = currentTime.tm_hour;
-    uint8_t minute = currentTime.tm_min;
+    // if time has advanced 5 minutes
+    // if (previousTime.tm_min % 5 != 0 && currentTime.tm_min % 5 == 0) {
+    if (previousTime.tm_min != currentTime.tm_min) {
+        ESP_LOGD(LOG_TAG, "Activate transition");
+        //transition = std::unique_ptr<Transition>(new Slideshow(getImageFromTime(previousTime), getImageFromTime(currentTime)));
+        transition = std::unique_ptr<Transition>(new Slideshow(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)), std::unique_ptr<Image>(new Image(Image::Preset::XmasTree))));
+    }
+    previousTime = currentTime; 
 
-    int currentHourWord = hour;
-    if (currentHourWord > 12) currentHourWord = currentHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (currentHourWord == 0) currentHourWord = 12;                     // 0 is also called 12
 
-    int nextHourWord = hour + 1;
-    if (nextHourWord > 12) nextHourWord = nextHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (nextHourWord == 0) nextHourWord = 12;                  // 0 is also called 12
+    if (transition.get() != nullptr && !transition->isDone()) {
+        transition->update();
+        return;
+    }
 
+
+    // show current time
     Display::clear();
 
+    int current_hourword = currentTime.tm_hour;
+    if (current_hourword > 12) current_hourword = current_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (current_hourword == 0) current_hourword = 12;                     // 0 is also called 12
+
+    int next_hourword = currentTime.tm_hour + 1;
+    if (next_hourword > 12) next_hourword = next_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (next_hourword == 0) next_hourword = 12;                  // 0 is also called 12
+    
     const ClockConfig &config = ConfigService::CONFIG.clockConfig;
     setColor(ledsByWord[HETIS], config.colorItIs);
-    switch ((minute % 60) / 5) {
+    switch ((currentTime.tm_min % 60) / 5) {
         case 0:
             setColor(ledsByWord[currentHourWord], config.colorHour);
             setColor(ledsByWord[UUR], config.colorWords);
@@ -127,7 +132,7 @@ void Clock::loop() {
     delay(1000);
 }
 
-void Clock::setColor(const std::vector<uint8_t> leds, HsbColor color) {
+void Clock::setColor(const std::vector<uint8_t> &leds, HsbColor color) {
     for (uint8_t led : leds) {
         Display::drawPixel(led % Display::WIDTH, led / Display::WIDTH, color);
     }

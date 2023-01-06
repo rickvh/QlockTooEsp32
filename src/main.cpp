@@ -181,6 +181,7 @@ void loop() {
   }
 };
 
+// Listen for Over-The-Air updates
 void runOtaTask(void * parameter) {
   for (;;) {
     ArduinoOTA.handle();
@@ -188,7 +189,7 @@ void runOtaTask(void * parameter) {
   }
 }
 
-
+// FreeRTOS task which keeps running the current app. The currentApp however, will be changed when requested.
 void runAppTask(void * parameter) {
   for (;;) {
     Mode newMode;

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include "app.h"
 #include "display.h"
 #include "configservice.h"
+#include "transitions/transition.h"
 
 namespace qlocktoo {
 class Clock : public App {
@@ -20,9 +22,11 @@ class Clock : public App {
     const uint8_t VOOR2 = 20;
     const uint8_t OVER2 = 21;
 
-    struct tm currentTime;
+    struct tm previousTime, currentTime;
     uint8_t timeBrightness();
-    void setColor(const std::vector<uint8_t> leds, HsbColor color);
+    void setColor(const std::vector<uint8_t> &leds, HsbColor color);
+    std::unique_ptr<Transition> transition = nullptr;
+    std::unique_ptr<Image> getImageFromTime(const tm &time);
 
     // Every pixel is calculated as: pixel = y * displaywidth + x. Where x and y are zero-based, starting in the top-left corner.
     const std::vector<std::vector<uint8_t>> ledsByWord = {

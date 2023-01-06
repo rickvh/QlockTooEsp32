@@ -27,6 +27,7 @@ class Display {
     const static uint8_t WIDTH = 11;
     const static uint8_t HEIGHT = 10;
 
+    static void begin();
     static uint8_t setbrightness(uint8_t brightness) { return brightness; }; // TODO
     static uint8_t getbrightness() { return 255; }; // TODO
 

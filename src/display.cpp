@@ -13,7 +13,6 @@
 namespace qlocktoo {
     static uint16_t getLedByCoordinate(uint16_t x, uint16_t y) {
 #ifdef BOARD_FREESTYLE
-            #pragma message("Compiling for SK6812")
         static uint8_t mapping[11][10] = {
             {73, 80, 102, 96, 58, 51, 22, 7, 30, 0},
             {81, 66, 65, 88, 89, 15, 14, 44, 43, 37},
@@ -30,7 +29,6 @@ namespace qlocktoo {
             return mapping[x][9 - y];
 #endif
 #ifdef BOARD_WS2811
-            #pragma message("Compiling for WS2811")
             if (y%2 == 0) {
                 return y * Display::WIDTH + x; 
             } else {

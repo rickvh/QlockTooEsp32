@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include "mode.h"
 
 namespace qlocktoo {
@@ -10,6 +9,7 @@ class App {
     qlocktoo::Mode mode;
 
    protected:
+    App() = delete;
     App(Mode mode) : initialized(false), mode(mode) {};
     virtual void setup() = 0;
     virtual void loop() = 0;
