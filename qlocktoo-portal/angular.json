@@ -76,18 +76,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "qlocktoo-portal:build"
+            "buildTarget": "qlocktoo-portal:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "qlocktoo-portal:build:production"
+              "buildTarget": "qlocktoo-portal:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "qlocktoo-portal:build"
+            "buildTarget": "qlocktoo-portal:build"
           }
         },
         "test": {
