@@ -174,6 +174,13 @@ void Webinterface::begin() {
                 xQueueSend(xChangeAppQueue, &newMode, 0);
                 request->send(200, "application/json", "{ \"status\": \"success\" }");
             }
+
+            if (request->url() == "/api/reboot") {
+                ESP_LOGI(LOG_TAG, "Rebooting");        
+                request->send(200, "application/json", "{ \"status\": \"success\" }");
+                delay(1000);
+                ESP.restart();
+            }
         }
     );
 
