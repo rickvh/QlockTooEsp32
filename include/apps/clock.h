@@ -25,7 +25,7 @@ class Clock : public App {
     void setColor(const std::vector<uint8_t> leds, HsbColor color);
 
     // Every pixel is calculated as: pixel = y * displaywidth + x. Where x and y are zero-based, starting in the top-left corner.
-    const std::vector<std::vector<uint8_t>> ledsbyword = {
+    const std::vector<std::vector<uint8_t>> ledsByWord = {
         {0, 1, 2, 4, 5},                // HET IS
         {51, 52, 53},                   // een
         {55, 56, 57, 58},               // twee

@@ -39,84 +39,91 @@ void Clock::loop() {
     uint8_t hour = currentTime.tm_hour;
     uint8_t minute = currentTime.tm_min;
 
-    int current_hourword = hour;
-    if (current_hourword > 12) current_hourword = current_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (current_hourword == 0) current_hourword = 12;                     // 0 is also called 12
+    int currentHourWord = hour;
+    if (currentHourWord > 12) currentHourWord = currentHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (currentHourWord == 0) currentHourWord = 12;                     // 0 is also called 12
 
-    int next_hourword = hour + 1;
-    if (next_hourword > 12) next_hourword = next_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (next_hourword == 0) next_hourword = 12;                  // 0 is also called 12
+    int nextHourWord = hour + 1;
+    if (nextHourWord > 12) nextHourWord = nextHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (nextHourWord == 0) nextHourWord = 12;                  // 0 is also called 12
 
     Display::clear();
 
     const ClockConfig &config = ConfigService::CONFIG.clockConfig;
-    setColor(ledsbyword[HETIS], config.colorItIs);
+    setColor(ledsByWord[HETIS], config.colorItIs);
     switch ((minute % 60) / 5) {
         case 0:
-            setColor(ledsbyword[current_hourword], config.colorHour);
-            setColor(ledsbyword[UUR], config.colorWords);
+            setColor(ledsByWord[currentHourWord], config.colorHour);
+            setColor(ledsByWord[UUR], config.colorWords);
             break;
         case 1:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsByWord[VIJF], config.colorWords);
+            setColor(ledsByWord[OVER1], config.colorWords);
+            setColor(ledsByWord[currentHourWord], config.colorHour);
             break;
         case 2:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[OVER2], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsByWord[TIEN], config.colorWords);
+            setColor(ledsByWord[OVER2], config.colorWords);
+            setColor(ledsByWord[currentHourWord], config.colorHour);
             break;
         case 3:
-            setColor(ledsbyword[KWART], config.colorWords);
-            setColor(ledsbyword[OVER2], config.colorWords);
-            setColor(ledsbyword[current_hourword], config.colorHour);
+            setColor(ledsByWord[KWART], config.colorWords);
+            setColor(ledsByWord[OVER2], config.colorWords);
+            setColor(ledsByWord[currentHourWord], config.colorHour);
             break;
         case 4:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[TIEN], config.colorWords);
+            setColor(ledsByWord[VOOR1], config.colorWords);
+            setColor(ledsByWord[HALF], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 5:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[VIJF], config.colorWords);
+            setColor(ledsByWord[VOOR1], config.colorWords);
+            setColor(ledsByWord[HALF], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 6:
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[HALF], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 7:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[VIJF], config.colorWords);
+            setColor(ledsByWord[OVER1], config.colorWords);
+            setColor(ledsByWord[HALF], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 8:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[OVER1], config.colorWords);
-            setColor(ledsbyword[HALF], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[TIEN], config.colorWords);
+            setColor(ledsByWord[OVER1], config.colorWords);
+            setColor(ledsByWord[HALF], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 9:
-            setColor(ledsbyword[KWART], config.colorWords);
-            setColor(ledsbyword[VOOR2], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[KWART], config.colorWords);
+            setColor(ledsByWord[VOOR2], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 10:
-            setColor(ledsbyword[TIEN], config.colorWords);
-            setColor(ledsbyword[VOOR1], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[TIEN], config.colorWords);
+            setColor(ledsByWord[VOOR1], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
         case 11:
-            setColor(ledsbyword[VIJF], config.colorWords);
-            setColor(ledsbyword[VOOR2], config.colorWords);
-            setColor(ledsbyword[next_hourword], config.colorHour);
+            setColor(ledsByWord[VIJF], config.colorWords);
+            setColor(ledsByWord[VOOR2], config.colorWords);
+            setColor(ledsByWord[nextHourWord], config.colorHour);
             break;
     }
-
     Display::show();
+
+    // Display minutes 1-4 
+    uint8_t minutesAfterFive = minute % 5;
+    Display::writeMinute1(minutesAfterFive > 0);
+    Display::writeMinute2(minutesAfterFive > 1);
+    Display::writeMinute3(minutesAfterFive > 2);
+    Display::writeMinute4(minutesAfterFive > 3);
+    
     delay(1000);
 }
 

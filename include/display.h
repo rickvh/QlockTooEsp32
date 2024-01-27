@@ -8,6 +8,11 @@ namespace qlocktoo {
 class Display {
    private:
     const static uint8_t LEDSTRIP_PIN = 13;
+    const static uint8_t MINUTE_1_PIN = 23;
+    const static uint8_t MINUTE_2_PIN = 3;
+    const static uint8_t MINUTE_3_PIN = 1;
+    const static uint8_t MINUTE_4_PIN = 22;
+
     static bool initialized;
 #ifdef BOARD_WS2811
     static NeoPixelBus<NeoGrbFeature, NeoWs2811Method> realDisplay;
@@ -19,7 +24,6 @@ class Display {
    public:
     static void begin();
 
-    // Generic display methods - facade
     const static uint8_t WIDTH = 11;
     const static uint8_t HEIGHT = 10;
 
@@ -34,6 +38,13 @@ class Display {
     static void show() { realDisplay.Show(); };
     static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);
+    /**
+     * Depending on the hardware this will provide access to the leds indication individual minutes.
+    */
+    static void writeMinute1(boolean enabled);
+    static void writeMinute2(boolean enabled);
+    static void writeMinute3(boolean enabled);
+    static void writeMinute4(boolean enabled);
 
     // Helper methods
     static uint32_t ColorHSV(uint16_t hue, uint8_t sat, uint8_t val) {

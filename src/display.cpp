@@ -58,6 +58,16 @@ namespace qlocktoo {
             // realDisplay.setRemapFunction(getLedByCoordinate);
             // realDisplay.Begin begin(LEDSTRIP_PIN, WIDTH * HEIGHT);
             initialized = true;
+
+            // Initialize minute LED's
+            pinMode(MINUTE_1_PIN, OUTPUT);
+            pinMode(MINUTE_2_PIN, OUTPUT);
+            pinMode(MINUTE_3_PIN, OUTPUT);
+            pinMode(MINUTE_4_PIN, OUTPUT);
+            digitalWrite(MINUTE_1_PIN, LOW);
+            digitalWrite(MINUTE_2_PIN, LOW);
+            digitalWrite(MINUTE_3_PIN, LOW);
+            digitalWrite(MINUTE_4_PIN, LOW);
         }
     }
 
@@ -114,5 +124,29 @@ namespace qlocktoo {
                 err += dx;
             }
         }
+    }
+
+    void Display::writeMinute1(boolean enabled) {
+        #ifdef BOARD_FREESTYLE
+        digitalWrite(MINUTE_1_PIN, enabled);
+        #endif
+    }
+
+    void Display::writeMinute2(boolean enabled) {
+        #ifdef BOARD_FREESTYLE
+        digitalWrite(MINUTE_2_PIN, enabled);
+        #endif
+    }
+
+    void Display::writeMinute3(boolean enabled) {
+        #ifdef BOARD_FREESTYLE
+        digitalWrite(MINUTE_3_PIN, enabled);
+        #endif
+    }
+
+    void Display::writeMinute4(boolean enabled) {
+        #ifdef BOARD_FREESTYLE
+        digitalWrite(MINUTE_4_PIN, enabled);
+        #endif
     }
 }

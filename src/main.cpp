@@ -55,6 +55,26 @@ TaskHandle_t currentAppTask = NULL;
 QueueHandle_t xChangeAppQueue = NULL;
 QueueHandle_t xWifiConfigChangedQueue = NULL;
 
+void setupIO() {
+  #ifdef BOARD_FREESTYLE
+  /**
+   * 'Freestyle' hardware layout has non-addressable led's indicating 1 to 4 minutes after the displayed text.
+  */
+  const int pinMinute1 = 23;
+  const int pinMinute2 = 22;
+  const int pinMinute3 = 1;
+  const int pinMinute4 = 3;
+  pinMode(pinMinute1, OUTPUT);
+  pinMode(pinMinute2, OUTPUT);
+  pinMode(pinMinute3, OUTPUT);
+  pinMode(pinMinute4, OUTPUT);
+  digitalWrite(pinMinute1, LOW);
+  digitalWrite(pinMinute1, LOW);
+  digitalWrite(pinMinute1, LOW);
+  digitalWrite(pinMinute1, LOW);
+  #endif
+}
+
 void setupWifi() {
   ESP_LOGI(LOG_TAG, "Connecting to Wifi...");
   Wifi.begin();
@@ -122,8 +142,10 @@ void setup() {
     ESP_LOGE(LOG_TAG, "SPIFFS cannot be opened\n");
   };
 
-  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
+  ESP_LOGI(LOG_TAG, "Setup I/O");
+  setupIO();
   ESP_LOGI(LOG_TAG, "Setup RTOS queues");
+  xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
   xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
   ESP_LOGI(LOG_TAG, "Setup persistent configuration");
   ConfigService::init();
