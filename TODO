@@ -2,23 +2,7 @@ Prio's:
 - store clockkleuren to flash
   - Check ook of de clockconfig niet wordt ingeladen VOORDAT de configuratie correct is ingelezen vanuit flash
   - Splits apicall voor clock naar switchen en updaten van kleurconfig
-- logmessages via ESP_LOGI()
-- waarom krijg je zo vaak de wifi animatie @boottime???
 - bouw release
-
-
-Flow:
-=====
-[ ] - boot: print versie etc naar Serial
-[ ] - boot: init config (config class instantieren, meer niet)
-[x] - boot: setup display: clear
-[ ] - boot: setup WifiEventHandler -> luister naar state
-[ ] - boot: setup WiFi -> state = NO_WIFI --> showAnimation(Animation.NO_WIFI)
-[x] - boot: setup OTA 
-[x] - boot: setup NTP
-[x] - boot: setup Display
-[x] - boot: setup webserver (heeft al eigen task??)
-
 
 
 ==================================
@@ -34,10 +18,6 @@ Prio:
 [x]   - uur: kleur
 [ ]   - transition: none, fade, ?
 [ ]   - Tijdzone via: https://github.com/nayarsystems/posix_tz_db
-[ ] - 
-[ ] - 
-[ ] - 
-[ ] - 
 
 
 # Fix flashsize:

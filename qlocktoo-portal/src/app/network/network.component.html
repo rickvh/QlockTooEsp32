@@ -2,19 +2,19 @@
 
 <form [formGroup]="form" (ngSubmit)="onFormSubmit()">
   <p>
-    <mat-form-field appearance="standard">
+    <mat-form-field>
       <mat-label>Enter your SSID</mat-label>
       <input matInput placeholder="mynetwork" formControlName="ssid" required>
     </mat-form-field>
   </p>
   <p>
-    <mat-form-field appearance="standard">
+    <mat-form-field>
       <mat-label>Enter your password</mat-label>
       <input matInput placeholder="secret1234" formControlName="password">
     </mat-form-field>
   </p>
   <p>
-    <mat-form-field appearance="standard">
+    <mat-form-field>
       <mat-label>Enter Qlocktoo hostname</mat-label>
       <input matInput placeholder="qlocktoo" formControlName="hostname" required>
     </mat-form-field>
