@@ -9,12 +9,21 @@ import IroColorValue from '@jaames/iro';
 })
 export class ColorpickerComponent implements OnInit {
   private colorpicker: any;
+  private _color = new IroColorValue.Color('#ff0000');
 
-  constructor(private el: ElementRef) {
-      this.color = new IroColorValue.Color('#ff0000');
-  }
   @Input()
-  color: IroColorValue.Color;
+  set color(value: IroColorValue.Color) {
+    this._color = value;
+    if (this.colorpicker) {
+      // clone color
+      const hsv = this._color.hsv;
+      this.colorpicker.color.hsv = { h: hsv.h, s: hsv.s, v: hsv.v };
+    }
+  }
+
+  get color(): IroColorValue.Color {
+    return this._color;
+  }
 
   @Output()
   colorChange = new EventEmitter();
@@ -22,9 +31,16 @@ export class ColorpickerComponent implements OnInit {
   @Output()
   colorChanged = new EventEmitter();
 
+  constructor(private el: ElementRef) {
+    this.color = new IroColorValue.Color('#000');
+  }
+
   ngOnInit(){
     let $this= this;
-    this.colorpicker = iro.ColorPicker(this.el.nativeElement, { color: this.color });
+    this.colorpicker = iro.ColorPicker(this.el.nativeElement, {
+      color: this.color,
+      wheelLightness: false
+    });
     this.colorpicker.on('input:change', function(color: IroColorValue.Color) {
       $this.colorChange.emit(color);
       $this.colorChanged.emit(color);

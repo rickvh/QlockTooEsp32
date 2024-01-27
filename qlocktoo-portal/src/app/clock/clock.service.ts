@@ -17,7 +17,7 @@ export class ClockService {
   }
 
   public getConfig(): Observable<ClockConfig> {
-    console.info('get config from Qlock');
+    console.info('get config from QlockToo');
     if (this.busy) {
       return EMPTY;
     }
@@ -25,14 +25,14 @@ export class ClockService {
 
     return this.http.get<ClockConfig>('/api/clock', {}).pipe(
       map((data: any) => {
-        console.log('config from Qlock received');
+        console.log('config from QlockToo received');
         this.busy = false;
         return this.serializer.fromJson(data);
       }));
   }
 
   public saveConfig(config: ClockConfig) {
-    console.info('send config to Qlock');
+    console.info('send config to QlockToo');
     if (this.busy) {
       return;
     }
@@ -50,9 +50,9 @@ export class ClockService {
 
   public getDefault(): ClockConfig {
     return {
-      colorItIs: new IroColorValue.Color('#000'),
-      colorWords: new IroColorValue.Color('#000'),
-      colorHour: new IroColorValue.Color('#000')
+      colorItIs: new IroColorValue.Color('#FFF'),
+      colorWords: new IroColorValue.Color('#FFF'),
+      colorHour: new IroColorValue.Color('#FFF')
     };
   }
 }
