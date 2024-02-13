@@ -23,7 +23,7 @@ Webinterface::Webinterface(int port) : server(AsyncWebServer(port)) {
 
 void Webinterface::begin() {
     // Host the static Angular application which should be stored in SPIFFS.
-    server.serveStatic("/", SPIFFS, "/qlocktoo-portal").setDefaultFile("index.html");
+    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
     // API: Get current clock configuration
     server.on("/api/clock", HTTP_GET, [&](AsyncWebServerRequest *request) {
