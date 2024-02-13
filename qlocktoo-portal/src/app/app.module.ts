@@ -2,7 +2,6 @@ import { NetworkComponent } from './network/network.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -36,7 +35,6 @@ import { ColorpickerComponent } from './colorpicker/colorpicker.component';
     NoopAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-    MatSliderModule,
     MatButtonModule,
     MatCheckboxModule,
     MatExpansionModule,
