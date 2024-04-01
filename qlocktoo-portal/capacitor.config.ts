@@ -5,7 +5,9 @@ const config: CapacitorConfig = {
   appName: 'QlockToo',
   webDir: 'dist/qlocktoo-portal',
   server: {
-    androidScheme: 'https'
+    hostname: '127.0.0.1',
+    cleartext: true,
+    allowNavigation: ['*'],
   }
 };
 
