@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'nl.qlocktoo',
   appName: 'QlockToo',
-  webDir: 'dist',
+  webDir: 'dist/qlocktoo-portal',
   server: {
     androidScheme: 'https'
   }
