@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">QlockToo</string>
+    <string name="title_activity_main">QlockToo</string>
+    <string name="package_name">nl.qlocktoo</string>
+    <string name="custom_url_scheme">nl.qlocktoo</string>
+</resources>
