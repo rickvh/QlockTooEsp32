@@ -5,14 +5,14 @@
 #include "transitions/transition.h"
 
 namespace qlocktoo {
-    class Slideshow : public Transition {
+    class Fade : public Transition {
         private:
-            static constexpr const char* LOG_TAG = "slideshow";
+            static constexpr const char* LOG_TAG = "fade";
             bool done = false;
             int frame = 0;
 
         public:
-            Slideshow(std::unique_ptr<Image> from, std::unique_ptr<Image> to) : Transition(std::move(from), std::move(to)) {};
+            Fade(std::unique_ptr<Image> from, std::unique_ptr<Image> to) : Transition(std::move(from), std::move(to)) {};
             void update() override;
             bool isDone() override { return done; }
     };

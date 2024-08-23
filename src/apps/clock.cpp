@@ -1,5 +1,5 @@
 #include "apps/clock.h"
-#include "transitions/slideshow.h"
+#include "transitions/fade.h"
 #include <memory>
 #include <vector>
 #include <WiFi.h>
@@ -31,8 +31,8 @@ void Clock::loop() {
     // if (previousTime.tm_min % 5 != 0 && currentTime.tm_min % 5 == 0) {
     if (previousTime.tm_min != currentTime.tm_min) {
         ESP_LOGD(LOG_TAG, "Activate transition");
-        //transition = std::unique_ptr<Transition>(new Slideshow(getImageFromTime(previousTime), getImageFromTime(currentTime)));
-        transition = std::unique_ptr<Transition>(new Slideshow(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)), std::unique_ptr<Image>(new Image(Image::Preset::XmasTree))));
+        //transition = std::unique_ptr<Transition>(new Fade(getImageFromTime(previousTime), getImageFromTime(currentTime)));
+        transition = std::unique_ptr<Transition>(new Fade(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)), std::unique_ptr<Image>(new Image(Image::Preset::XmasTree))));
     }
     previousTime = currentTime; 
 

@@ -1,11 +1,11 @@
-#include "transitions/slideshow.h"
+#include "transitions/fade.h"
 #include <memory>
 #include "display.h"
 #include "image.h"
 
 using namespace qlocktoo;
 
-void Slideshow::update() {
+void Fade::update() {
     frame++;
     ESP_LOGD(LOG_TAG, "show frame %u", frame);
     Display::clear();
