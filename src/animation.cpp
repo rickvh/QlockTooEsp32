@@ -3,7 +3,7 @@
 
 using namespace qlocktoo;
 
-Animation::Animation(Preset preset) : App(Mode::Animation) {
+Animation::Animation(Preset preset) : App() {
     switch(preset) {
         case Preset::Wifi:
             frames.push_back(Image::Preset::Wifi1);
@@ -25,6 +25,6 @@ void Animation::loop() {
         currentFrame = 0;
     }
     Image image(frames.at(currentFrame));
-    image.show();
+    //Imageviewer viewer(image);
     delay(300);
 }

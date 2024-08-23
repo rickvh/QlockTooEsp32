@@ -8,6 +8,7 @@ namespace qlocktoo {
     class Fade : public Transition {
         private:
             static constexpr const char* LOG_TAG = "fade";
+            std::unique_ptr<Image> current;
             bool done = false;
             int frame = 0;
 

@@ -20,6 +20,6 @@ class Swirl : public App {
     void loop() override;
 
    public:
-    Swirl() : App(Mode::Swirl) {}
+    Swirl() : App() {}
 };
 }

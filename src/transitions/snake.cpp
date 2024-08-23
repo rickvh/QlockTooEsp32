@@ -33,10 +33,10 @@ void Snake::update() {
 
     switch (frame) {
         case 1:
-            from->show();
+            // from->show();
             break;
         case 2:
-            to->show();
+            // to->show();
             done = true;
             break;
         default:

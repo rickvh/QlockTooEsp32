@@ -2,6 +2,7 @@
 #include <memory>
 #include "display.h"
 #include "image.h"
+#include "apps/imageviewer.h"
 
 using namespace qlocktoo;
 
@@ -12,15 +13,16 @@ void Fade::update() {
 
     switch (frame) {
         case 1:
-            from->show();
+            // TODO
             break;
         case 2:
-            to->show();
+            // TODO
             done = true;
             break;
         default:
             break;
     }
+
 
     delay(5000);
 }

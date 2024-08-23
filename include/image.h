@@ -27,16 +27,12 @@ const static uint8_t PROGMEM IMG_SNOWMAN_BLUE[] = {
 const static uint8_t PROGMEM IMG_ERROR[] = {
     4, 5, 15, 16, 26, 27, 37, 38, 48, 49, 59, 60, 92, 93, 103, 104};
 
-class Image : public App {
+class Image {
    private:
     static constexpr const char* LOG_TAG = "image";
     const static uint8_t WIDTH = Display::WIDTH;
     const static uint8_t HEIGHT = Display::HEIGHT;
     std::array<NeoGrbwFeature::ColorObject, WIDTH * HEIGHT> pixels;
-
-    // App implementation
-    void setup();
-    void loop();
 
    public:
     enum class Preset {
@@ -52,8 +48,7 @@ class Image : public App {
     Image(Preset file);
     void readFile(std::string filename);
     NeoGrbwFeature::ColorObject getColor(uint8_t x, uint8_t y);
+    void setColor(uint8_t x, uint8_t y, NeoGrbwFeature::ColorObject color);
     uint32_t getRawColor(uint8_t x, uint8_t y);
-
-    void show();
 };
 }

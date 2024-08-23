@@ -59,6 +59,6 @@ class Clock : public App {
     void loop() override;
 
    public:
-    Clock() : App(Mode::Clock) {};
+    Clock() : App() {};
 };
 }

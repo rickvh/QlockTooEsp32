@@ -6,11 +6,11 @@
 #include "display.h"
 
 namespace qlocktoo {
-Image::Image() : App(Mode::Image) {
+Image::Image() {
     pixels.fill(RgbwColor(0, 0, 0, 0));
 }
 
-Image::Image(Preset preset) : App(Mode::Image) {
+Image::Image(Preset preset) {
     RgbwColor color(0, 0, 0, 0);
     pixels.fill(color);
 
@@ -168,21 +168,4 @@ NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {
     return pixels[y * WIDTH + x];
 }
 
-void Image::show() {
-    for (uint8_t y = 0; y < HEIGHT; y++) {
-        for (uint8_t x = 0; x < WIDTH; x++) {
-            auto color = getColor(x, y);
-            Display::drawPixel(x, y, color);
-        }
-    }
-    Display::show();
-}
-
-void Image::setup() {
-    show();
-}
-
-void Image::loop() {
-    delay(300);
-}
 }  // namespace qlocktoo

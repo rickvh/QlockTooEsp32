@@ -3,13 +3,6 @@
 namespace qlocktoo {
 
 enum class Mode {
-    // don't use these directly to set a mode. Should be refactored.
-    Unknown,
-    Image,
-    Animation,
-    Text,
-    
-    // actual modes
     WifiConnecting,
     WifiSetupRequired,
     OTAinProgress,

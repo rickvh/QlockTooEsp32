@@ -23,6 +23,6 @@ class Ledtest : public App {
     void loop() override;
 
    public:
-    Ledtest() : App(Mode::Ledtest) {}
+    Ledtest() : App() {}
 };
 }

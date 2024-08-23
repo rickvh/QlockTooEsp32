@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <ArduinoOTA.h>
 #include <WiFiClient.h>
+#include <memory>
 #include <string>
 #include <utility>
 #include "utils/stringutils.h"
@@ -20,6 +21,7 @@
 #include "apps/ledtest.h"
 #include "apps/swirl.h"
 #include "apps/clock.h"
+#include "apps/imageviewer.h"
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
@@ -40,7 +42,7 @@ void listPartitions();
 void listFiles();
 
 App* currentApp = NULL;
-qlocktoo::Mode currentMode = Mode::Unknown;
+qlocktoo::Mode currentMode = Mode::WifiConnecting;
 WifiManager Wifi;
 Webinterface webinterface(80);
 
@@ -228,14 +230,14 @@ void changeMode(qlocktoo::Mode mode) {
       currentApp = new Animation(Animation::Preset::Wifi);
       break;
     case Mode::Xmas:
-      currentApp = new Image(Image::Preset::XmasTree);
+      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::XmasTree)));
       break;
     case Mode::Snow:
-      currentApp = new Image(Image::Preset::Snowman);
+      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)));
       break;
     case Mode::WifiSetupRequired:
     case Mode::Error:
-      currentApp = new Image(Image::Preset::Error);
+      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Error)));
       break;
     case Mode::Ledtest:
       currentApp = new Ledtest();
