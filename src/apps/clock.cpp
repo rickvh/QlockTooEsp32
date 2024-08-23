@@ -46,13 +46,13 @@ void Clock::loop() {
     // show current time
     Display::clear();
 
-    int current_hourword = currentTime.tm_hour;
-    if (current_hourword > 12) current_hourword = current_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (current_hourword == 0) current_hourword = 12;                     // 0 is also called 12
+    int currentHourWord = currentTime.tm_hour;
+    if (currentHourWord > 12) currentHourWord = currentHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (currentHourWord == 0) currentHourWord = 12;                     // 0 is also called 12
 
-    int next_hourword = currentTime.tm_hour + 1;
-    if (next_hourword > 12) next_hourword = next_hourword - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
-    if (next_hourword == 0) next_hourword = 12;                  // 0 is also called 12
+    int nextHourWord = currentTime.tm_hour + 1;
+    if (nextHourWord > 12) nextHourWord = nextHourWord - 12;  // 12 hour clock, where 12 stays 12 and 13 becomes one
+    if (nextHourWord == 0) nextHourWord = 12;                  // 0 is also called 12
     
     const ClockConfig &config = ConfigService::CONFIG.clockConfig;
     setColor(ledsByWord[HETIS], config.colorItIs);
@@ -123,7 +123,7 @@ void Clock::loop() {
     Display::show();
 
     // Display minutes 1-4 
-    uint8_t minutesAfterFive = minute % 5;
+    uint8_t minutesAfterFive = currentTime.tm_min % 5;
     Display::writeMinute1(minutesAfterFive > 0);
     Display::writeMinute2(minutesAfterFive > 1);
     Display::writeMinute3(minutesAfterFive > 2);

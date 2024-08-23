@@ -22,8 +22,6 @@ class Display {
     static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
 
    public:
-    static void begin();
-
     const static uint8_t WIDTH = 11;
     const static uint8_t HEIGHT = 10;
 
