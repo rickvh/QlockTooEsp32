@@ -3,6 +3,7 @@
 #include "app.h"
 #include "Arduino.h"
 #include "display.h"
+#include <string>
 
 namespace qlocktoo {
 class Swirl : public App {
@@ -21,5 +22,6 @@ class Swirl : public App {
 
    public:
     Swirl() : App() {}
+    std::string name() override;
 };
 }

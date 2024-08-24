@@ -57,26 +57,6 @@ TaskHandle_t currentAppTask = NULL;
 QueueHandle_t xChangeAppQueue = NULL;
 QueueHandle_t xWifiConfigChangedQueue = NULL;
 
-void setupIO() {
-  #ifdef BOARD_FREESTYLE
-  /**
-   * 'Freestyle' hardware layout has non-addressable led's indicating 1 to 4 minutes after the displayed text.
-  */
-  const int pinMinute1 = 23;
-  const int pinMinute2 = 22;
-  const int pinMinute3 = 1;
-  const int pinMinute4 = 3;
-  pinMode(pinMinute1, OUTPUT);
-  pinMode(pinMinute2, OUTPUT);
-  pinMode(pinMinute3, OUTPUT);
-  pinMode(pinMinute4, OUTPUT);
-  digitalWrite(pinMinute1, LOW);
-  digitalWrite(pinMinute1, LOW);
-  digitalWrite(pinMinute1, LOW);
-  digitalWrite(pinMinute1, LOW);
-  #endif
-}
-
 void setupWifi() {
   ESP_LOGI(LOG_TAG, "Connecting to Wifi...");
   Wifi.begin();
@@ -139,13 +119,9 @@ void setupOTA() {
 void setup() {
   Serial.begin(115200);
   ESP_LOGI(LOG_TAG, "QlockToo version %s", BuildInfo::version);
-
   if (!SPIFFS.begin(true)) {
     ESP_LOGE(LOG_TAG, "SPIFFS cannot be opened\n");
   };
-
-  ESP_LOGI(LOG_TAG, "Setup I/O");
-  setupIO();
   ESP_LOGI(LOG_TAG, "Setup RTOS queues");
   xChangeAppQueue = xQueueCreate(1, sizeof(Mode));
   xWifiConfigChangedQueue = xQueueCreate(1, sizeof(NetworkConfig));
@@ -249,7 +225,7 @@ void changeMode(qlocktoo::Mode mode) {
       return;
   }
 
-  ESP_LOGI(LOG_TAG, "Start new app '%s'", modeToString(currentMode));
+  ESP_LOGI(LOG_TAG, "Start new app '%s'", currentApp->name().c_str());
 }
 
 void listPartitions(void)

@@ -3,6 +3,7 @@
 #include "app.h"
 #include "Arduino.h"
 #include "display.h"
+#include <string>
 
 namespace qlocktoo {
 class Ledtest : public App {
@@ -24,5 +25,6 @@ class Ledtest : public App {
 
    public:
     Ledtest() : App() {}
+    std::string name() override;
 };
 }

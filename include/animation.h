@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include "app.h"
 #include "image.h"
 
@@ -15,6 +16,9 @@ class Animation : public App {
 
     vector<Image::Preset> frames;
     uint8_t currentFrame;
+
+   protected:
+    std::string name() override;
 
    public:
     enum class Preset {

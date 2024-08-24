@@ -1,6 +1,7 @@
 #include "apps/clock.h"
 #include "transitions/fade.h"
 #include <memory>
+#include <string>
 #include <vector>
 #include <WiFi.h>
 #include "time.h"
@@ -8,6 +9,10 @@
 #define NTP_TIMEOUT 1500
 
 using namespace qlocktoo;
+
+std::string Clock::name() {
+    return "Clock";
+}
 
 void Clock::setup() {
     ESP_LOGI(LOG_TAG, "Clock setup");

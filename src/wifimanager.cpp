@@ -67,14 +67,9 @@ void WifiManager::WiFiEvent(arduino_event_id_t event, arduino_event_info_t info)
             ESP_LOGI(LOG_TAG, "STA Disconnected: %u", info.wifi_sta_disconnected.reason);
             ConfigService::connectedToWifi = false;
             reconnectCount++;
-            ESP_LOGI(LOG_TAG, "Retry (%u/10)", reconnectCount);
+            ESP_LOGI(LOG_TAG, "Retry (%u)", reconnectCount);
             WiFi.reconnect();
-            if (reconnectCount == 10) {
-                startAP();
-                showSetupRequired();
-            } else {
-                showWifiAnimation();
-            }
+            showWifiAnimation();
             break;
         case ARDUINO_EVENT_WIFI_STA_CONNECTED:
             ESP_LOGI(LOG_TAG, "STA Connected");

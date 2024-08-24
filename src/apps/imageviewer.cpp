@@ -6,6 +6,10 @@
 #include "display.h"
 
 namespace qlocktoo {
+std::string Imageviewer::name() {
+    return "Imageviewer";
+}
+
 void Imageviewer::setup() {
     for (uint8_t y = 0; y < Display::HEIGHT; y++) {
         for (uint8_t x = 0; x < Display::WIDTH; x++) {

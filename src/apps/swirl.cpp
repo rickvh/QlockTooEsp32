@@ -1,7 +1,12 @@
 #include "apps/swirl.h"
 #include "display.h"
+#include <string>
 
 using namespace qlocktoo;
+
+std::string Swirl::name() {
+    return "Swirl";
+}
 
 void Swirl::setup() {
     Display::clear();

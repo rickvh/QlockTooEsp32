@@ -1,4 +1,5 @@
 #include "app.h"
+#include <string>
 
 using namespace qlocktoo;
 

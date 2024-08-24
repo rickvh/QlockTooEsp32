@@ -50,10 +50,6 @@ void ConfigService::init() {
         strcpy(CONFIG.networkConfig.ssid, "");
         strcpy(CONFIG.networkConfig.password, "");
     }
-
-// reset anyway, as we're still trying to fix some issues
-// CONFIG = Config();
-
     configfile.close();
     printConfig();
 }

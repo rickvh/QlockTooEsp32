@@ -20,5 +20,6 @@ class Imageviewer : public App {
 
    public:
     Imageviewer(std::unique_ptr<Image> image) : App(), image(std::move(image)) {}
+    std::string name() override;
 };
 }

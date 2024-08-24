@@ -1,7 +1,12 @@
 #include "animation.h"
 #include "image.h"
+#include <string>
 
 using namespace qlocktoo;
+
+std::string Animation::name() {
+    return "Animation";
+}
 
 Animation::Animation(Preset preset) : App() {
     switch(preset) {

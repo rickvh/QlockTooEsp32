@@ -57,7 +57,10 @@ namespace qlocktoo {
             // realDisplay.Begin begin(LEDSTRIP_PIN, WIDTH * HEIGHT);
             initialized = true;
 
-            // Initialize minute LED's
+#ifdef BOARD_FREESTYLE
+            /**
+             * 'Freestyle' hardware layout has non-addressable led's indicating 1 to 4 minutes after the displayed text.
+             */
             pinMode(MINUTE_1_PIN, OUTPUT);
             pinMode(MINUTE_2_PIN, OUTPUT);
             pinMode(MINUTE_3_PIN, OUTPUT);
@@ -66,6 +69,7 @@ namespace qlocktoo {
             digitalWrite(MINUTE_2_PIN, LOW);
             digitalWrite(MINUTE_3_PIN, LOW);
             digitalWrite(MINUTE_4_PIN, LOW);
+#endif            
         }
     }
 

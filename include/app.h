@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mode.h"
+#include <string>
 
 namespace qlocktoo {
 class App {
@@ -16,5 +17,6 @@ class App {
     virtual ~App() {};
     virtual void stop() {};
     virtual void handle();
+    virtual std::string name() = 0;
 };
 }
