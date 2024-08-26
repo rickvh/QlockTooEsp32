@@ -30,31 +30,22 @@ namespace qlocktoo {
 #endif
 #ifdef BOARD_WS2811
             if (y%2 == 0) {
-                return y * Display::WIDTH + x; 
+                return (Display::HEIGHT - y) * Display::WIDTH - x - 1; 
             } else {
-                return (y + 1) * Display::WIDTH - x - 1; 
+                return (Display::HEIGHT - 1 - y) * Display::WIDTH + x; 
             }
 #endif
     }
 
-
-#ifdef BOARD_WS2811
-    NeoPixelBus<NeoGrbFeature, NeoWs2811Method> Display::realDisplay(110, LEDSTRIP_PIN);
-#else
-    NeoPixelBus<NeoGrbwFeature, NeoSk6812Method> Display::realDisplay(110, LEDSTRIP_PIN);
-#endif
-
+    NeoPixelBus<COLOR_FEATURE, NEOPIXEL_METHOD> Display::realDisplay(110, LEDSTRIP_PIN);
     bool Display::initialized = false;
 
     void Display::begin() {
         if (!initialized) {
-            RgbColor dark(2, 2, 0);
+            RgbColor initColor(2, 2, 0);
             realDisplay.Begin();
-            // realDisplay.SetBrightness(255);
-            realDisplay.ClearTo(dark);
+            realDisplay.ClearTo(initColor);
             realDisplay.Show();
-            // realDisplay.setRemapFunction(getLedByCoordinate);
-            // realDisplay.Begin begin(LEDSTRIP_PIN, WIDTH * HEIGHT);
             initialized = true;
 
 #ifdef BOARD_FREESTYLE
@@ -132,11 +123,17 @@ namespace qlocktoo {
         #ifdef BOARD_FREESTYLE
         digitalWrite(MINUTE_1_PIN, enabled);
         #endif
+        #ifdef BOARD_WS2811
+        drawPixel(HEIGHT*WIDTH + 0, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        #endif
     }
 
     void Display::writeMinute2(boolean enabled) {
         #ifdef BOARD_FREESTYLE
         digitalWrite(MINUTE_2_PIN, enabled);
+        #endif
+        #ifdef BOARD_WS2811
+        drawPixel(HEIGHT*WIDTH + 1, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
         #endif
     }
 
@@ -144,11 +141,17 @@ namespace qlocktoo {
         #ifdef BOARD_FREESTYLE
         digitalWrite(MINUTE_3_PIN, enabled);
         #endif
+        #ifdef BOARD_WS2811
+        drawPixel(HEIGHT*WIDTH + 2, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        #endif
     }
 
     void Display::writeMinute4(boolean enabled) {
         #ifdef BOARD_FREESTYLE
         digitalWrite(MINUTE_4_PIN, enabled);
+        #endif
+        #ifdef BOARD_WS2811
+        drawPixel(HEIGHT*WIDTH + 3, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
         #endif
     }
 }

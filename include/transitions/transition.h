@@ -1,14 +1,13 @@
 #pragma once
 
-#include <memory>
 #include "image.h"
 
 namespace qlocktoo {
     class Transition {
         protected:
-            Transition(std::unique_ptr<Image> from, std::unique_ptr<Image> to) : from(std::move(from)), to(std::move(to)) {};
-            std::unique_ptr<Image> from;
-            std::unique_ptr<Image> to;
+            Transition(Image from, Image to) : from(from), to(to) {};
+            Image from;
+            Image to;
         
         public:
             virtual void update() = 0;

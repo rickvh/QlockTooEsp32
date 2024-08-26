@@ -7,6 +7,7 @@
 
 #include "app.h"
 #include "display.h"
+#include "coordinate.h"
 
 namespace qlocktoo {
 const static uint8_t PROGMEM IMG_WIFI_FRAME_1[] = {
@@ -32,7 +33,7 @@ class Image {
     static constexpr const char* LOG_TAG = "image";
     const static uint8_t WIDTH = Display::WIDTH;
     const static uint8_t HEIGHT = Display::HEIGHT;
-    std::array<NeoGrbwFeature::ColorObject, WIDTH * HEIGHT> pixels;
+    std::array<HsbColor, WIDTH * HEIGHT> pixels;
 
    public:
     enum class Preset {
@@ -47,8 +48,8 @@ class Image {
     Image();
     Image(Preset file);
     void readFile(std::string filename);
-    NeoGrbwFeature::ColorObject getColor(uint8_t x, uint8_t y);
-    void setColor(uint8_t x, uint8_t y, NeoGrbwFeature::ColorObject color);
-    uint32_t getRawColor(uint8_t x, uint8_t y);
+    HsbColor getColor(Coordinate coordinate);
+    void setColor(Coordinate coordinate, HsbColor color);
+    void fill(HsbColor color);
 };
 }

@@ -6,17 +6,22 @@
 #include "display.h"
 
 namespace qlocktoo {
+
+// TODO: dit moet in de algehele config staan
+const float BRIGHTNESS = 0.75f;
+
 Image::Image() {
-    pixels.fill(RgbwColor(0, 0, 0, 0));
+    fill(HsbColor(0.0f, 1.0f, 0.0f));
 }
 
 Image::Image(Preset preset) {
-    RgbwColor color(0, 0, 0, 0);
-    pixels.fill(color);
+    HsbColor color(0.0f, 1.0f, 0.0f);
+    fill(color);
+    color.B = BRIGHTNESS;
 
     switch (preset) {
         case Preset::Error:
-            color.R = 200;
+            color.H = 0.0f;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -31,7 +36,7 @@ Image::Image(Preset preset) {
             }
             break;
         case Preset::Wifi1:
-            color.B = 200;
+            color.H = 0.47f;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -46,7 +51,7 @@ Image::Image(Preset preset) {
             }
             break;
         case Preset::Wifi2:
-            color.B = 200;
+            color.H = 0.47f;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -61,7 +66,7 @@ Image::Image(Preset preset) {
             }
             break;
         case Preset::Wifi3:
-            color.B = 200;
+            color.H = 0.47f;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -77,7 +82,7 @@ Image::Image(Preset preset) {
             break;
 
         case Preset::XmasTree:
-            color.G = 200;
+            color.H = 0.24f;
 
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
@@ -90,12 +95,12 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            pixels[5] = RgbwColor(200, 200, 0, 0);
-            pixels[104] = RgbwColor(200, 0, 0, 0);
+            pixels[5] = HsbColor(0.1667f, 1.0f, BRIGHTNESS);
+            pixels[104] = HsbColor(0.0f, 1.0f, BRIGHTNESS);
             break;
 
         case Preset::Snowman:
-            color.W = 200;
+            color.S = 0.0f;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -107,8 +112,8 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            color.W = 0;
-            color.R = 200;
+            color.S = 1.0f;
+            color.H = 0.0f;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -120,8 +125,7 @@ Image::Image(Preset preset) {
                     }
                 }
             }
-            color.R = 0;
-            color.B = 200;
+            color.H = 0.47f;
             for (uint8_t y = 0; y < HEIGHT; y++) {
                 for (uint8_t x = 0; x < WIDTH; x++) {
                     uint8_t index = y * WIDTH + x;
@@ -148,10 +152,11 @@ void Image::readFile(std::string filename) {
 
     File file = SPIFFS.open(filename.c_str());
 
-    uint8_t x = 0, y = 0, red = 0, green = 0, blue = 0, white = 0;
-    while (file >> x >> y >> red >> green >> blue >> white) {
-        pixels[y * WIDTH + x] = RgbwColor(red, green, blue, white);
-    }
+    uint8_t x = 0, y = 0;
+    float hue = 0.0f, saturation = 0.0f, brightness = 0.0f;
+    // while (file >> x >> y >> hue >> saturation >> brightness) {
+        // pixels[y * WIDTH + x] = COLOR_FEATURE::ColorObject(HsbColor(hue, saturation, brightness));
+    // }
 
     // while (file.available()) {
     //     int l = file.readBytesUntil('\n', buffer, sizeof(buffer));
@@ -161,11 +166,19 @@ void Image::readFile(std::string filename) {
     // }
 }
 
-NeoGrbwFeature::ColorObject Image::getColor(uint8_t x, uint8_t y) {
-    if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
-        return RgbwColor(0, 0, 0, 0);
+HsbColor Image::getColor(Coordinate coordinate) {
+    if (coordinate.x < 0 || coordinate.x > WIDTH || coordinate.y < 0 || coordinate.y > HEIGHT) {
+        return HsbColor(0.0f, 0.0f, 0.0f);
     }
-    return pixels[y * WIDTH + x];
+    return pixels[coordinate.y * WIDTH + coordinate.x];
+}
+
+void Image::setColor(Coordinate coordinate,HsbColor color) {
+    pixels[coordinate.y * WIDTH + coordinate.x] = color;
+}
+
+void Image::fill(HsbColor color) {
+    pixels.fill(color);
 }
 
 }  // namespace qlocktoo

@@ -21,7 +21,6 @@
 #include "apps/ledtest.h"
 #include "apps/swirl.h"
 #include "apps/clock.h"
-#include "apps/imageviewer.h"
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
@@ -138,11 +137,10 @@ void setup() {
   ESP_LOGI(LOG_TAG, "Setup Webinterface");
   webinterface.begin();
 
-  // Start OTA and Clock tasks
-  xTaskCreatePinnedToCore(runOtaTask, "OTA", 8192, NULL, 2, &otaTask, 1);
-  
-
   changeMode(Mode::Clock);
+
+  // Start tasks
+  xTaskCreatePinnedToCore(runOtaTask, "OTA", 8192, NULL, 2, &otaTask, 1);
   xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 0);
 }
 
@@ -171,7 +169,7 @@ void runOtaTask(void * parameter) {
 void runAppTask(void * parameter) {
   for (;;) {
     Mode newMode;
-    if (xQueueReceive(xChangeAppQueue, &newMode, pdMS_TO_TICKS(300)) == pdTRUE) {
+    if (xQueueReceive(xChangeAppQueue, &newMode, 0) == pdTRUE) {
       ESP_LOGI(LOG_TAG, "Mode changed: %s -> %s", modeToString(currentMode), modeToString(newMode));
       changeMode(newMode);
     }
@@ -181,7 +179,7 @@ void runAppTask(void * parameter) {
     }
 
     // For safety reasons - make sure there's at least a chance for FreeRTOS to switch tasks.
-    delay(10);
+    delay(1);
   }
 }
 
@@ -205,16 +203,16 @@ void changeMode(qlocktoo::Mode mode) {
     case Mode::OTAinProgress:
       currentApp = new Animation(Animation::Preset::Wifi);
       break;
-    case Mode::Xmas:
-      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::XmasTree)));
-      break;
-    case Mode::Snow:
-      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)));
-      break;
+    // case Mode::Xmas:
+      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::XmasTree)));
+      // break;
+    // case Mode::Snow:
+      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)));
+      // break;
     case Mode::WifiSetupRequired:
-    case Mode::Error:
-      currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Error)));
-      break;
+    // case Mode::Error:
+      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Error)));
+      // break;
     case Mode::Ledtest:
       currentApp = new Ledtest();
       break;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 #include "image.h"
 #include "word.h"
@@ -25,7 +24,7 @@ class Snake : public Transition {
         void setup();
 
     public:
-        Snake(std::unique_ptr<Image> from, std::unique_ptr<Image> to) : Transition(std::move(from), std::move(to)) { setup(); };
+        Snake(Image &from, Image &to) : Transition(from, to) { setup(); };
         void update() override;
         bool isDone() override { return done; }
 };

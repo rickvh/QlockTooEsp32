@@ -6,54 +6,44 @@
 #include "app.h"
 #include "display.h"
 #include "configservice.h"
+#include "coordinate.h"
 #include "transitions/transition.h"
 
 namespace qlocktoo {
 class Clock : public App {
    private:
     static constexpr const char* LOG_TAG = "clock";
-    const uint8_t HETIS = 0;
-    const uint8_t VIJF = 13;
-    const uint8_t TIEN = 14;
-    const uint8_t KWART = 15;
-    const uint8_t VOOR1 = 16;
-    const uint8_t OVER1 = 17;
-    const uint8_t HALF = 18;
-    const uint8_t UUR = 19;
-    const uint8_t VOOR2 = 20;
-    const uint8_t OVER2 = 21;
+
+    const std::vector<Coordinate> HETIS = {{0, 9}, {1, 9}, {2, 9}, {4, 9}, {5, 9}};
+    const std::vector<Coordinate> VIJF = {{7, 9}, {8, 9}, {9, 9}, {10, 9}};
+    const std::vector<Coordinate> TIEN = {{0, 8}, {1, 8}, {2, 8}, {3, 8}};
+    const std::vector<Coordinate> KWART = {{6, 7}, {7, 7}, {8, 7}, {9, 7}, {10, 7}};
+    const std::vector<Coordinate> VOOR1 = {{7, 8}, {8, 8}, {9, 8}, {10, 8}};
+    const std::vector<Coordinate> OVER1 = {{0, 7}, {1, 7}, {2, 7}, {3, 7}};
+    const std::vector<Coordinate> HALF = {{0, 6}, {1, 6}, {2, 6}, {3, 6}};
+    const std::vector<Coordinate> UUR = {{8, 0}, {9, 0}, {10, 0}};
+    const std::vector<Coordinate> VOOR2 = {{0, 5}, {1, 5}, {2, 5}, {3, 5}};
+    const std::vector<Coordinate> OVER2 = {{7, 6}, {8, 6}, {9, 6}, {10, 6}};
+    const std::vector<std::vector<Coordinate>> GETAL = {
+        {{7, 5}, {8, 5}, {9, 5}},
+        {{0, 4}, {1, 4}, {2, 4}, {3, 4}},
+        {{7, 4}, {8, 4}, {9, 4}, {10, 4}},
+        {{0, 3}, {1, 3}, {2, 3}, {3, 3}},
+        {{4, 3}, {5, 3}, {6, 3}, {7, 3}},
+        {{8, 3}, {9, 3}, {10, 3}},
+        {{0, 2}, {1, 2}, {2, 2}, {3, 2}, {4, 2}},
+        {{0, 1}, {1, 1}, {2, 1}, {3, 1}},
+        {{6, 2}, {7, 2}, {8, 2}, {9, 2}, {10, 2}},
+        {{4, 1}, {5, 1}, {6, 1}, {7, 1}},
+        {{8, 1}, {9, 1}, {10, 1}},
+        {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}}
+    };
 
     struct tm previousTime, currentTime;
     uint8_t timeBrightness();
-    void setColor(const std::vector<uint8_t> &leds, HsbColor color);
-    std::unique_ptr<Transition> transition = nullptr;
-    std::unique_ptr<Image> getImageFromTime(const tm &time);
-
-    // Every pixel is calculated as: pixel = y * displaywidth + x. Where x and y are zero-based, starting in the top-left corner.
-    const std::vector<std::vector<uint8_t>> ledsByWord = {
-        {0, 1, 2, 4, 5},                // HET IS
-        {51, 52, 53},                   // een
-        {55, 56, 57, 58},               // twee
-        {62, 63, 64, 65},               // drie
-        {66, 67, 68, 69},               // vier
-        {70, 71, 72, 73},               // vijf
-        {74, 75, 76},                   // zes
-        {77, 78, 79, 80, 81},           // zeven
-        {88, 89, 90, 91},               // acht
-        {83, 84, 85, 86, 87},           // negen
-        {92, 93, 94, 95},               // tien
-        {96, 97, 98},                   // elf
-        {99, 100, 101, 102, 103, 104},  // twaalf
-        {7, 8, 9, 10},                  // VIJF
-        {11, 12, 13, 14},               // TIEN
-        {28, 29, 30, 31, 32},           // KWART
-        {18, 19, 20, 21},               // VOOR1
-        {22, 23, 24, 25},               // OVER1
-        {33, 34, 35, 36},               // HALF
-        {107, 108, 109},                // UUR
-        {44, 45, 46, 47},               // VOOR2
-        {40, 41, 42, 43}                // OVER2
-    };
+    void setColor(Image &image, const std::vector<Coordinate> &coordinates, HsbColor color);
+    std::unique_ptr<Transition> transition;
+    Image getImageFromTime(const tm &time);
 
    protected:
     void setup() override;

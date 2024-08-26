@@ -1,5 +1,4 @@
 #include "transitions/snake.h"
-#include <memory>
 #include "display.h"
 #include "image.h"
 

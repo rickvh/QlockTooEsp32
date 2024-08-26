@@ -16,8 +16,8 @@ enum class Mode {
 
 static const char *mode_str[] =
     { 
-        "Unknown", "Image", "Animation", "Text",
-        "WifiConnecting", "WifiSetupRequired", "OTAinProgress", "Clock", "Swirl", "Ledtest", "Snow", "Error"
+        "WifiConnecting", "WifiSetupRequired", "OTAinProgress", "Clock",
+        "Swirl", "Ledtest", "Xmas", "Snow", "Error"
     };
 
 const char *modeToString(Mode mode);
