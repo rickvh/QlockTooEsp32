@@ -7,9 +7,11 @@ namespace qlocktoo {
 #ifdef BOARD_WS2811
     #define COLOR_FEATURE NeoGrbFeature
     #define NEOPIXEL_METHOD NeoWs2811Method
+    #define LEDS_IN_LEDSTRIP 114
 #else
     #define COLOR_FEATURE NeoGrbwFeature
     #define NEOPIXEL_METHOD NeoSk6812Method
+    #define LEDS_IN_LEDSTRIP 110
 #endif
 
 class Display {
@@ -28,8 +30,8 @@ class Display {
     const static uint8_t HEIGHT = 10;
     static void begin();
     static uint8_t setbrightness(uint8_t brightness) { return brightness; }; // TODO
-    static uint8_t getbrightness() { return 255; }; // TODO
-    static void clear() { realDisplay.ClearTo(HsbColor(0.0f, 0.0f, 0.0f)); };
+    static uint8_t getbrightness() { return 20; }; // TODO
+    static void clear() { realDisplay.ClearTo(HsbColor(0.0f, 1.0f, 0.0f)); };
     static void show() { realDisplay.Show(); };
     static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);

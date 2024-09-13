@@ -27,6 +27,7 @@ namespace qlocktoo {
             {106, 69, 62, 85, 92, 18, 11, 47, 26, 34}};
             
             return mapping[x][9 - y];
+
 #endif
 #ifdef BOARD_WS2811
             if (y%2 == 0) {
@@ -36,8 +37,8 @@ namespace qlocktoo {
             }
 #endif
     }
-
-    NeoPixelBus<COLOR_FEATURE, NEOPIXEL_METHOD> Display::realDisplay(110, LEDSTRIP_PIN);
+    
+    NeoPixelBus<COLOR_FEATURE, NEOPIXEL_METHOD> Display::realDisplay(LEDS_IN_LEDSTRIP, LEDSTRIP_PIN);
     bool Display::initialized = false;
 
     void Display::begin() {
@@ -124,7 +125,7 @@ namespace qlocktoo {
         digitalWrite(MINUTE_1_PIN, enabled);
         #endif
         #ifdef BOARD_WS2811
-        drawPixel(HEIGHT*WIDTH + 0, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        drawPixel(HEIGHT*WIDTH + 0, HsbColor(0.0f, 0.0f, enabled ? (float)getbrightness() / 255.0f : 0.0f));
         #endif
     }
 
@@ -133,7 +134,7 @@ namespace qlocktoo {
         digitalWrite(MINUTE_2_PIN, enabled);
         #endif
         #ifdef BOARD_WS2811
-        drawPixel(HEIGHT*WIDTH + 1, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        drawPixel(HEIGHT*WIDTH + 1, HsbColor(0.0f, 0.0f, enabled ? (float)getbrightness() / 255.0f : 0.0f));
         #endif
     }
 
@@ -142,7 +143,7 @@ namespace qlocktoo {
         digitalWrite(MINUTE_3_PIN, enabled);
         #endif
         #ifdef BOARD_WS2811
-        drawPixel(HEIGHT*WIDTH + 2, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        drawPixel(HEIGHT*WIDTH + 2, HsbColor(0.0f, 0.0f, enabled ? (float)getbrightness() / 255.0f : 0.0f));
         #endif
     }
 
@@ -151,7 +152,7 @@ namespace qlocktoo {
         digitalWrite(MINUTE_4_PIN, enabled);
         #endif
         #ifdef BOARD_WS2811
-        drawPixel(HEIGHT*WIDTH + 3, HsbColor(0.0f, 1.0f, (float)getbrightness() / 255));
+        drawPixel(HEIGHT*WIDTH + 3, HsbColor(0.0f, 0.0f, enabled ? (float)getbrightness() / 255.0f : 0.0f));
         #endif
     }
 }

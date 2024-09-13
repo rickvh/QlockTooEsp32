@@ -63,12 +63,12 @@ void Clock::loop() {
 
 
     // Display minutes 1-4 
-    // uint8_t minutesAfterFive = currentTime.tm_min % 5;
-    // Display::writeMinute1(minutesAfterFive > 0);
-    // Display::writeMinute2(minutesAfterFive > 1);
-    // Display::writeMinute3(minutesAfterFive > 2);
-    // Display::writeMinute4(minutesAfterFive > 3);
-    // Display::show();
+    uint8_t minutesAfterFive = currentTime.tm_min % 5;
+    Display::writeMinute1(minutesAfterFive > 0);
+    Display::writeMinute2(minutesAfterFive > 1);
+    Display::writeMinute3(minutesAfterFive > 2);
+    Display::writeMinute4(minutesAfterFive > 3);
+    Display::show();
     
     delay(1000);
 }
