@@ -25,6 +25,7 @@ class Clock : public App {
     const std::vector<Coordinate> VOOR2 = {{0, 5}, {1, 5}, {2, 5}, {3, 5}};
     const std::vector<Coordinate> OVER2 = {{7, 6}, {8, 6}, {9, 6}, {10, 6}};
     const std::vector<std::vector<Coordinate>> GETAL = {
+        {{}},
         {{7, 5}, {8, 5}, {9, 5}},
         {{0, 4}, {1, 4}, {2, 4}, {3, 4}},
         {{7, 4}, {8, 4}, {9, 4}, {10, 4}},

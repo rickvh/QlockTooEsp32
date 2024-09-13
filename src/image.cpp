@@ -173,7 +173,7 @@ HsbColor Image::getColor(Coordinate coordinate) {
     return pixels[coordinate.y * WIDTH + coordinate.x];
 }
 
-void Image::setColor(Coordinate coordinate,HsbColor color) {
+void Image::setColor(Coordinate coordinate, HsbColor color) {
     pixels[coordinate.y * WIDTH + coordinate.x] = color;
 }
 

@@ -1,13 +1,11 @@
 #pragma once
 
 #include <pgmspace.h>
-
 #include <array>
 #include <string>
-
 #include "app.h"
-#include "display.h"
 #include "coordinate.h"
+#include "NeoPixelBus.h"
 
 namespace qlocktoo {
 const static uint8_t PROGMEM IMG_WIFI_FRAME_1[] = {
@@ -31,8 +29,8 @@ const static uint8_t PROGMEM IMG_ERROR[] = {
 class Image {
    private:
     static constexpr const char* LOG_TAG = "image";
-    const static uint8_t WIDTH = Display::WIDTH;
-    const static uint8_t HEIGHT = Display::HEIGHT;
+    const static uint8_t WIDTH = 11;
+    const static uint8_t HEIGHT = 10;
     std::array<HsbColor, WIDTH * HEIGHT> pixels;
 
    public:

@@ -9,7 +9,6 @@ void Fade::update() {
     frame++;
     ESP_LOGD(LOG_TAG, "show frame %u", frame);
 
-    Display::clear();
     bool differenceBetweenCurrentAndTarget = false;
     for (uint8_t y = 0; y < Display::HEIGHT; y++) {
         for (uint8_t x = 0; x < Display::WIDTH; x++) {
@@ -33,10 +32,10 @@ void Fade::update() {
                 getFadedValue(currentBrightness, targetBrightness)
             );
             current.setColor({x, y}, color);
-            Display::drawPixel(x, y, color);
         }
         delay(10); // Warning: you may adjust this value, but keep it with at least value '0' in order to allow RTOS to switch tasks to prevent a watchdog reset.
     }
+    Display::drawImage(current);
     Display::show();
     done = !differenceBetweenCurrentAndTarget;
 }

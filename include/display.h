@@ -2,13 +2,15 @@
 
 #include "Arduino.h"
 #include <NeoPixelBrightnessBus.h>
+#include "image.h"
 
 namespace qlocktoo {
 #ifdef BOARD_WS2811
     #define COLOR_FEATURE NeoGrbFeature
     #define NEOPIXEL_METHOD NeoWs2811Method
     #define LEDS_IN_LEDSTRIP 114
-#else
+#endif
+#ifdef BOARD_FREESTYLE
     #define COLOR_FEATURE NeoGrbwFeature
     #define NEOPIXEL_METHOD NeoSk6812Method
     #define LEDS_IN_LEDSTRIP 110
@@ -17,10 +19,12 @@ namespace qlocktoo {
 class Display {
    private:
     const static uint8_t LEDSTRIP_PIN = 13;
+    #ifdef BOARD_FREESTYLE
     const static uint8_t MINUTE_1_PIN = 23;
     const static uint8_t MINUTE_2_PIN = 3;
     const static uint8_t MINUTE_3_PIN = 1;
     const static uint8_t MINUTE_4_PIN = 22;
+    #endif
     static bool initialized;
     static NeoPixelBus<COLOR_FEATURE, NEOPIXEL_METHOD> realDisplay;
     static void drawPixel(int16_t index, NeoGrbwFeature::ColorObject);
@@ -35,9 +39,7 @@ class Display {
     static void show() { realDisplay.Show(); };
     static void drawPixel(int16_t x, int16_t y, NeoGrbwFeature::ColorObject color);
     static void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, NeoGrbwFeature::ColorObject color);
-    /**
-     * Depending on the hardware this will provide access to the leds indication individual minutes.
-    */
+    static void drawImage(Image &image);
     static void writeMinute1(boolean enabled);
     static void writeMinute2(boolean enabled);
     static void writeMinute3(boolean enabled);

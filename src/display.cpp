@@ -120,6 +120,14 @@ namespace qlocktoo {
         }
     }
 
+    void Display::drawImage(Image &image) {
+        for (uint8_t y = 0; y < Display::HEIGHT; y++) {
+            for (uint8_t x = 0; x < Display::WIDTH; x++) {
+                drawPixel(x, y, image.getColor({x, y}));
+            }
+        }
+    }
+
     void Display::writeMinute1(boolean enabled) {
         #ifdef BOARD_FREESTYLE
         digitalWrite(MINUTE_1_PIN, enabled);
