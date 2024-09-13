@@ -46,7 +46,7 @@ void Webinterface::begin() {
         
         // TODO: tempcode om naar clock-mode te gaan zonder dat er een kleurconfig wordt opgeslagen. TODO: kleurconfig loskoppelen van mode setten
         auto newMode = Mode::Clock;
-        xQueueSend(xChangeAppQueue, &newMode, 0);
+        xQueueOverwrite(xChangeAppQueue, &newMode);
 
         String response;
         serializeJsonPretty(jsonDoc, response);
@@ -113,7 +113,7 @@ void Webinterface::begin() {
             ConfigService::saveEventually();
         }
         auto newMode = Mode::Clock;
-        xQueueSend(xChangeAppQueue, &newMode, 0);
+        xQueueOverwrite(xChangeAppQueue, &newMode);
         request->send(200, "application/json", "{ \"status\": \"success\" }");
     });
 
@@ -158,14 +158,14 @@ void Webinterface::begin() {
     server.on("/api/swirl", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         ESP_LOGI(LOG_TAG, "Mode set to SWIRL");
         auto newMode = Mode::Swirl;
-        xQueueSend(xChangeAppQueue, &newMode, 0);
+        xQueueOverwrite(xChangeAppQueue, &newMode);
         request->send(200, "application/json", "{ \"status\": \"success\" }");
     });
 
     server.on("/api/ledtest", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         ESP_LOGI(LOG_TAG, "Mode set to LEDTEST");
         auto newMode = Mode::Ledtest;
-        xQueueSend(xChangeAppQueue, &newMode, 0);
+        xQueueOverwrite(xChangeAppQueue, &newMode);
         request->send(200, "application/json", "{ \"status\": \"success\" }");
     });
 

@@ -75,7 +75,6 @@ void WifiManager::WiFiEvent(arduino_event_id_t event, arduino_event_info_t info)
             ESP_LOGI(LOG_TAG, "STA Connected");
             ConfigService::connectedToWifi = true;
             reconnectCount = 0;
-            showClock();
             break;
         case ARDUINO_EVENT_WIFI_READY:
             ESP_LOGI(LOG_TAG, "Ready");
@@ -83,6 +82,7 @@ void WifiManager::WiFiEvent(arduino_event_id_t event, arduino_event_info_t info)
         case ARDUINO_EVENT_WIFI_STA_GOT_IP:
             ESP_LOGI(LOG_TAG, "STA Got IP: %s", WiFi.localIP().toString());
             WiFi.enableAP(false);
+            showClock();
             break;
         case ARDUINO_EVENT_WIFI_STA_START:
             ESP_LOGI(LOG_TAG, "STA Start");
@@ -95,15 +95,15 @@ void WifiManager::WiFiEvent(arduino_event_id_t event, arduino_event_info_t info)
 
 void WifiManager::showWifiAnimation() {
     auto newMode = Mode::WifiConnecting;
-    xQueueSend(xChangeAppQueue, &newMode, 0);
+    xQueueOverwrite(xChangeAppQueue, &newMode);
 }
 
 void WifiManager::showSetupRequired() {
     auto newMode = Mode::WifiSetupRequired;
-    xQueueSend(xChangeAppQueue, &newMode, 0);
+    xQueueOverwrite(xChangeAppQueue, &newMode);
 }
 
 void WifiManager::showClock() {
     auto newMode = Mode::Clock;
-    xQueueSend(xChangeAppQueue, &newMode, 0);
+    xQueueOverwrite(xChangeAppQueue, &newMode);
 }
