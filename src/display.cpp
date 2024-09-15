@@ -26,7 +26,7 @@ namespace qlocktoo {
             {76, 77, 107, 99, 55, 54, 25, 10, 33, 3},
             {106, 69, 62, 85, 92, 18, 11, 47, 26, 34}};
             
-            return mapping[x][9 - y];
+            return mapping[x][y];
 
 #endif
 #ifdef BOARD_WS2811
