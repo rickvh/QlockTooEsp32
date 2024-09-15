@@ -40,6 +40,7 @@ class Clock : public App {
     };
 
     struct tm previousTime, currentTime;
+    bool clockInitialised = false;
     uint8_t timeBrightness();
     void setColor(Image &image, const std::vector<Coordinate> &coordinates, HsbColor color);
     std::unique_ptr<Transition> transition;
