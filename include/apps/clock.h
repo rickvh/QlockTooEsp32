@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <vector>
-#include <string>
 #include "app.h"
 #include "display.h"
 #include "configservice.h"

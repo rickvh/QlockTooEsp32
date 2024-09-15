@@ -1,5 +1,6 @@
 #include "animation.h"
 #include "image.h"
+#include "display.h"
 #include <string>
 
 using namespace qlocktoo;
@@ -30,6 +31,7 @@ void Animation::loop() {
         currentFrame = 0;
     }
     Image image(frames.at(currentFrame));
-    //Imageviewer viewer(image);
+    Display::drawImage(image);
+    Display::show();
     delay(300);
 }

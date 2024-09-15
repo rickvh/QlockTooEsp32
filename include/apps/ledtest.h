@@ -3,7 +3,6 @@
 #include "app.h"
 #include "Arduino.h"
 #include "display.h"
-#include <string>
 
 namespace qlocktoo {
 class Ledtest : public App {

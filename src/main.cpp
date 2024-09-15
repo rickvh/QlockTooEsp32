@@ -21,6 +21,7 @@
 #include "apps/ledtest.h"
 #include "apps/swirl.h"
 #include "apps/clock.h"
+#include "apps/imageviewer.h"
 #include "tz.h"
 #include "image.h"
 #include "animation.h"
@@ -203,16 +204,16 @@ void changeMode(qlocktoo::Mode mode) {
     case Mode::OTAinProgress:
       currentApp = new Animation(Animation::Preset::Wifi);
       break;
-    // case Mode::Xmas:
-      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::XmasTree)));
-      // break;
-    // case Mode::Snow:
-      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Snowman)));
-      // break;
+    case Mode::Xmas:
+      currentApp = new Imageviewer(Image(Image::Preset::XmasTree));
+      break;
+    case Mode::Snow:
+      currentApp = new Imageviewer(Image(Image::Preset::Snowman));
+      break;
     case Mode::WifiSetupRequired:
-    // case Mode::Error:
-      // currentApp = new Imageviewer(std::unique_ptr<Image>(new Image(Image::Preset::Error)));
-      // break;
+    case Mode::Error:
+      currentApp = new Imageviewer(Image(Image::Preset::Error));
+      break;
     case Mode::Ledtest:
       currentApp = new Ledtest();
       break;

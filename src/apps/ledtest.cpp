@@ -2,6 +2,7 @@
 #include "display.h"
 
 using namespace qlocktoo;
+
 std::string Ledtest::name() {
     return "Ledtest";
 }
