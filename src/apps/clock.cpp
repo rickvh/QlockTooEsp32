@@ -1,5 +1,6 @@
 #include "apps/clock.h"
-#include "transitions/fade.h"
+#include "transitions/fadetransition.h"
+#include "transitions/snaketransition.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -44,7 +45,7 @@ void Clock::loop() {
         ESP_LOGD(LOG_TAG, "Activate transition");
         auto previousTimeImage = getImageFromTime(previousTime);
         auto currentTimeImage = getImageFromTime(currentTime);
-        transition = unique_ptr<Transition>(new Fade(previousTimeImage, currentTimeImage));
+        transition = unique_ptr<Transition>(new SnakeTransition(previousTimeImage, currentTimeImage));
     }
     previousTime = currentTime; 
 

@@ -2,9 +2,11 @@
 
 #include <pgmspace.h>
 #include <array>
+#include <set>
 #include <string>
 #include "app.h"
 #include "coordinate.h"
+#include "transitions/pixel.h"
 #include "NeoPixelBus.h"
 
 namespace qlocktoo {
@@ -32,7 +34,7 @@ class Image {
     const static uint8_t WIDTH = 11;
     const static uint8_t HEIGHT = 10;
     std::array<HsbColor, WIDTH * HEIGHT> pixels;
-
+    
    public:
     enum class Preset {
         Error,
@@ -49,5 +51,6 @@ class Image {
     HsbColor getColor(Coordinate coordinate);
     void setColor(Coordinate coordinate, HsbColor color);
     void fill(HsbColor color);
+    std::set<Pixel> getPixelsThatAreNotLitIn(Image other);
 };
 }

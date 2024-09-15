@@ -4,18 +4,18 @@
 #include "transitions/transition.h"
 
 namespace qlocktoo {
-    class Fade : public Transition {
+    class FadeTransition : public Transition {
         private:
-            static constexpr const char* LOG_TAG = "fade";
+            static constexpr const char* LOG_TAG = "fadeTransition";
             const float STEP = 0.01f;
-            Image current;
+            Image current, to;
             bool done = false;
             int frame = 0;
             float getFadedValue(float currentValue, float targetValue);
             void showCurrentFrame();
 
         public:
-            Fade(Image &from, Image &to) : Transition(from, to), current(from) {};
+            FadeTransition(Image &from, Image &to) : Transition(), current(from), to(to) {};
             void update() override;
             bool isDone() override { return done; }
     };

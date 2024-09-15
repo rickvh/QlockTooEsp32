@@ -1,41 +1,45 @@
 #pragma once
 
-#include <functional>
+// #include <functional>
+#include "NeoPixelBus.h"
+#include "coordinate.h"
 
 namespace qlocktoo {
 struct Pixel
 {
-    unsigned int x, y;
+    Coordinate coordinate;
+    HsbColor color;
 
     Pixel() = default;
-    Pixel(unsigned int x, unsigned int y) : x(x), y(y) {}
+    Pixel(Coordinate coordinate, HsbColor color) : coordinate(coordinate), color(color) {}
 
-    Pixel& operator=(const Pixel& p)
+    Pixel& operator=(const Pixel& pixel)
     {
-        x = p.x;
-        y = p.y;
+        coordinate = pixel.coordinate;
+        color = pixel.color;
         return *this;
     }
 
-    bool operator==(const Pixel& p) const
+    bool operator==(const Pixel& pixel) const
     {
-        return (x == p.x && y == p.y);
+        return (coordinate == pixel.coordinate &&
+            color.H == pixel.color.H &&
+            color.S == pixel.color.S &&
+            color.B == pixel.color.B);
     }
 
-    bool operator!=(const Pixel& p) const
+    bool operator==(const Coordinate& other) const
     {
-        return !(*this == p);
+        return coordinate == other;
     }
 
-    unsigned int manhattanDistanceTo(const Pixel& other) const {
-        return abs(int(x) - int(other.x)) + abs(int(y) - int(other.y));
+    bool operator!=(const Pixel& pixel) const
+    {
+        return !(*this == pixel);
     }
 
+    bool operator<(const Pixel& other) const {
+        return coordinate.y < other.coordinate.y && coordinate.x < other.coordinate.x;
+    }
 };
 }
-
-template<> struct std::hash<qlocktoo::Pixel> {
-    size_t operator()(const qlocktoo::Pixel &p) const {
-        return hash<unsigned int>()(p.x) ^ hash<unsigned int>()(p.y);
-    }
-};

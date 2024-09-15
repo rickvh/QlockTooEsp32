@@ -1,11 +1,11 @@
-#include "transitions/fade.h"
+#include "transitions/fadetransition.h"
 #include "display.h"
 #include "image.h"
 #include "math.h"
 
 using namespace qlocktoo;
 
-void Fade::update() {
+void FadeTransition::update() {
     frame++;
     ESP_LOGD(LOG_TAG, "show frame %u", frame);
 
@@ -40,7 +40,7 @@ void Fade::update() {
     done = !differenceBetweenCurrentAndTarget;
 }
 
-float Fade::getFadedValue(float currentValue, float targetValue) {
+float FadeTransition::getFadedValue(float currentValue, float targetValue) {
     if (fabs(currentValue - targetValue) < STEP) {
         return targetValue;
     }
@@ -51,7 +51,7 @@ float Fade::getFadedValue(float currentValue, float targetValue) {
     }
 }
 
-void Fade::showCurrentFrame() {
+void FadeTransition::showCurrentFrame() {
     for (uint8_t y = 0; y < Display::HEIGHT; y++) {
         for (uint8_t x = 0; x < Display::WIDTH; x++) {
             auto color = current.getColor({x, y});

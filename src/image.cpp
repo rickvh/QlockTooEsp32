@@ -181,4 +181,7 @@ void Image::fill(HsbColor color) {
     pixels.fill(color);
 }
 
-}  // namespace qlocktoo
+std::set<Pixel> getPixelsThatAreNotLitIn(Image other) {
+    return {};
+}
+}

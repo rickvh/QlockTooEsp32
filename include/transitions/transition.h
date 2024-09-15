@@ -5,9 +5,7 @@
 namespace qlocktoo {
     class Transition {
         protected:
-            Transition(Image from, Image to) : from(from), to(to) {};
-            Image from;
-            Image to;
+            Transition() {};
         
         public:
             virtual void update() = 0;

@@ -1,32 +1,28 @@
 #pragma once
 
-#include <vector>
-#include "image.h"
-#include "word.h"
-#include "transitions/transition.h"
+#include <list>
+#include <set>
+#include "pixel.h"
+#include "display.h"
 
 namespace qlocktoo {
-enum class SnakeState {
-    IDENTIFY,
-    MOVING_TO_TARGET
-};
-
-class Snake : public Transition {
+class Snake {
     private:
-        SnakeState state;
-        std::vector<Word> targets;
-
-
         static constexpr const char* LOG_TAG = "snake";
-        bool done = false;
-        int delayBetweenMoves = 5000; //ms
-        int frame = 0;
-        void setup();
+        HsbColor bodyColor;
+        std::list<Pixel> body;
+        std::set<Pixel> targets;
+        std::set<Pixel> obstacles;
+        const Pixel* currentTarget = nullptr;
+        std::list<Coordinate> pathToNextTarget;
+        void calculatePathToNextTarget();
 
     public:
-        Snake(Image &from, Image &to) : Transition(from, to) { setup(); };
-        void update() override;
-        bool isDone() override { return done; }
+        Snake() = default;
+        Snake(Pixel body, const std::set<Pixel>& targets, const std::set<Pixel>& obstacles) : body({body}), targets(targets), obstacles(obstacles), bodyColor(body.color) {}
+
+        void move();
+        bool isDone() const { return targets.empty(); };
+        void draw() const;
 };
 }
-
