@@ -1,7 +1,5 @@
 #define USE_MDNS        1
 #define HOST_NAME       "qlocktoo"
-
-//#define DEBUG_DISABLED // uncomment for production release
 #define WEBSOCKET_DISABLED // disbale logging via websockets
 
 #include <Arduino.h>
@@ -28,9 +26,7 @@
 #include "buildinfo.h"
 #include <SPIFFS.h>
 
-
 using namespace qlocktoo;
-using namespace std;
 
 const uint8_t   timeZone = 1;     // Central European Time
 int8_t minutesTimeZone = 0;

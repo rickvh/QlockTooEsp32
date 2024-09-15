@@ -3,12 +3,10 @@
 #include <vector>
 #include <Arduino.h>
 
-using namespace std;
-
-vector<string> split(const string &s, char delim);
+std::vector<std::string> split(const std::string &s, char delim);
 
 template <typename T>
-void parseInt(const string& s, T& target)
+void parseInt(const std::string& s, T& target)
 {
     String temp = String(s.c_str());
     target = temp.toInt();

@@ -45,7 +45,7 @@ void Clock::loop() {
         ESP_LOGD(LOG_TAG, "Activate transition");
         auto previousTimeImage = getImageFromTime(previousTime);
         auto currentTimeImage = getImageFromTime(currentTime);
-        transition = unique_ptr<Transition>(new SnakeTransition(previousTimeImage, currentTimeImage));
+        transition = std::unique_ptr<Transition>(new SnakeTransition(previousTimeImage, currentTimeImage));
     }
     previousTime = currentTime; 
 

@@ -2,8 +2,6 @@
 #include "display.h"
 #include "Ticker.h"
 
-using namespace std;
-
 namespace qlocktoo {
 
 typedef struct {

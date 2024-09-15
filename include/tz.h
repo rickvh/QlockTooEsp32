@@ -3,14 +3,11 @@
 #include <pgmspace.h>
 #include <string>
 
-using namespace std;
-
-
-const string temp_fixed_tz PROGMEM = "CET-1CEST,M3.5.0,M10.5.0/3";
+const std::string temp_fixed_tz PROGMEM = "CET-1CEST,M3.5.0,M10.5.0/3";
 
 typedef struct {
-    string zone;
-    string info;
+    std::string zone;
+    std::string info;
 } zoneinfo_t;
 
 const zoneinfo_t TIMEZONES[] PROGMEM = {
@@ -18,7 +15,6 @@ const zoneinfo_t TIMEZONES[] PROGMEM = {
         {"Greenwich", "GMT0"}
     };
 
-void setTimezone(const string &zone);
+void setTimezone(const std::string &zone);
 
-string getTimezone();
-
+std::string getTimezone();

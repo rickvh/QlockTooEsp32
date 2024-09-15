@@ -6,15 +6,13 @@
 #include "app.h"
 #include "image.h"
 
-using namespace std;
-
 namespace qlocktoo {
 class Animation : public App {
    private:
     void setup();
     void loop();
 
-    vector<Image::Preset> frames;
+    std::vector<Image::Preset> frames;
     uint8_t currentFrame;
 
    protected:

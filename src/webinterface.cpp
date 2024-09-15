@@ -14,7 +14,6 @@
 #include "configservice.h"
 #include "buildinfo.h"
 
-using namespace std;
 using namespace qlocktoo;
 
 Webinterface::Webinterface(int port) : server(AsyncWebServer(port)) {
