@@ -38,8 +38,9 @@ struct Pixel
         return !(*this == pixel);
     }
 
-    bool operator<(const Pixel& other) const {
-        return coordinate.y < other.coordinate.y && coordinate.x < other.coordinate.x;
-    }
+    // bool operator<(const Pixel& other) const {
+    //     // TODO: geen hardcoded display width. Anders maar een lijst gebruiken voor de pixels die weg moeten / erbij komen??
+    //     return (coordinate.y * 11 + coordinate.x) < (other.coordinate.y * 11 + other.coordinate.x);
+    // }
 };
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <set>
+#include <list>
 #include "transition.h"
 #include "snake.h"
 
@@ -13,8 +13,9 @@ class SnakeTransition : public Transition {
         Image from;
         Image to;
         Snake snake;
-        std::set<Pixel> pixelsToAdd, pixelsToRemove, pixelsThatDontChange;
-        std::set<Pixel> getObstacles() const;
+        std::list<Pixel> pixelsToAdd, pixelsToRemove, pixelsThatDontChange;
+        std::list<Pixel> getObstacles() const;
+        void logPixels(std::list<qlocktoo::Pixel> pixels);
 
         template<typename S>
         auto selectRandom(const S &set) {

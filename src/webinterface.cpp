@@ -80,6 +80,18 @@ void Webinterface::begin() {
         request->send(200, "application/json", response);
     });
 
+    server.on("/api/snake", HTTP_GET, [&](AsyncWebServerRequest *request) {
+        ESP_LOGI(LOG_TAG, "Snake test");
+        
+        auto newMode = Mode::Snake;
+        xQueueOverwrite(xChangeAppQueue, &newMode);
+
+        StaticJsonDocument<256> jsonDoc;
+        String response;
+        serializeJsonPretty(jsonDoc, response);
+        request->send(200, "application/json", response);
+    });
+
     server.on("/api/clock", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         StaticJsonDocument<512> jsonDoc;
         if (DeserializationError::Ok == deserializeJson(jsonDoc, (const char *)data)) {

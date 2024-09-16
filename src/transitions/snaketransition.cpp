@@ -1,29 +1,57 @@
+#include "transitions/snaketransition.h"
 #include <algorithm>
 #include <memory>
-#include <list>
-#include <set>
 #include <random>
 #include "display.h"
-#include "transitions/snaketransition.h"
 
-using std::string;
-using std::set;
 using namespace qlocktoo;
+
+void SnakeTransition::logPixels(std::list<qlocktoo::Pixel> pixels) {
+    for (auto pixel : pixels) {
+        ESP_LOGD(LOG_TAG, "(%u, %u) - %f, %f, %f", pixel.coordinate.x, pixel.coordinate.y, pixel.color.H, pixel.color.S, pixel.color.B);
+    }
+}
 
 SnakeTransition::SnakeTransition(Image from, Image to) : Transition(),
         from(from),
         to(to)
 {
-    // set_difference(from. ->begin(), from->end(), to->begin(), to->end(), std::inserter(pixelsToRemove, pixelsToRemove.begin()), WordComparator());
-    // set_difference(to->begin(), to->end(), from->begin(), from->end(), std::inserter(pixelsToAdd, pixelsToAdd.begin()), WordComparator());
-    // set_intersection(to->begin(), to->end(), from->begin(), from->end(), std::inserter(pixelsThatDontChange, wordsToAdd.begin()), WordComparator());
+    pixelsToRemove = from.getPixelsThatSatisfy(to, [](const HsbColor& fromColor, const HsbColor& toColor) {
+        return fromColor.B > 0.0f && toColor.B == 0.0f;
+    });
+    ESP_LOGD(LOG_TAG, "pixelsToRemove: %u", pixelsToRemove.size());
+    logPixels(pixelsToRemove);
+    ESP_LOGD(LOG_TAG, "\n");
 
-    Pixel snakePixel = selectRandom(pixelsToRemove);
-    pixelsToRemove.erase(snakePixel);
+    pixelsToAdd = from.getPixelsThatSatisfy(to, [](const HsbColor& fromColor, const HsbColor& toColor) {
+        return fromColor.B == 0.0f && toColor.B > 0.0f;
+    });
+    ESP_LOGD(LOG_TAG, "pixelsToAdd: %u", pixelsToAdd.size());
+    logPixels(pixelsToAdd);
+    ESP_LOGD(LOG_TAG, "\n");
+
+    pixelsThatDontChange = from.getPixelsThatSatisfy(to, [](const HsbColor& fromColor, const HsbColor& toColor) {
+        // return fromColor.H == toColor.H && fromColor.S == toColor.S && fromColor.B == toColor.B;
+        return fromColor.B > 0.0f && toColor.B > 0.0f;
+    });
+    ESP_LOGD(LOG_TAG, "pixelsThatDontChange: %u", pixelsThatDontChange.size());
+    // logPixels(pixelsThatDontChange);
+    ESP_LOGD(LOG_TAG, "\n");
+
+    Pixel snakePixel;
+    if (pixelsToRemove.size() != 0) {
+        snakePixel = selectRandom(pixelsToRemove);
+        
+        pixelsToRemove.remove(snakePixel);
+    } else {
+        ESP_LOGE(LOG_TAG, "No pixels to eat. Snake will start at 0,0 to prevent a crash.");
+    }
+    ESP_LOGD(LOG_TAG, "Snakepixel set to (%u, %u)", snakePixel.coordinate.x, snakePixel.coordinate.y);
     
-    set<Pixel> targets;
+    
+    std::list<Pixel> targets;
     for (auto const &pixel: pixelsToRemove) {
-        targets.insert(pixel);
+        targets.push_back(pixel);
     }
     snake = Snake(snakePixel, targets, getObstacles());
 }
@@ -34,10 +62,10 @@ void SnakeTransition::update() {
     delay(500);
 }
 
-std::set<Pixel> SnakeTransition::getObstacles() const {
-    auto obstacles = std::set<Pixel>();
+std::list<Pixel> SnakeTransition::getObstacles() const {
+    auto obstacles = std::list<Pixel>();
     for(auto& pixel : pixelsThatDontChange) {
-        obstacles.insert(pixel);
+        obstacles.push_back(pixel);
     }
     return obstacles;
 }

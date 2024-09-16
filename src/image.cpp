@@ -2,7 +2,7 @@
 #include <SPIFFS.h>
 #include <algorithm>
 #include <array>
-#include <string>
+#include <functional>
 #include "display.h"
 
 namespace qlocktoo {
@@ -166,7 +166,7 @@ void Image::readFile(std::string filename) {
     // }
 }
 
-HsbColor Image::getColor(Coordinate coordinate) {
+HsbColor Image::getColor(Coordinate coordinate) const {
     if (coordinate.x < 0 || coordinate.x > WIDTH || coordinate.y < 0 || coordinate.y > HEIGHT) {
         return HsbColor(0.0f, 0.0f, 0.0f);
     }
@@ -181,7 +181,19 @@ void Image::fill(HsbColor color) {
     pixels.fill(color);
 }
 
-std::set<Pixel> getPixelsThatAreNotLitIn(Image other) {
-    return {};
+std::list<Pixel> Image::getPixelsThatSatisfy(const Image& other, std::function<bool(const HsbColor&, const HsbColor&)> condition) {
+    std::list<Pixel> pixelsThatSatisfy;
+    for (int y = 0; y < Display::HEIGHT; ++y) {
+        for (int x = 0; x < Display::WIDTH; ++x) {
+            Coordinate coordinate(x, y);
+            auto myColor = getColor(coordinate);
+            auto otherColor = other.getColor(coordinate);
+            if (condition(myColor, otherColor)) {
+                auto pixel = Pixel(coordinate, myColor);
+                pixelsThatSatisfy.push_back(pixel);
+            }
+        }
+    }
+    return pixelsThatSatisfy;
 }
 }

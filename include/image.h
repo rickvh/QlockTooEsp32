@@ -2,7 +2,7 @@
 
 #include <pgmspace.h>
 #include <array>
-#include <set>
+#include <list>
 #include <string>
 #include "app.h"
 #include "coordinate.h"
@@ -48,9 +48,9 @@ class Image {
     Image();
     Image(Preset file);
     void readFile(std::string filename);
-    HsbColor getColor(Coordinate coordinate);
+    HsbColor getColor(Coordinate coordinate) const;
     void setColor(Coordinate coordinate, HsbColor color);
     void fill(HsbColor color);
-    std::set<Pixel> getPixelsThatAreNotLitIn(Image other);
+    std::list<Pixel> getPixelsThatSatisfy(const Image& other, std::function<bool(const HsbColor&, const HsbColor&)> condition);
 };
 }

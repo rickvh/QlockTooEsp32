@@ -138,7 +138,7 @@ void setup() {
 
   // Start tasks
   xTaskCreatePinnedToCore(runOtaTask, "OTA", 8192, NULL, 2, &otaTask, 1);
-  xTaskCreatePinnedToCore(runAppTask, "App", 8192, NULL, 1, &currentAppTask, 0);
+  xTaskCreatePinnedToCore(runAppTask, "App", 16384, NULL, 1, &currentAppTask, 0);
 }
 
 // Arduino loop. Most features are implemented as RTOS tasks and are therefore not handled inside this loop.

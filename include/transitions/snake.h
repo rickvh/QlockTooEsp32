@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <set>
 #include "pixel.h"
 #include "display.h"
 
@@ -11,15 +10,15 @@ class Snake {
         static constexpr const char* LOG_TAG = "snake";
         HsbColor bodyColor;
         std::list<Pixel> body;
-        std::set<Pixel> targets;
-        std::set<Pixel> obstacles;
+        std::list<Pixel> targets;
+        std::list<Pixel> obstacles;
         const Pixel* currentTarget = nullptr;
         std::list<Coordinate> pathToNextTarget;
         void calculatePathToNextTarget();
 
     public:
         Snake() = default;
-        Snake(Pixel body, const std::set<Pixel>& targets, const std::set<Pixel>& obstacles) : body({body}), targets(targets), obstacles(obstacles), bodyColor(body.color) {}
+        Snake(Pixel body, const std::list<Pixel>& targets, const std::list<Pixel>& obstacles) : body({body}), targets(targets), obstacles(obstacles), bodyColor(body.color) {}
 
         void move();
         bool isDone() const { return targets.empty(); };

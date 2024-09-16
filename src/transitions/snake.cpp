@@ -15,6 +15,7 @@ void Snake::move() {
     if (!currentTarget) {
         // pick next target
         currentTarget = &(*targets.begin());
+        ESP_LOGD(LOG_TAG, "New target: %u, %u", currentTarget->coordinate.x, currentTarget->coordinate.y);
         calculatePathToNextTarget();
     }
     
@@ -25,12 +26,17 @@ void Snake::move() {
 
     // move snake 1 step towards currentTarget
     Coordinate nextStep = pathToNextTarget.front();
+    ESP_LOGD(LOG_TAG, "move to %u, %u", nextStep.x, nextStep.y);
     pathToNextTarget.pop_front();    
     body.push_front(Pixel(nextStep, bodyColor));
     body.pop_back();
 
     // check if snake hits _a_ target. This could also be a target that's not our current target!
+
+// TODO: wanneer target wordt gehit, wordt deze hieronder niet daadwerkelijk gevonden en opgeruimd.
+
     auto found = std::find(targets.begin(), targets.end(), body.front());
+    ESP_LOGD(LOG_TAG, "found != targets.end(): %s", found != targets.end() ? "true" : "false");
     if (found != targets.end()) {
         // check if target is our current target
         if (body.front() == *currentTarget) {
@@ -42,6 +48,7 @@ void Snake::move() {
     draw();
 }
 
+// Implements the A-star path-finding algorithm
 void Snake::calculatePathToNextTarget() {
     // Create a priority queue for the nodes to be visited
     std::unordered_map<Coordinate, Coordinate> cameFrom;
@@ -108,13 +115,13 @@ void Snake::calculatePathToNextTarget() {
 
 void Snake::draw() const {
     for (auto& coordinate : pathToNextTarget) {
-        Display::drawPixel(coordinate.x, coordinate.y, HsbColor(0.0f, 1.0f, 0.5f));
+        Display::drawPixel(coordinate.x, coordinate.y, HsbColor(0.0f, 1.0f, 0.01f));
     }
     for (auto& pixel : body) {
         Display::drawPixel(pixel.coordinate.x, pixel.coordinate.y, HsbColor(0.2f, 1.0f, 0.5f));
     }
     for (auto& pixel : obstacles) {
-        Display::drawPixel(pixel.coordinate.x, pixel.coordinate.y, HsbColor(0.4f, 1.0f, 0.5f));
+        Display::drawPixel(pixel.coordinate.x, pixel.coordinate.y, HsbColor(0.4f, 1.0f, 0.05f));
     }
     for (auto& pixel : targets) {
         Display::drawPixel(pixel.coordinate.x, pixel.coordinate.y, HsbColor(0.6f, 1.0f, 0.5f));

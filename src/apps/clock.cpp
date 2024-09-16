@@ -34,15 +34,24 @@ void Clock::loop() {
     }
 
     if (!clockInitialised) {
-        Image currentTimeImage = getImageFromTime(currentTime);
+        previousTime.tm_hour = 12;
+        previousTime.tm_min = 0;
+        currentTime.tm_hour = 12;
+        currentTime.tm_min = 5;
+        Image currentTimeImage = getImageFromTime(previousTime);
+
+        // Image currentTimeImage = getImageFromTime(currentTime);
         Display::drawImage(currentTimeImage);
         Display::show();
         clockInitialised = true;
+
+        delay(1000);
     }
 
     // if time has advanced 5 minutes
-    if (previousTime.tm_min % 5 != 0 && currentTime.tm_min % 5 == 0) {
-        ESP_LOGD(LOG_TAG, "Activate transition");
+    //if (previousTime.tm_min % 5 != 0 && currentTime.tm_min % 5 == 0) {
+    if (previousTime.tm_min != currentTime.tm_min) {
+        ESP_LOGD(LOG_TAG, "Activate transition from %u:%u to %u:%u", previousTime.tm_hour, previousTime.tm_min, currentTime.tm_hour, currentTime.tm_min);
         auto previousTimeImage = getImageFromTime(previousTime);
         auto currentTimeImage = getImageFromTime(currentTime);
         transition = std::unique_ptr<Transition>(new SnakeTransition(previousTimeImage, currentTimeImage));
