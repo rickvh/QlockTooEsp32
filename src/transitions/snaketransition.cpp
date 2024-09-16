@@ -40,8 +40,7 @@ SnakeTransition::SnakeTransition(Image from, Image to) : Transition(),
 
     Pixel snakePixel;
     if (pixelsToRemove.size() != 0) {
-        snakePixel = selectRandom(pixelsToRemove);
-        
+        snakePixel = selectRandom(pixelsToRemove);    
         pixelsToRemove.remove(snakePixel);
     } else {
         ESP_LOGE(LOG_TAG, "No pixels to eat. Snake will start at 0,0 to prevent a crash.");
@@ -53,7 +52,7 @@ SnakeTransition::SnakeTransition(Image from, Image to) : Transition(),
     for (auto const &pixel: pixelsToRemove) {
         targets.push_back(pixel);
     }
-    snake = Snake(snakePixel, targets, getObstacles());
+    snake = Snake({snakePixel}, targets, getObstacles());
 }
 
 

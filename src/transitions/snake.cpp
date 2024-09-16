@@ -29,20 +29,21 @@ void Snake::move() {
     ESP_LOGD(LOG_TAG, "move to %u, %u", nextStep.x, nextStep.y);
     pathToNextTarget.pop_front();    
     body.push_front(Pixel(nextStep, bodyColor));
-    body.pop_back();
-
+    
     // check if snake hits _a_ target. This could also be a target that's not our current target!
-
-// TODO: wanneer target wordt gehit, wordt deze hieronder niet daadwerkelijk gevonden en opgeruimd.
-
-    auto found = std::find(targets.begin(), targets.end(), body.front());
+    auto found = std::find_if(targets.begin(), targets.end(), [&](const Pixel& pixel) {
+        return pixel.coordinate == body.front().coordinate;
+    });
     ESP_LOGD(LOG_TAG, "found != targets.end(): %s", found != targets.end() ? "true" : "false");
     if (found != targets.end()) {
         // check if target is our current target
+        ESP_LOGD(LOG_TAG, "is currentTarget: %s", body.front() == *currentTarget ? "true" : "false");
         if (body.front() == *currentTarget) {
             currentTarget = nullptr;
         }
         targets.erase(found);
+    } else {
+        body.pop_back();
     }
     
     draw();

@@ -15,13 +15,14 @@ class Snake {
         const Pixel* currentTarget = nullptr;
         std::list<Coordinate> pathToNextTarget;
         void calculatePathToNextTarget();
+        boolean done = false;
 
     public:
         Snake() = default;
-        Snake(Pixel body, const std::list<Pixel>& targets, const std::list<Pixel>& obstacles) : body({body}), targets(targets), obstacles(obstacles), bodyColor(body.color) {}
+        Snake(std::list<Pixel>& body, const std::list<Pixel>& targets, const std::list<Pixel>& obstacles) : body(body), targets(targets), obstacles(obstacles), bodyColor(body.color) {}
 
         void move();
-        bool isDone() const { return targets.empty(); };
+        bool isDone() const { return done; };
         void draw() const;
 };
 }
