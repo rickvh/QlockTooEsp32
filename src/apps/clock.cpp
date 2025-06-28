@@ -32,21 +32,19 @@ void Clock::loop() {
         return;
     }
 
-    if (!clockInitialised) {
-        Image currentTimeImage = getImageFromTime(currentTime);
-        Display::drawImage(currentTimeImage);
-        Display::show();
-        clockInitialised = true;
-    }
-
     // if time has advanced 5 minutes
     if (previousTime.tm_min % 5 != 0 && currentTime.tm_min % 5 == 0) {
         ESP_LOGD(LOG_TAG, "Activate transition");
         auto previousTimeImage = getImageFromTime(previousTime);
         auto currentTimeImage = getImageFromTime(currentTime);
         transition = unique_ptr<Transition>(new Fade(previousTimeImage, currentTimeImage));
+        previousTime = currentTime; 
+        return;
     }
     previousTime = currentTime; 
+
+    Image currentTimeImage = getImageFromTime(currentTime);
+    Display::drawImage(currentTimeImage);
 
     // Display minutes 1-4 
     uint8_t minutesAfterFive = currentTime.tm_min % 5;
@@ -54,8 +52,8 @@ void Clock::loop() {
     Display::writeMinute2(minutesAfterFive > 1);
     Display::writeMinute3(minutesAfterFive > 2);
     Display::writeMinute4(minutesAfterFive > 3);
-    Display::show();
     
+    Display::show();
     delay(1000);
 }
 

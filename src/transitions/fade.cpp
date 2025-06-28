@@ -33,7 +33,7 @@ void Fade::update() {
             );
             current.setColor({x, y}, color);
         }
-        delay(10); // Warning: you may adjust this value, but keep it with at least value '0' in order to allow RTOS to switch tasks to prevent a watchdog reset.
+        delay(1); // Warning: you may adjust this value, but keep it with at least value '0' in order to allow RTOS to switch tasks to prevent a watchdog reset.
     }
     Display::drawImage(current);
     Display::show();
